@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #f4f4f0; /* Off-white / light beige */
+    --foreground: #000000;
+    
+    --primary: #ff90e8; /* Bright pink */
+    --primary-foreground: #000000;
+    
+    --secondary: #ffc900; /* Bright yellow */
+    --secondary-foreground: #000000;
+    
+    --accent: #23a094; /* Teal */
+    --accent-foreground: #000000;
+    
+    --card: #ffffff;
+    --card-foreground: #000000;
+    
+    --border: #000000;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased min-h-screen font-sans;
+  }
+}

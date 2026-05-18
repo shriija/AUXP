@@ -1,0 +1,74 @@
+### Variables
+@baseUrl = http://localhost:5000/api
+# Replace this token with the one you get from login/register
+@token = YOUR_JWT_TOKEN_HERE
+
+### --- AUTHENTICATION ---
+
+### 1. Register a new user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "Test Student",
+    "email": "student@university.edu",
+    "password": "password123"
+}
+
+### 2. Login with user
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "student@university.edu",
+    "password": "password123"
+}
+
+### --- RESOURCES ---
+
+### 3. Get all resources (Public)
+GET {{baseUrl}}/resources
+
+### 4. Create a new resource (Protected)
+# --> Make sure you replace @token at the top with your login token!
+POST {{baseUrl}}/resources
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "title": "Calculus 101 Midterm Notes",
+    "subject": "Math",
+    "topic": "Calculus",
+    "fileUrl": "https://res.cloudinary.com/demo/image/upload/sample.pdf",
+    "tags": ["math", "midterm", "notes"]
+}
+
+### 5. Get a single resource by ID (Replace ID with one from Get All Resources response)
+GET {{baseUrl}}/resources/YOUR_RESOURCE_ID_HERE
+
+### 6. Generate Cloudinary Signature (Protected)
+GET {{baseUrl}}/resources/generate-signature
+Authorization: Bearer {{token}}
+
+### --- GAMIFICATION / VOTING ---
+
+### 7. Upvote a resource (Protected)
+POST {{baseUrl}}/votes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resourceId": "YOUR_RESOURCE_ID_HERE",
+    "type": "up"
+}
+
+### 8. Downvote a resource (Protected)
+POST {{baseUrl}}/votes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resourceId": "YOUR_RESOURCE_ID_HERE",
+    "type": "down"
+}
