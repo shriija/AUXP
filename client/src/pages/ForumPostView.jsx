@@ -112,82 +112,82 @@ export default function ForumPostView() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      <Link to="/forum" className="inline-flex items-center gap-2 mb-6 text-slate-500 font-semibold hover:text-primary transition-colors">
-        <ArrowLeft className="w-5 h-5" /> Back to Forum
+      <Link to="/forum" className="inline-flex items-center gap-2 mb-6 text-slate-600 font-bold hover:text-primary transition-colors text-xs">
+        <ArrowLeft className="w-4 h-4" /> BACK TO FORUM
       </Link>
 
-      <div className="bg-white border border-slate-200 rounded-neo shadow-neo p-6 md:p-8 mb-8 flex gap-6">
+      <div className="bg-white border-2 border-slate-900 rounded-none shadow-neo p-6 md:p-8 mb-8 flex gap-6">
         {/* Voting Column */}
-        <div className="flex flex-col items-center gap-1.5 min-w-[48px]">
-          <button onClick={() => handleVotePost('up')} className="p-1.5 rounded-full hover:bg-emerald-50 text-slate-450 hover:text-emerald-600 transition-colors">
-            <ThumbsUp className="w-5 h-5" />
+        <div className="flex flex-col items-center gap-1.5 min-w-[48px] font-mono">
+          <button onClick={() => handleVotePost('up')} className="p-1 rounded-none border-2 border-transparent hover:border-slate-900 hover:bg-emerald-50 text-slate-550 hover:text-emerald-700 transition-colors">
+            <ThumbsUp className="w-4 h-4" />
           </button>
-          <span className="font-extrabold text-sm text-slate-700">{post.upvotes - post.downvotes}</span>
-          <button onClick={() => handleVotePost('down')} className="p-1.5 rounded-full hover:bg-red-50 text-slate-450 hover:text-red-600 transition-colors">
-            <ThumbsDown className="w-5 h-5" />
+          <span className="font-extrabold text-xs text-slate-850">{post.upvotes - post.downvotes}</span>
+          <button onClick={() => handleVotePost('down')} className="p-1 rounded-none border-2 border-transparent hover:border-slate-900 hover:bg-red-50 text-slate-550 hover:text-red-700 transition-colors">
+            <ThumbsDown className="w-4 h-4" />
           </button>
         </div>
         <div className="flex-1">
           {postEditing ? (
             <div className="space-y-4">
-              <input type="text" value={editTitle} onChange={e => setEditTitle(e.target.value)} className="w-full bg-white border border-slate-200 rounded-neo px-4 py-2 font-bold text-xl outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" />
-              <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} className="w-full bg-white border border-slate-200 rounded-neo px-4 py-2 font-medium text-base leading-relaxed outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 h-32" />
+              <input type="text" value={editTitle} onChange={e => setEditTitle(e.target.value)} className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 font-bold text-base outline-none focus:bg-slate-50 text-slate-800" />
+              <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 font-semibold text-xs leading-relaxed outline-none focus:bg-slate-50 h-32 text-slate-700" />
               <div className="flex gap-2">
-                <button onClick={handleEditPostSubmit} className="p-2 bg-emerald-500 text-white rounded-neo hover:bg-emerald-600 transition-colors shadow-sm"><Check className="w-5 h-5" /></button>
-                <button onClick={() => setPostEditing(false)} className="p-2 bg-slate-100 text-slate-600 rounded-neo hover:bg-slate-200 transition-colors shadow-sm"><X className="w-5 h-5" /></button>
+                <button onClick={handleEditPostSubmit} className="p-1.5 bg-emerald-500 text-white rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm"><Check className="w-4 h-4" /></button>
+                <button onClick={() => setPostEditing(false)} className="p-1.5 bg-white text-slate-700 rounded-none border-2 border-slate-900 hover:bg-slate-50 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm"><X className="w-4 h-4" /></button>
               </div>
             </div>
           ) : (
             <>
               <div className="flex justify-between items-start mb-4">
-                <h1 className="text-2xl font-extrabold text-slate-900">{post.title}</h1>
+                <h1 className="text-xl font-extrabold text-slate-900">{post.title.toUpperCase()}</h1>
                 {user && user._id === post.author?._id && (
                   <div className="flex gap-2">
-                    <button onClick={() => { setPostEditing(true); setEditTitle(post.title); setEditDesc(post.description); }} className="p-1.5 border border-slate-200 rounded-neo hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors" title="Edit Post"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={handleDeletePost} className="p-1.5 border border-slate-200 rounded-neo hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors" title="Delete Post"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => { setPostEditing(true); setEditTitle(post.title); setEditDesc(post.description); }} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-slate-50 text-slate-700 hover:text-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Edit Post"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={handleDeletePost} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-red-50 text-slate-700 hover:text-red-700 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Delete Post"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 )}
               </div>
-              <p className="whitespace-pre-wrap font-medium text-base text-slate-700 leading-relaxed mb-6">{post.description}</p>
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-neo border border-slate-100 inline-flex">
-                <span>Posted by <span className="text-slate-750 font-bold">{post.author?.name}</span> on {new Date(post.createdAt).toLocaleDateString()} at {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {post.isEdited && <span className="italic text-xs ml-1">(edited)</span>}</span>
+              <p className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed mb-6 text-sm">{post.description}</p>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 bg-[#cbe3db]/40 px-3 py-1.5 rounded-none border-2 border-slate-900 inline-flex shadow-neo-sm">
+                <span>ASKED BY <span className="text-slate-800 font-extrabold">{post.author?.name?.toUpperCase()}</span> ON {new Date(post.createdAt).toLocaleDateString()} AT {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()} {post.isEdited && <span className="italic text-[9px] ml-1 text-primary">(EDITED)</span>}</span>
               </div>
             </>
           )}
         </div>
       </div>
 
-      <h3 className="text-xl font-extrabold text-slate-800 mb-6">{replies.length} Replies</h3>
+      <h3 className="text-lg font-extrabold text-slate-800 mb-6 uppercase">{replies.length} REPLIES</h3>
       
       <div className="space-y-6 mb-8">
         {replies.map(reply => (
-          <div key={reply._id} className="bg-white border border-slate-200 rounded-neo shadow-sm p-6 flex gap-6">
-            <div className="flex flex-col items-center gap-1 min-w-[40px]">
-              <button onClick={() => handleVoteReply(reply._id, 'up')} className="p-1 hover:text-emerald-600 text-slate-400"><ThumbsUp className="w-5 h-5" /></button>
-              <span className="font-extrabold text-sm text-slate-700">{reply.upvotes - reply.downvotes}</span>
-              <button onClick={() => handleVoteReply(reply._id, 'down')} className="p-1 hover:text-red-600 text-slate-400"><ThumbsDown className="w-5 h-5" /></button>
+          <div key={reply._id} className="bg-white border-2 border-slate-900 rounded-none shadow-neo p-6 flex gap-6">
+            <div className="flex flex-col items-center gap-1.5 min-w-[40px] font-mono">
+              <button onClick={() => handleVoteReply(reply._id, 'up')} className="p-1 hover:text-emerald-700 text-slate-500"><ThumbsUp className="w-4 h-4" /></button>
+              <span className="font-extrabold text-xs text-slate-800">{reply.upvotes - reply.downvotes}</span>
+              <button onClick={() => handleVoteReply(reply._id, 'down')} className="p-1 hover:text-red-700 text-slate-500"><ThumbsDown className="w-4 h-4" /></button>
             </div>
             <div className="flex-1">
               {replyEditingId === reply._id ? (
                 <div className="space-y-2">
-                  <textarea value={editReplyContent} onChange={e => setEditReplyContent(e.target.value)} className="w-full bg-white border border-slate-200 rounded-neo px-3 py-2 font-medium outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 h-24" />
+                  <textarea value={editReplyContent} onChange={e => setEditReplyContent(e.target.value)} className="w-full bg-white border-2 border-slate-900 rounded-none px-3 py-2 font-bold text-xs outline-none focus:bg-slate-50 h-24 text-slate-700" />
                   <div className="flex gap-2">
-                    <button onClick={() => handleEditReplySubmit(reply._id)} className="p-1.5 bg-emerald-500 text-white rounded-neo hover:bg-emerald-600 transition-colors shadow-sm"><Check className="w-4 h-4" /></button>
-                    <button onClick={() => setReplyEditingId(null)} className="p-1.5 bg-slate-100 text-slate-600 rounded-neo hover:bg-slate-200 transition-colors shadow-sm"><X className="w-4 h-4" /></button>
+                    <button onClick={() => handleEditReplySubmit(reply._id)} className="p-1.5 bg-emerald-500 text-white rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm"><Check className="w-4 h-4" /></button>
+                    <button onClick={() => setReplyEditingId(null)} className="p-1.5 bg-white text-slate-700 rounded-none border-2 border-slate-900 hover:bg-slate-50 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm"><X className="w-4 h-4" /></button>
                   </div>
                 </div>
               ) : (
                 <>
                   <div className="flex justify-between items-start mb-2">
-                    <p className="whitespace-pre-wrap font-medium text-slate-700 text-sm md:text-base leading-relaxed">{reply.content}</p>
+                    <p className="whitespace-pre-wrap font-medium text-slate-700 text-sm leading-relaxed">{reply.content}</p>
                     {user && user._id === reply.author?._id && (
                       <div className="flex gap-2">
-                        <button onClick={() => { setReplyEditingId(reply._id); setEditReplyContent(reply.content); }} className="p-1.5 border border-slate-200 rounded-neo hover:bg-slate-50 text-slate-500 hover:text-slate-755 transition-colors" title="Edit Reply"><Pencil className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => handleDeleteReply(reply._id)} className="p-1.5 border border-slate-200 rounded-neo hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors" title="Delete Reply"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => { setReplyEditingId(reply._id); setEditReplyContent(reply.content); }} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-slate-50 text-slate-600 hover:text-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Edit Reply"><Pencil className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleDeleteReply(reply._id)} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-red-50 text-slate-650 hover:text-red-705 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Delete Reply"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs font-semibold text-slate-500 mt-2 inline-block">— {reply.author?.name} on {new Date(reply.createdAt).toLocaleDateString()} at {new Date(reply.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {reply.isEdited && <span className="italic text-xs ml-1">(edited)</span>}</p>
+                  <p className="text-[10px] font-bold text-slate-600 mt-2 inline-block">— {reply.author?.name?.toUpperCase()} ON {new Date(reply.createdAt).toLocaleDateString()} AT {new Date(reply.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()} {reply.isEdited && <span className="italic text-[9px] ml-1 text-primary">(EDITED)</span>}</p>
                 </>
               )}
             </div>
@@ -196,17 +196,19 @@ export default function ForumPostView() {
       </div>
 
       {user && (
-        <form onSubmit={handleReplySubmit} className="bg-white border border-slate-200 rounded-neo shadow-sm p-6">
-          <h4 className="font-extrabold text-lg text-slate-800 mb-4">Your Answer</h4>
+        <form onSubmit={handleReplySubmit} className="bg-white border-2 border-slate-900 rounded-none shadow-neo p-6 relative pt-8 font-mono">
+          <div className="absolute -top-3.5 left-4 bg-primary px-3 py-1 text-xs text-white uppercase font-bold border-2 border-slate-900">
+            YOUR_ANSWER
+          </div>
           <textarea 
             required 
             value={replyContent} 
             onChange={e => setReplyContent(e.target.value)} 
-            className="w-full bg-white border border-slate-200 rounded-neo px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all font-medium text-slate-800 placeholder:text-slate-400 h-32 mb-4" 
+            className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-3 outline-none focus:bg-slate-50 transition-all font-bold text-slate-800 placeholder:text-slate-400 h-32 mb-4 text-xs" 
             placeholder="Write your reply here..." 
           />
-          <button type="submit" className="bg-primary text-white font-bold py-2 px-5 rounded-neo hover:bg-primary/95 transition-all shadow-sm">
-            Post Reply
+          <button type="submit" className="bg-[#ffb800] text-slate-950 border-2 border-slate-900 font-bold py-2 px-5 rounded-none hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs">
+            POST REPLY
           </button>
         </form>
       )}

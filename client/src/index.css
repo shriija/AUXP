@@ -2,24 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&display=swap');
+
 @layer base {
   :root {
-    --background: #f8fafc; /* Slate 50 */
-    --foreground: #0f172a; /* Slate 900 */
+    --background: #f8fafc; /* Light slate background */
+    --foreground: #0f172a; /* Slate 900 text */
     
-    --primary: #4f46e5; /* Indigo 600 */
+    --primary: #c12632; /* Anurag University Red */
     --primary-foreground: #ffffff;
     
-    --secondary: #f59e0b; /* Amber 500 */
-    --secondary-foreground: #0f172a;
+    --secondary: #1b355a; /* Anurag University Navy Blue */
+    --secondary-foreground: #ffffff;
     
-    --accent: #0d9488; /* Teal 600 */
-    --accent-foreground: #ffffff;
+    --accent: #ffb800; /* Anurag University Gold */
+    --accent-foreground: #0f172a;
     
     --card: #ffffff;
     --card-foreground: #0f172a;
     
-    --border: #e2e8f0; /* Slate 200 */
+    --border: #0f172a; /* Solid crisp pixel borders */
   }
 
   body {
