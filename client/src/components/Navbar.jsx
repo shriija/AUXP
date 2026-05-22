@@ -12,45 +12,45 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="border-b-4 border-black bg-white sticky top-0 z-50">
+    <nav className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          <Link to="/" className="flex items-center gap-2 hover:-translate-y-0.5 transition-transform">
-            <div className="bg-primary border-2 border-black p-1 rounded-neo shadow-neo-sm">
-              <BrainCircuit className="h-6 w-6 text-black" />
+          <Link to="/" className="flex items-center gap-2.5 transition-transform active:scale-[0.98]">
+            <div className="bg-primary/10 p-1.5 rounded-neo border border-primary/20 flex items-center justify-center">
+              <BrainCircuit className="h-5.5 w-5.5 text-primary" />
             </div>
-            <span className="font-bold text-xl tracking-tight text-black">StudyVault</span>
+            <span className="font-extrabold text-xl tracking-tight text-slate-900">StudyVault</span>
           </Link>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {isAuthenticated ? (
               <>
-                <div className="flex items-center gap-3 mr-4">
+                <div className="flex items-center gap-3 mr-2 sm:mr-4">
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold text-black">{user?.name}</p>
-                    <p className="text-xs font-semibold text-black/70">Lvl {user?.level} • {user?.xp} XP</p>
+                    <p className="text-sm font-semibold text-slate-800 leading-tight">{user?.name}</p>
+                    <p className="text-[11px] font-medium text-slate-500">Lvl {user?.level} • {user?.xp} XP</p>
                   </div>
-                  <div className="h-10 w-10 rounded-full bg-secondary border-2 border-black flex items-center justify-center text-black font-bold shadow-neo-sm">
+                  <div className="h-9 w-9 rounded-full bg-secondary/10 border border-secondary/30 flex items-center justify-center text-secondary font-bold text-sm shadow-sm" style={{ color: 'var(--secondary)' }}>
                     {user?.name?.charAt(0).toUpperCase()}
                   </div>
                 </div>
-                <Link to="/forum" className="p-2 text-sm font-bold border-2 border-transparent hover:border-black hover:bg-yellow-100 hover:shadow-neo-sm transition-all rounded-neo text-black">
+                <Link to="/forum" className="px-3.5 py-1.5 text-sm font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-colors rounded-neo">
                   Forum
                 </Link>
-                <Link to="/classrooms" className="p-2 text-sm font-bold border-2 border-transparent hover:border-black hover:bg-pink-100 hover:shadow-neo-sm transition-all rounded-neo text-black">
+                <Link to="/classrooms" className="px-3.5 py-1.5 text-sm font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-colors rounded-neo">
                   Classrooms
                 </Link>
-                <Link to="/dashboard" className="p-2 border-2 border-transparent hover:border-black hover:bg-secondary/20 hover:shadow-neo-sm transition-all rounded-neo text-black">
+                <Link to="/dashboard" className="p-2 text-slate-600 hover:text-primary hover:bg-slate-50 transition-colors rounded-neo" title="Dashboard">
                   <LayoutDashboard className="h-5 w-5" />
                 </Link>
-                <button onClick={handleLogout} className="p-2 border-2 border-transparent hover:border-black hover:bg-primary/20 hover:shadow-neo-sm transition-all rounded-neo text-black">
+                <button onClick={handleLogout} className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors rounded-neo" title="Logout">
                   <LogOut className="h-5 w-5" />
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-bold text-black border-2 border-transparent hover:border-black hover:shadow-neo-sm px-3 py-2 rounded-neo transition-all">Log in</Link>
-                <Link to="/register" className="bg-primary text-black border-2 border-black px-4 py-2 rounded-neo text-sm font-bold shadow-neo hover:translate-y-[2px] hover:shadow-neo-sm transition-all">
+                <Link to="/login" className="text-sm font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 px-3.5 py-2 rounded-neo transition-colors">Log in</Link>
+                <Link to="/register" className="bg-primary text-white hover:bg-primary/95 shadow-sm px-4.5 py-2 rounded-neo text-sm font-semibold transition-all hover:shadow-md active:scale-[0.98]">
                   Sign up
                 </Link>
               </>

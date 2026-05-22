@@ -4,25 +4,32 @@
 
 @layer base {
   :root {
-    --background: #f4f4f0; /* Off-white / light beige */
-    --foreground: #000000;
+    --background: #f8fafc; /* Slate 50 */
+    --foreground: #0f172a; /* Slate 900 */
     
-    --primary: #ff90e8; /* Bright pink */
-    --primary-foreground: #000000;
+    --primary: #4f46e5; /* Indigo 600 */
+    --primary-foreground: #ffffff;
     
-    --secondary: #ffc900; /* Bright yellow */
-    --secondary-foreground: #000000;
+    --secondary: #f59e0b; /* Amber 500 */
+    --secondary-foreground: #0f172a;
     
-    --accent: #23a094; /* Teal */
-    --accent-foreground: #000000;
+    --accent: #0d9488; /* Teal 600 */
+    --accent-foreground: #ffffff;
     
     --card: #ffffff;
-    --card-foreground: #000000;
+    --card-foreground: #0f172a;
     
-    --border: #000000;
+    --border: #e2e8f0; /* Slate 200 */
   }
 
   body {
     @apply bg-background text-foreground antialiased min-h-screen font-sans;
+  }
+
+  /* Hide native browser password reveal toggle (Edge/Chrome) */
+  input::-ms-reveal,
+  input::-ms-clear,
+  input::-webkit-credentials-auto-fill-button {
+    display: none;
   }
 }

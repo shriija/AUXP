@@ -9,6 +9,7 @@ import Forum from './pages/Forum';
 import ForumPostView from './pages/ForumPostView';
 import Classrooms from './pages/Classrooms';
 import ClassroomRoom from './pages/ClassroomRoom';
+import Landing from './pages/Landing';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -22,7 +23,7 @@ function App() {
         <Navbar />
         <main className="flex-1 flex flex-col">
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route 

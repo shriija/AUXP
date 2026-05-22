@@ -30,30 +30,12 @@ Content-Type: application/json
 ### 3. Get all resources (Public)
 GET {{baseUrl}}/resources
 
-### 4. Create a new resource (Protected)
-# --> Make sure you replace @token at the top with your login token!
-POST {{baseUrl}}/resources
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-    "title": "Calculus 101 Midterm Notes",
-    "subject": "Math",
-    "topic": "Calculus",
-    "fileUrl": "https://res.cloudinary.com/demo/image/upload/sample.pdf",
-    "tags": ["math", "midterm", "notes"]
-}
-
-### 5. Get a single resource by ID (Replace ID with one from Get All Resources response)
+### 4. Get a single resource by ID (Replace ID with one from Get All Resources response)
 GET {{baseUrl}}/resources/YOUR_RESOURCE_ID_HERE
-
-### 6. Generate Cloudinary Signature (Protected)
-GET {{baseUrl}}/resources/generate-signature
-Authorization: Bearer {{token}}
 
 ### --- GAMIFICATION / VOTING ---
 
-### 7. Upvote a resource (Protected)
+### 5. Upvote a resource (Protected)
 POST {{baseUrl}}/votes
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -63,7 +45,7 @@ Authorization: Bearer {{token}}
     "type": "up"
 }
 
-### 8. Downvote a resource (Protected)
+### 6. Downvote a resource (Protected)
 POST {{baseUrl}}/votes
 Content-Type: application/json
 Authorization: Bearer {{token}}

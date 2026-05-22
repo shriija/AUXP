@@ -65,39 +65,39 @@ export default function Classrooms() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-4xl font-black tracking-tight mb-2 text-black">Study Classrooms</h1>
-          <p className="text-black/70 font-semibold">Join a live room to chat and collaborate on a shared whiteboard.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight mb-1.5 text-slate-900">Active Study Classrooms</h1>
+          <p className="text-slate-500 font-medium text-sm sm:text-base">Join a live room to chat and collaborate on a shared whiteboard.</p>
         </div>
-        <button onClick={() => setShowCreate(!showCreate)} className="bg-primary text-black border-2 border-black px-4 py-2.5 rounded-neo font-bold flex items-center gap-2 transition-all shadow-neo hover:translate-y-[2px] hover:shadow-neo-sm">
+        <button onClick={() => setShowCreate(!showCreate)} className={`${showCreate ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-primary text-white hover:bg-primary/95'} px-4.5 py-2.5 rounded-neo font-semibold flex items-center gap-2 transition-all shadow-neo hover:shadow-neo-lg hover:-translate-y-0.5 active:translate-y-0 w-fit`}>
           <Plus className="w-5 h-5" />
           {showCreate ? 'Cancel' : 'Create Room'}
         </button>
       </div>
 
       {showCreate && (
-        <form onSubmit={handleCreate} className="bg-white border-4 border-black p-6 rounded-neo shadow-neo mb-8 space-y-4 max-w-2xl">
-          <h2 className="text-2xl font-black">Create a New Classroom</h2>
+        <form onSubmit={handleCreate} className="bg-white border border-slate-200 p-6 rounded-neo shadow-neo mb-8 space-y-4 max-w-md">
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Create a New Classroom</h2>
           <div>
-            <label className="block text-sm font-bold mb-1.5 text-black">Room Name</label>
-            <input required type="text" value={newName} onChange={e => setNewName(e.target.value)} className="w-full bg-white border-2 border-black rounded-neo px-4 py-2.5 outline-none focus:shadow-neo-sm focus:bg-pink-50 transition-colors font-medium text-black placeholder:text-black/40" placeholder="e.g. Calculus Study Group" />
+            <label className="block text-sm font-semibold mb-1.5 text-slate-700">Room Name</label>
+            <input required type="text" value={newName} onChange={e => setNewName(e.target.value)} className="w-full bg-white border border-slate-200 rounded-neo px-4 py-2.5 outline-none focus:border-primary/45 focus:ring-1 focus:ring-primary/20 transition-all font-medium text-slate-900 placeholder:text-slate-400 text-sm" placeholder="e.g. Calculus Study Group" />
           </div>
           <div>
-            <label className="block text-sm font-bold mb-1.5 text-black">Description</label>
-            <input type="text" value={newDesc} onChange={e => setNewDesc(e.target.value)} className="w-full bg-white border-2 border-black rounded-neo px-4 py-2.5 outline-none focus:shadow-neo-sm focus:bg-pink-50 transition-colors font-medium text-black placeholder:text-black/40" placeholder="e.g. Preparing for finals..." />
+            <label className="block text-sm font-semibold mb-1.5 text-slate-700">Description</label>
+            <input type="text" value={newDesc} onChange={e => setNewDesc(e.target.value)} className="w-full bg-white border border-slate-200 rounded-neo px-4 py-2.5 outline-none focus:border-primary/45 focus:ring-1 focus:ring-primary/20 transition-all font-medium text-slate-900 placeholder:text-slate-400 text-sm" placeholder="e.g. Preparing for finals..." />
           </div>
           <div className="flex items-center gap-2">
-            <input type="checkbox" id="privateRoom" checked={isPrivate} onChange={e => setIsPrivate(e.target.checked)} className="w-4 h-4 border-2 border-black rounded-sm accent-black" />
-            <label htmlFor="privateRoom" className="text-sm font-bold text-black cursor-pointer flex items-center gap-1"><Lock className="w-4 h-4"/> Private Room</label>
+            <input type="checkbox" id="privateRoom" checked={isPrivate} onChange={e => setIsPrivate(e.target.checked)} className="w-4 h-4 border border-slate-200 rounded-sm accent-primary" />
+            <label htmlFor="privateRoom" className="text-sm font-semibold text-slate-700 cursor-pointer flex items-center gap-1"><Lock className="w-4 h-4"/> Private Room</label>
           </div>
           {isPrivate && (
             <div>
-              <label className="block text-sm font-bold mb-1.5 text-black">6-Digit Access Code</label>
-              <input required type="text" maxLength={6} value={code} onChange={e => setCode(e.target.value)} className="w-full max-w-[200px] bg-white border-2 border-black rounded-neo px-4 py-2.5 outline-none focus:shadow-neo-sm focus:bg-pink-50 transition-colors font-black text-center tracking-widest text-xl text-black placeholder:text-black/40" placeholder="000000" />
+              <label className="block text-sm font-semibold mb-1.5 text-slate-700">6-Digit Access Code</label>
+              <input required type="text" maxLength={6} value={code} onChange={e => setCode(e.target.value)} className="w-full max-w-[200px] bg-white border border-slate-200 rounded-neo px-4 py-2.5 outline-none focus:border-primary/45 focus:ring-1 focus:ring-primary/20 transition-all font-bold text-center tracking-widest text-xl text-slate-900 placeholder:text-slate-400" placeholder="000000" />
             </div>
           )}
-          <button type="submit" className="bg-secondary text-black font-black py-2.5 px-6 rounded-neo border-2 border-black shadow-neo hover:translate-y-[2px] hover:shadow-neo-sm transition-all">
+          <button type="submit" className="bg-primary text-white font-semibold py-2.5 px-6 rounded-neo shadow-neo hover:shadow-neo-lg hover:-translate-y-0.5 active:translate-y-0 transition-all">
             Start Classroom
           </button>
         </form>
@@ -105,29 +105,29 @@ export default function Classrooms() {
 
       {loading ? (
         <div className="flex justify-center items-center py-20">
-          <Loader2 className="w-10 h-10 animate-spin text-black" />
+          <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
         </div>
       ) : classrooms.length === 0 ? (
-        <div className="text-center py-20 text-black/60 border-4 border-dashed border-black/20 rounded-neo mx-4 my-2 font-bold bg-white">
-          <Users className="w-16 h-16 mx-auto mb-4 opacity-40 text-black" />
-          <p>No active classrooms right now. Start one!</p>
+        <div className="text-center py-20 text-slate-400 border border-dashed border-slate-200 rounded-neo mx-4 my-2 font-medium bg-white">
+          <Users className="w-12 h-12 mx-auto mb-3 opacity-40 text-slate-400" />
+          <p className="text-sm">No active classrooms right now. Start one!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {classrooms.map(room => (
-            <div key={room._id} className="bg-white border-4 border-black rounded-neo p-5 shadow-neo flex flex-col justify-between hover:-translate-y-1 hover:shadow-neo-lg transition-all relative">
+            <div key={room._id} className="bg-white border border-slate-200 rounded-neo p-5 shadow-neo flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-neo-lg transition-all duration-200 relative group">
               <div>
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-2xl font-black line-clamp-1 pr-6">{room.name}</h3>
-                  {room.isPrivate && <Lock className="w-5 h-5 text-black absolute top-5 right-5" />}
+                  <h3 className="text-lg font-bold text-slate-900 line-clamp-1 pr-6 group-hover:text-primary transition-colors">{room.name}</h3>
+                  {room.isPrivate && <Lock className="w-4 h-4 text-slate-400 absolute top-5 right-5" />}
                 </div>
-                <p className="text-black/70 font-medium line-clamp-2 mb-4 h-10">{room.description}</p>
-                <div className="flex items-center gap-2 text-sm font-bold text-black/60 mb-6">
-                  <Users className="w-4 h-4 text-black" />
+                <p className="text-slate-500 text-sm font-medium line-clamp-2 mb-4 h-10 leading-relaxed">{room.description}</p>
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-6">
+                  <Users className="w-4 h-4" />
                   <span>{room.members.length} members joined</span>
                 </div>
               </div>
-              <button onClick={() => handleJoin(room)} className="w-full bg-black text-white font-black py-2.5 rounded-neo border-2 border-black hover:bg-black/80 transition-colors">
+              <button onClick={() => handleJoin(room)} className="w-full bg-secondary text-slate-900 text-center font-semibold py-2.5 rounded-neo shadow-neo hover:shadow-neo-lg hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm">
                 Join Room
               </button>
             </div>

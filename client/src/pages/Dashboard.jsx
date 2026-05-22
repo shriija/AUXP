@@ -55,12 +55,12 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-4xl font-black tracking-tight mb-2 text-black">Vault Dashboard</h1>
-          <p className="text-black/70 font-semibold">Discover and share collaborative study resources.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight mb-1.5 text-slate-900">Vault Dashboard</h1>
+          <p className="text-slate-500 font-medium text-sm sm:text-base">Discover and share collaborative study resources.</p>
         </div>
-        <button onClick={() => setIsUploadOpen(true)} className="bg-primary text-black border-2 border-black px-4 py-2.5 rounded-neo font-bold flex items-center gap-2 transition-all shadow-neo hover:translate-y-[2px] hover:shadow-neo-sm">
+        <button onClick={() => setIsUploadOpen(true)} className="bg-primary text-white hover:bg-primary/95 px-4.5 py-2.5 rounded-neo font-semibold flex items-center gap-2 transition-all shadow-neo hover:shadow-neo-lg hover:-translate-y-0.5 active:translate-y-0 w-fit">
           <Upload className="w-5 h-5" />
           Upload Notes
         </button>
@@ -76,37 +76,40 @@ export default function Dashboard() {
         
         {/* Left Sidebar - Gamification */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-secondary border-4 border-black rounded-neo p-6 shadow-neo relative overflow-hidden">
-            <h3 className="font-black text-xl mb-4 flex items-center gap-2 text-black">
-              <Sparkles className="w-6 h-6 text-black fill-white" /> 
+          <div className="bg-slate-900 border border-slate-800 rounded-neo p-6 shadow-neo relative overflow-hidden text-white">
+            {/* Glowing background hint */}
+            <div className="absolute -top-12 -right-12 w-24 h-24 bg-secondary/10 rounded-full filter blur-xl pointer-events-none"></div>
+
+            <h3 className="font-bold text-lg mb-5 flex items-center gap-2 text-white">
+              <Sparkles className="w-5 h-5 text-secondary fill-secondary/20" /> 
               Your Progress
             </h3>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center border-4 border-black text-2xl font-black text-black shadow-neo-sm">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="h-14 w-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xl font-extrabold text-white shadow-inner">
                 {user?.level}
               </div>
               <div>
-                <p className="font-black text-lg text-black">Level {user?.level}</p>
-                <p className="text-sm font-bold text-black/70">{user?.xp} total XP</p>
+                <p className="font-extrabold text-base text-white">Level {user?.level}</p>
+                <p className="text-xs font-semibold text-slate-400">{user?.xp} total XP</p>
               </div>
             </div>
-            <div className="w-full bg-white rounded-full h-4 mb-2 overflow-hidden border-2 border-black">
-              <div className="bg-primary h-4 border-r-2 border-black" style={{ width: `${(user?.xp % 100)}%` }}></div>
+            <div className="w-full bg-white/10 rounded-full h-3 mb-2.5 overflow-hidden">
+              <div className="bg-secondary h-3 rounded-full" style={{ width: `${(user?.xp % 100)}%` }}></div>
             </div>
-            <p className="text-xs font-bold text-black/70 text-right">{100 - (user?.xp % 100)} XP to next level</p>
+            <p className="text-[11px] font-semibold text-slate-400 text-right">{100 - (user?.xp % 100)} XP to next level</p>
           </div>
         </div>
 
         {/* Main Feed - Resources */}
         <div className="lg:col-span-3">
-          <div className="bg-white border-4 border-black rounded-neo shadow-neo overflow-hidden min-h-[500px]">
+          <div className="bg-white border border-slate-200 rounded-neo shadow-neo overflow-hidden min-h-[500px]">
             {/* Category Tabs */}
-            <div className="p-4 border-b-4 border-black bg-white sticky top-0 z-10 flex gap-4 overflow-x-auto">
+            <div className="p-4 border-b border-slate-200 bg-white sticky top-0 z-10 flex gap-3 overflow-x-auto">
               {['All', 'Class Notes', 'Past Papers', 'Resources'].map(cat => (
                 <button 
                   key={cat}
                   onClick={() => { setCategory(cat); setYear(''); }}
-                  className={`px-5 py-2 rounded-neo text-black text-sm font-bold border-2 border-black whitespace-nowrap transition-transform ${category === cat || (!category && cat === 'All') ? 'bg-primary shadow-neo-sm translate-y-[2px]' : 'bg-white hover:bg-secondary/20'}`}
+                  className={`px-4 py-2 rounded-neo text-sm font-semibold whitespace-nowrap transition-colors border ${category === cat || (!category && cat === 'All') ? 'bg-primary text-white border-primary shadow-neo-sm' : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-50'}`}
                 >
                   {cat}
                 </button>
@@ -115,12 +118,12 @@ export default function Dashboard() {
             
             {/* Year Filters (only show if category is selected and not 'All') */}
             {category && category !== 'All' && (
-              <div className="p-3 border-b-4 border-black bg-yellow-100 flex gap-4 overflow-x-auto">
+              <div className="p-3 border-b border-slate-200 bg-slate-50/50 flex gap-3 overflow-x-auto">
                 {['Year I', 'Year II', 'Year III', 'Year IV'].map(y => (
                   <button 
                     key={y}
                     onClick={() => setYear(y)}
-                    className={`px-4 py-1.5 rounded-neo text-black text-xs font-black border-2 border-black whitespace-nowrap transition-transform ${year === y ? 'bg-black text-white shadow-neo-sm translate-y-[2px]' : 'bg-white hover:bg-black/10'}`}
+                    className={`px-3 py-1.5 rounded-neo text-xs font-bold border whitespace-nowrap transition-colors ${year === y ? 'bg-slate-900 text-white border-slate-900 shadow-neo-sm' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
                   >
                     {y}
                   </button>
@@ -129,43 +132,43 @@ export default function Dashboard() {
             )}
             
             {/* Search & Filters */}
-            <div className="p-4 border-b-4 border-black bg-secondary/10 flex flex-col md:flex-row gap-4">
+            <div className="p-4 border-b border-slate-200 bg-slate-50/20 flex flex-col md:flex-row gap-3.5">
               <input 
                 type="text" 
                 placeholder="Search notes, tags..." 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="flex-1 bg-white border-2 border-black rounded-neo px-4 py-2 text-sm font-bold outline-none focus:shadow-neo-sm placeholder:text-black/40"
+                className="flex-1 bg-white border border-slate-200 rounded-neo px-3.5 py-2 text-sm font-medium outline-none focus:border-primary/45 focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-slate-400 text-slate-900"
               />
               <input 
                 type="text" 
                 placeholder="Subject" 
                 value={subject}
                 onChange={e => setSubject(e.target.value)}
-                className="w-full md:w-32 bg-white border-2 border-black rounded-neo px-4 py-2 text-sm font-bold outline-none focus:shadow-neo-sm placeholder:text-black/40"
+                className="w-full md:w-32 bg-white border border-slate-200 rounded-neo px-3.5 py-2 text-sm font-medium outline-none focus:border-primary/45 focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-slate-400 text-slate-900"
               />
               <input 
                 type="text" 
                 placeholder="Topic" 
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
-                className="w-full md:w-32 bg-white border-2 border-black rounded-neo px-4 py-2 text-sm font-bold outline-none focus:shadow-neo-sm placeholder:text-black/40"
+                className="w-full md:w-32 bg-white border border-slate-200 rounded-neo px-3.5 py-2 text-sm font-medium outline-none focus:border-primary/45 focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-slate-400 text-slate-900"
               />
             </div>
             
             <div className="p-6 space-y-5">
               {category && category !== 'All' && !year ? (
-                <div className="text-center py-20 text-black/60 border-4 border-dashed border-black/20 rounded-neo mx-4 my-2 font-bold">
+                <div className="text-center py-20 text-slate-500 border border-dashed border-slate-200 rounded-neo mx-4 my-2 font-medium">
                   <p>Please select an academic year to view these resources.</p>
                 </div>
               ) : loading ? (
                 <div className="flex justify-center items-center py-20">
-                  <Loader2 className="w-10 h-10 animate-spin text-black" />
+                  <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
                 </div>
               ) : resources.length === 0 ? (
-                <div className="text-center py-20 text-black/60 border-4 border-dashed border-black/20 rounded-neo mx-4 my-2 font-bold">
-                  <FileText className="w-16 h-16 mx-auto mb-4 opacity-40 text-black" />
-                  <p>No resources found. Be the first to upload!</p>
+                <div className="text-center py-20 text-slate-400 border border-dashed border-slate-200 rounded-neo mx-4 my-2 font-medium">
+                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-40 text-slate-400" />
+                  <p className="text-sm">No resources found. Be the first to upload!</p>
                 </div>
               ) : (
                 resources.map((resource, i) => (
@@ -174,36 +177,36 @@ export default function Dashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                     key={resource._id} 
-                    className="flex gap-5 p-5 rounded-neo border-4 border-black bg-white shadow-neo hover:-translate-y-1 hover:shadow-neo-lg transition-all group"
+                    className="flex gap-5 p-5 rounded-neo border border-slate-200 bg-white shadow-neo hover:-translate-y-0.5 hover:shadow-neo-lg transition-all duration-200 group"
                   >
                     {/* Voting Column */}
-                    <div className="flex flex-col items-center gap-2 min-w-[48px]">
-                      <button onClick={() => handleVote(resource._id, 'up')} className="p-2 border-2 border-transparent rounded-neo hover:border-black hover:bg-green-300 text-black transition-colors">
-                        <ThumbsUp className="w-6 h-6" />
+                    <div className="flex flex-col items-center gap-1 min-w-[44px] bg-slate-50 border border-slate-100 rounded-neo p-1.5 h-fit shadow-inner">
+                      <button onClick={() => handleVote(resource._id, 'up')} className="p-1 rounded-neo hover:bg-green-50 text-slate-500 hover:text-green-600 transition-colors" title="Upvote">
+                        <ThumbsUp className="w-4 h-4" />
                       </button>
-                      <span className="font-black text-lg text-black">{resource.upvotes - resource.downvotes}</span>
-                      <button onClick={() => handleVote(resource._id, 'down')} className="p-2 border-2 border-transparent rounded-neo hover:border-black hover:bg-red-300 text-black transition-colors">
-                        <ThumbsDown className="w-6 h-6" />
+                      <span className="font-bold text-xs text-slate-700">{resource.upvotes - resource.downvotes}</span>
+                      <button onClick={() => handleVote(resource._id, 'down')} className="p-1 rounded-neo hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors" title="Downvote">
+                        <ThumbsDown className="w-4 h-4" />
                       </button>
                     </div>
 
                     {/* Content Column */}
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
-                        <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer" className="font-black text-xl text-black hover:text-primary transition-colors line-clamp-1 hover:underline">
+                        <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${resource.fileUrl}`} target="_blank" rel="noopener noreferrer" className="font-extrabold text-lg text-slate-900 hover:text-primary transition-colors line-clamp-1 hover:underline">
                           {resource.title}
                         </a>
                       </div>
-                      <div className="flex gap-2 text-xs font-bold text-black mb-4">
-                        {resource.year && <span className="bg-green-200 px-3 py-1 rounded-neo border-2 border-black">{resource.year}</span>}
-                        <span className="bg-accent px-3 py-1 rounded-neo border-2 border-black">{resource.subject}</span>
-                        <span className="bg-pink-200 px-3 py-1 rounded-neo border-2 border-black">{resource.topic}</span>
+                      <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 mb-3.5">
+                        {resource.year && <span className="bg-green-50 text-green-700 px-2.5 py-0.5 rounded-full border border-green-100">{resource.year}</span>}
+                        <span className="bg-primary/5 text-primary px-2.5 py-0.5 rounded-full border border-primary/10">{resource.subject}</span>
+                        <span className="bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full border border-indigo-100">{resource.topic}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-sm font-bold text-black/70">
-                        <div className="h-7 w-7 rounded-full bg-secondary border-2 border-black flex items-center justify-center text-[12px] text-black font-black">
+                      <div className="flex items-center gap-2.5 text-xs font-medium text-slate-500">
+                        <div className="h-6 w-6 rounded-full bg-secondary/15 border border-secondary/30 flex items-center justify-center text-[10px] text-amber-700 font-bold">
                           {resource.uploadedBy?.name?.charAt(0).toUpperCase()}
                         </div>
-                        <span>Uploaded by <span className="text-black">{resource.uploadedBy?.name}</span></span>
+                        <span>Uploaded by <span className="text-slate-800 font-semibold">{resource.uploadedBy?.name}</span></span>
                       </div>
                     </div>
                   </motion.div>

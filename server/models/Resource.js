@@ -25,7 +25,7 @@ const resourceSchema = new mongoose.Schema({
     },
     fileUrl: {
         type: String,
-        required: true // Cloudinary URL
+        required: true // Local file path, e.g. /uploads/filename.ext
     },
     uploadedBy: {
         type: mongoose.Schema.Types.ObjectId,
