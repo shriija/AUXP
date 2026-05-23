@@ -49,6 +49,19 @@ export const useAuthStore = create(
         set({ user: null, token: null, isAuthenticated: false });
       },
       
+      getMe: async () => {
+        try {
+          const res = await api.get('/auth/me');
+          set({
+            user: { _id: res.data._id, name: res.data.name, email: res.data.email, xp: res.data.xp, level: res.data.level, badges: res.data.badges }
+          });
+          return res.data;
+        } catch (error) {
+          console.error('Failed to fetch current user', error);
+          return null;
+        }
+      },
+      
       clearError: () => set({ error: null })
     }),
     {

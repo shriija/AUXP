@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import UploadModal from '../components/UploadModal';
 
 export default function Dashboard() {
-  const { user } = useAuthStore();
+  const { user, getMe } = useAuthStore();
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [search, setSearch] = useState('');
   const [subject, setSubject] = useState('');
   const [topic, setTopic] = useState('');
+  const [myUploads, setMyUploads] = useState([]);
 
   useEffect(() => {
     if (category && category !== 'All' && !year) {
@@ -23,6 +24,12 @@ export default function Dashboard() {
     }
     fetchResources();
   }, [category, year, search, subject, topic]);
+
+  useEffect(() => {
+    if (user?._id) {
+      fetchMyUploads();
+    }
+  }, [user?._id]);
 
   const fetchResources = async () => {
     try {
@@ -40,6 +47,40 @@ export default function Dashboard() {
       console.error('Failed to fetch resources', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMyUploads = async () => {
+    try {
+      if (!user?._id) return;
+      const res = await api.get(`/resources?uploadedBy=${user._id}&includeDeleted=true`);
+      setMyUploads(res.data);
+    } catch (error) {
+      console.error('Failed to fetch user uploads', error);
+    }
+  };
+
+  const handleDeleteResource = async (resourceId) => {
+    if (!window.confirm('Are you sure you want to delete this resource?')) return;
+    try {
+      await api.delete(`/resources/${resourceId}`);
+      fetchResources();
+      fetchMyUploads();
+      getMe();
+    } catch (error) {
+      console.error('Failed to delete resource', error);
+    }
+  };
+
+  const handleRestoreResource = async (resourceId) => {
+    if (!window.confirm('Are you sure you want to re-upload / restore this resource?')) return;
+    try {
+      await api.post(`/resources/${resourceId}/restore`);
+      fetchResources();
+      fetchMyUploads();
+      getMe();
+    } catch (error) {
+      console.error('Failed to restore resource', error);
     }
   };
 
@@ -69,7 +110,11 @@ export default function Dashboard() {
       <UploadModal 
         isOpen={isUploadOpen} 
         onClose={() => setIsUploadOpen(false)} 
-        onUploadSuccess={fetchResources} 
+        onUploadSuccess={() => {
+          fetchResources();
+          fetchMyUploads();
+          getMe();
+        }} 
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -93,6 +138,56 @@ export default function Dashboard() {
               <div className="bg-primary h-full border-r-2 border-slate-900" style={{ width: `${(user?.xp % 100)}%` }}></div>
             </div>
             <p className="text-[9px] font-bold text-slate-700 text-right">{100 - (user?.xp % 100)} XP TO NEXT LEVEL</p>
+          </div>
+
+          {/* User Profile / My Uploads Section */}
+          <div className="bg-[#cbe3db] border-2 border-slate-900 rounded-none p-6 shadow-neo font-mono relative">
+            <div className="absolute -top-3 left-4 bg-[#1b355a] px-2 py-0.5 text-[9px] text-white border-2 border-slate-900 uppercase font-bold">
+              MY_UPLOADS
+            </div>
+            <div className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-1">
+              {myUploads.length === 0 ? (
+                <p className="text-[10px] font-bold text-slate-500 uppercase">No uploads yet.</p>
+              ) : (
+                myUploads.map(upload => (
+                  <div key={upload._id} className="flex flex-col border-b border-slate-900/10 pb-2 last:border-b-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[10px] font-bold uppercase truncate max-w-[120px] ${upload.isDeleted ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                        {upload.title}
+                      </span>
+                      {upload.isDeleted ? (
+                        (upload.uploadedBy?._id === user?._id || upload.uploadedBy === user?._id) && (
+                          <button
+                            onClick={() => handleRestoreResource(upload._id)}
+                            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[8px] font-bold border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                            title="Re-upload"
+                          >
+                            RE-UPLOAD
+                          </button>
+                        )
+                      ) : (
+                        (upload.uploadedBy?._id === user?._id || upload.uploadedBy === user?._id) && (
+                          <button
+                            onClick={() => handleDeleteResource(upload._id)}
+                            className="bg-red-55 hover:bg-red-100 text-red-700 px-2 py-0.5 text-[8px] font-bold border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                            title="Delete"
+                          >
+                            DELETE
+                          </button>
+                        )
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1 text-[8px] font-bold text-slate-500 uppercase">
+                      <span>{upload.category}</span>
+                      <span>•</span>
+                      <span className={upload.isDeleted ? 'text-red-600' : 'text-emerald-700'}>
+                        {upload.isDeleted ? 'DELETED' : 'ACTIVE'}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 
@@ -188,10 +283,18 @@ export default function Dashboard() {
 
                     {/* Content Column */}
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-start justify-between mb-2 gap-4">
                         <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${resource.fileUrl}`} target="_blank" rel="noopener noreferrer" className="font-bold text-base text-slate-850 hover:text-primary transition-colors line-clamp-1 hover:underline">
                           {resource.title.toUpperCase()}
                         </a>
+                        {(resource.uploadedBy?._id === user?._id || resource.uploadedBy === user?._id) && (
+                          <button
+                            onClick={() => handleDeleteResource(resource._id)}
+                            className="bg-red-55 hover:bg-red-100 text-red-700 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all shrink-0 cursor-pointer"
+                          >
+                            DELETE
+                          </button>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-2 text-[10px] font-bold mb-4">
                         {resource.year && <span className="bg-emerald-50 text-emerald-800 px-2 py-0.5 border-2 border-slate-900 rounded-none shadow-neo-sm">{resource.year.toUpperCase()}</span>}

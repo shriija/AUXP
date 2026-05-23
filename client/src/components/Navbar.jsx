@@ -25,15 +25,15 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {isAuthenticated ? (
               <>
-                <div className="flex items-center gap-3 mr-4">
+                <Link to="/profile" className="flex items-center gap-3 mr-4 hover:opacity-85 transition-all group" title="View Profile">
                   <div className="text-right hidden sm:block font-mono">
-                    <p className="text-xs font-bold text-slate-800">{user?.name}</p>
+                    <p className="text-xs font-bold text-slate-800 group-hover:text-primary transition-colors">{user?.name}</p>
                     <p className="text-[10px] font-bold text-slate-600">LVL {user?.level} • {user?.xp} XP</p>
                   </div>
-                  <div className="h-8 w-8 rounded-none bg-white flex items-center justify-center text-primary font-extrabold border-2 border-slate-900 shadow-neo-sm" title={user?.name}>
+                  <div className="h-8 w-8 rounded-none bg-white flex items-center justify-center text-primary font-extrabold border-2 border-slate-900 shadow-neo-sm group-hover:shadow-neo transition-all" title={user?.name}>
                     {user?.name?.charAt(0).toUpperCase()}
                   </div>
-                </div>
+                </Link>
                 <Link to="/forum" className="px-3.5 py-1.5 text-xs font-bold text-slate-800 hover:text-primary hover:bg-white/40 border-2 border-transparent hover:border-slate-900 rounded-none transition-all">
                   FORUM
                 </Link>

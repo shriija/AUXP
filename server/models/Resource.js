@@ -42,6 +42,10 @@ const resourceSchema = new mongoose.Schema({
     downvotes: {
         type: Number,
         default: 0
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

@@ -19,8 +19,13 @@ const createResource = async (req, res) => {
             uploadedBy: req.user._id
         });
 
-        // Gamification: Add 40 XP to user for uploading
-        await User.findByIdAndUpdate(req.user._id, { $inc: { xp: 40 } });
+        // Gamification: Add 40 XP to user for uploading and recalculate level
+        const user = await User.findById(req.user._id);
+        if (user) {
+            user.xp += 40;
+            user.level = Math.floor(user.xp / 100) + 1;
+            await user.save();
+        }
 
         res.status(201).json(resource);
     } catch (error) {
@@ -30,13 +35,21 @@ const createResource = async (req, res) => {
 
 const getResources = async (req, res) => {
     try {
-        const { category, year, search, subject, topic } = req.query;
+        const { category, year, search, subject, topic, uploadedBy, includeDeleted } = req.query;
         let query = {};
 
         if (category) query.category = category;
         if (year) query.year = year;
         if (subject) query.subject = new RegExp(subject, 'i');
         if (topic) query.topic = new RegExp(topic, 'i');
+        if (uploadedBy) query.uploadedBy = uploadedBy;
+        
+        if (includeDeleted === 'true') {
+            // Include both active and deleted
+        } else {
+            query.isDeleted = { $ne: true };
+        }
+
         if (search) {
             query.$or = [
                 { title: new RegExp(search, 'i') },
@@ -69,4 +82,62 @@ const getResourceById = async (req, res) => {
     }
 };
 
-module.exports = { createResource, getResources, getResourceById };
+const deleteResource = async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+        
+        // Authorization check
+        if (resource.uploadedBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Unauthorized to delete this resource' });
+        }
+        
+        resource.isDeleted = true;
+        await resource.save();
+        
+        // Gamification: Deduct 40 XP and recalculate level
+        const user = await User.findById(req.user._id);
+        if (user) {
+            user.xp = Math.max(0, user.xp - 40);
+            user.level = Math.floor(user.xp / 100) + 1;
+            await user.save();
+        }
+        
+        res.json({ message: 'Resource soft-deleted successfully', resource });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete resource', error: error.message });
+    }
+};
+
+const restoreResource = async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+        
+        // Authorization check
+        if (resource.uploadedBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Unauthorized to restore this resource' });
+        }
+        
+        resource.isDeleted = false;
+        await resource.save();
+        
+        // Gamification: Add 40 XP and recalculate level
+        const user = await User.findById(req.user._id);
+        if (user) {
+            user.xp += 40;
+            user.level = Math.floor(user.xp / 100) + 1;
+            await user.save();
+        }
+        
+        res.json({ message: 'Resource restored successfully', resource });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to restore resource', error: error.message });
+    }
+};
+
+module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource };
