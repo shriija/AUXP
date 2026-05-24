@@ -133,7 +133,7 @@ export default function ClassroomRoom() {
     try {
       const dataUrl = await canvasRef.current.exportImage('png');
       const snapshot = { dataUrl, createdBy: user.name, timestamp: new Date() };
-      socketRef.current.emit('save-snapshot', { roomId: id, dataUrl, createdBy: user.name });
+      socketRef.current.emit('save-snapshot', { roomId: id, dataUrl, createdBy: user.name, userId: user?._id });
       setSnapshots(prev => [...prev, snapshot]);
     } catch (e) {
       console.error(e);
@@ -230,7 +230,7 @@ export default function ClassroomRoom() {
             className="w-full h-full"
             onChange={(newPaths) => {
               if (isRemoteUpdate.current) return;
-              socketRef.current?.emit('update-paths', { roomId: id, paths: newPaths });
+              socketRef.current?.emit('update-paths', { roomId: id, paths: newPaths, userId: user?._id });
             }}
           />
         </div>

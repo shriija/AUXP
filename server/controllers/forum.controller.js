@@ -1,5 +1,6 @@
 const ForumPost = require('../models/ForumPost');
 const ForumReply = require('../models/ForumReply');
+const { awardXP, checkAchievements } = require('../utils/gamification');
 
 const createPost = async (req, res) => {
     try {
@@ -10,6 +11,10 @@ const createPost = async (req, res) => {
             tags,
             author: req.user._id
         });
+        
+        // Gamification: Forum post (+10 XP)
+        await awardXP(req.user._id, 'FORUM_POST');
+        
         res.status(201).json(post);
     } catch (error) {
         res.status(500).json({ message: 'Failed to create post', error: error.message });
@@ -47,6 +52,11 @@ const addReply = async (req, res) => {
             content,
             author: req.user._id
         });
+        
+        // Gamification: Forum reply (+5 XP) and check achievements
+        await awardXP(req.user._id, 'FORUM_REPLY');
+        await checkAchievements(req.user._id, 'REPLY');
+        
         res.status(201).json(reply);
     } catch (error) {
         res.status(500).json({ message: 'Failed to add reply', error: error.message });
@@ -103,28 +113,43 @@ const voteReply = async (req, res) => {
         const reply = await ForumReply.findById(req.params.id);
         if (!reply) return res.status(404).json({ message: 'Reply not found' });
         
+        const replyAuthor = reply.author;
         const existingVoteIndex = reply.voters.findIndex(v => v.user.toString() === userId.toString());
         
         if (existingVoteIndex !== -1) {
             const existingVote = reply.voters[existingVoteIndex];
             if (existingVote.type === type) {
                 reply.voters.splice(existingVoteIndex, 1);
-                if (type === 'up') reply.upvotes = Math.max(0, reply.upvotes - 1);
-                if (type === 'down') reply.downvotes = Math.max(0, reply.downvotes - 1);
+                if (type === 'up') {
+                    reply.upvotes = Math.max(0, reply.upvotes - 1);
+                    // Retracted reply upvote, deduct -3 XP
+                    await awardXP(replyAuthor, 'REPLY_UPVOTE_RECEIVED', -1);
+                } else if (type === 'down') {
+                    reply.downvotes = Math.max(0, reply.downvotes - 1);
+                }
             } else {
                 existingVote.type = type;
                 if (type === 'up') {
                     reply.upvotes += 1;
                     reply.downvotes = Math.max(0, reply.downvotes - 1);
+                    // Switched from Down to Up, award +3 XP
+                    await awardXP(replyAuthor, 'REPLY_UPVOTE_RECEIVED', 1);
                 } else {
                     reply.downvotes += 1;
                     reply.upvotes = Math.max(0, reply.upvotes - 1);
+                    // Switched from Up to Down, deduct -3 XP
+                    await awardXP(replyAuthor, 'REPLY_UPVOTE_RECEIVED', -1);
                 }
             }
         } else {
             reply.voters.push({ user: userId, type });
-            if (type === 'up') reply.upvotes += 1;
-            if (type === 'down') reply.downvotes += 1;
+            if (type === 'up') {
+                reply.upvotes += 1;
+                // Fresh upvote, award +3 XP
+                await awardXP(replyAuthor, 'REPLY_UPVOTE_RECEIVED', 1);
+            } else if (type === 'down') {
+                reply.downvotes += 1;
+            }
         }
         
         await reply.save();

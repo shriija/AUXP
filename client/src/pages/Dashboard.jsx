@@ -7,7 +7,7 @@ import UploadModal from '../components/UploadModal';
 import EditModal from '../components/EditModal';
 
 export default function Dashboard() {
-  const { user, getMe } = useAuthStore();
+  const { user, token, getMe } = useAuthStore();
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [myUploads, setMyUploads] = useState([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
+  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     if (category && category !== 'All' && !year) {
@@ -217,6 +218,30 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+
+          {/* XP Economy System Card */}
+          <div className="bg-white border-2 border-slate-900 rounded-none p-4 shadow-neo font-mono relative">
+            <button
+              onClick={() => setShowRules(!showRules)}
+              className="w-full text-left font-extrabold text-xs text-slate-900 uppercase flex justify-between items-center cursor-pointer outline-none"
+            >
+              <span>XP ECONOMY SYSTEM</span>
+              <span>{showRules ? '▼' : '▶'}</span>
+            </button>
+            {showRules && (
+              <div className="mt-3 border-t border-slate-200 pt-2 space-y-1.5 text-[9px] font-bold text-slate-700">
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Upload Resource</span><span className="text-emerald-600">+40 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Resource Upvoted</span><span className="text-emerald-600">+5 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Forum Post Created</span><span className="text-emerald-600">+10 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Forum Reply Posted</span><span className="text-emerald-600">+5 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Forum Reply Upvoted</span><span className="text-emerald-600">+3 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Classroom Created</span><span className="text-emerald-600">+20 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Joined Classroom</span><span className="text-emerald-600">+5 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Daily Login Streak</span><span className="text-emerald-600">+2 XP</span></div>
+                <div className="flex justify-between"><span>Notes Downloaded (Other)</span><span className="text-emerald-600">+2 XP</span></div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Main Feed - Resources */}
@@ -312,7 +337,7 @@ export default function Dashboard() {
                     {/* Content Column */}
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2 gap-4">
-                        <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${resource.fileUrl}`} target="_blank" rel="noopener noreferrer" className="font-bold text-base text-slate-850 hover:text-primary transition-colors line-clamp-1 hover:underline">
+                        <a href={`${import.meta.env.VITE_API_URL}/resources/${resource._id}/download?token=${token}`} target="_blank" rel="noopener noreferrer" className="font-bold text-base text-slate-850 hover:text-primary transition-colors line-clamp-1 hover:underline">
                           {resource.title.toUpperCase()}
                         </a>
                         {(resource.uploadedBy?._id === user?._id || resource.uploadedBy === user?._id) && (

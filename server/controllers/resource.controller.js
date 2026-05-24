@@ -1,5 +1,6 @@
 const Resource = require('../models/Resource');
 const User = require('../models/User');
+const { awardXP, checkAchievements } = require('../utils/gamification');
 
 const createResource = async (req, res) => {
     try {
@@ -27,13 +28,9 @@ const createResource = async (req, res) => {
             uploadedBy: req.user._id
         });
 
-        // Gamification: Add 40 XP to user for uploading and recalculate level
-        const user = await User.findById(req.user._id);
-        if (user) {
-            user.xp += 40;
-            user.level = Math.floor(user.xp / 100) + 1;
-            await user.save();
-        }
+        // Gamification: Add 40 XP and check achievements
+        await awardXP(req.user._id, 'UPLOAD');
+        await checkAchievements(req.user._id, 'UPLOAD');
 
         res.status(201).json(resource);
     } catch (error) {
@@ -105,13 +102,9 @@ const deleteResource = async (req, res) => {
         resource.isDeleted = true;
         await resource.save();
         
-        // Gamification: Deduct 40 XP and recalculate level
-        const user = await User.findById(req.user._id);
-        if (user) {
-            user.xp = Math.max(0, user.xp - 40);
-            user.level = Math.floor(user.xp / 100) + 1;
-            await user.save();
-        }
+        // Gamification: Deduct 40 XP and re-check achievements
+        await awardXP(req.user._id, 'UPLOAD', -1);
+        await checkAchievements(req.user._id, 'UPLOAD');
         
         res.json({ message: 'Resource soft-deleted successfully', resource });
     } catch (error) {
@@ -134,13 +127,9 @@ const restoreResource = async (req, res) => {
         resource.isDeleted = false;
         await resource.save();
         
-        // Gamification: Add 40 XP and recalculate level
-        const user = await User.findById(req.user._id);
-        if (user) {
-            user.xp += 40;
-            user.level = Math.floor(user.xp / 100) + 1;
-            await user.save();
-        }
+        // Gamification: Add 40 XP and check achievements
+        await awardXP(req.user._id, 'UPLOAD');
+        await checkAchievements(req.user._id, 'UPLOAD');
         
         res.json({ message: 'Resource restored successfully', resource });
     } catch (error) {
@@ -183,4 +172,24 @@ const updateResource = async (req, res) => {
     }
 };
 
-module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource };
+const downloadResource = async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+        
+        // If downloader is not the owner, award +2 XP to the owner!
+        if (resource.uploadedBy.toString() !== req.user._id.toString()) {
+            await awardXP(resource.uploadedBy, 'DOWNLOAD_RECEIVED');
+        }
+        
+        const path = require('path');
+        const filePath = path.join(__dirname, '..', resource.fileUrl);
+        res.download(filePath, resource.title + path.extname(resource.fileUrl));
+    } catch (error) {
+        res.status(500).json({ message: 'Download failed', error: error.message });
+    }
+};
+
+module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource, downloadResource };

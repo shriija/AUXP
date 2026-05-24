@@ -6,13 +6,23 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import EditModal from '../components/EditModal';
 
+const ALL_BADGES = [
+  { key: 'First Upload', desc: 'Uploaded your first resource' },
+  { key: '10 Resources Shared', desc: 'Shared 10 active study notes' },
+  { key: 'Forum Helper', desc: 'Replied 5 times to forum posts' },
+  { key: 'Whiteboard Wizard', desc: 'Saved or collaborated on whiteboard' },
+  { key: '30-Day Streak', desc: 'Maintained a 30-day login streak' },
+  { key: 'Level 10 Scholar', desc: 'Reached Level 10 or higher' }
+];
+
 export default function Profile() {
-  const { user, getMe } = useAuthStore();
+  const { user, token, getMe } = useAuthStore();
   const [uploads, setUploads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
+  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     fetchProfileData();
@@ -124,6 +134,51 @@ export default function Profile() {
               </div>
             </div>
           </div>
+
+          {/* Achievements Card */}
+          <div className="bg-white border-2 border-slate-900 rounded-none p-6 shadow-neo font-mono relative mt-6">
+            <div className="absolute -top-3 left-4 bg-primary text-white px-2 py-0.5 text-[9px] border-2 border-slate-900 uppercase font-bold">
+              ACHIEVEMENTS
+            </div>
+            <div className="space-y-3 mt-2">
+              {ALL_BADGES.map((b) => {
+                const isUnlocked = user?.badges?.includes(b.key);
+                return (
+                  <div key={b.key} className={`border-2 border-slate-900 p-2 flex gap-2.5 items-center transition-all ${isUnlocked ? 'bg-[#fffbeb]' : 'bg-slate-50 opacity-60'}`}>
+                    <div className="text-xl shrink-0">{isUnlocked ? '🏆' : '🔒'}</div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-extrabold text-[10px] text-slate-850 truncate">{b.key.toUpperCase()}</h4>
+                      <p className="text-[8px] text-slate-500 font-bold leading-tight">{b.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* XP Economy System Card */}
+          <div className="bg-white border-2 border-slate-900 rounded-none p-4 shadow-neo font-mono relative mt-6">
+            <button
+              onClick={() => setShowRules(!showRules)}
+              className="w-full text-left font-extrabold text-xs text-slate-900 uppercase flex justify-between items-center cursor-pointer outline-none"
+            >
+              <span>XP ECONOMY SYSTEM</span>
+              <span>{showRules ? '▼' : '▶'}</span>
+            </button>
+            {showRules && (
+              <div className="mt-3 border-t border-slate-200 pt-2 space-y-1.5 text-[9px] font-bold text-slate-700">
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Upload Resource</span><span className="text-emerald-600">+40 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Resource Upvoted</span><span className="text-emerald-600">+5 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Forum Post Created</span><span className="text-emerald-600">+10 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Forum Reply Posted</span><span className="text-emerald-600">+5 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Forum Reply Upvoted</span><span className="text-emerald-600">+3 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Classroom Created</span><span className="text-emerald-600">+20 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Joined Classroom</span><span className="text-emerald-600">+5 XP</span></div>
+                <div className="flex justify-between border-b border-slate-100 pb-1"><span>Daily Login Streak</span><span className="text-emerald-600">+2 XP</span></div>
+                <div className="flex justify-between"><span>Notes Downloaded (Other)</span><span className="text-emerald-600">+2 XP</span></div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Column: Uploaded Resources Management */}
@@ -195,7 +250,7 @@ export default function Profile() {
                             EDIT
                           </button>
                           <a 
-                            href={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${upload.fileUrl}`} 
+                            href={`${import.meta.env.VITE_API_URL}/resources/${upload._id}/download?token=${token}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="bg-slate-50 hover:bg-slate-100 text-slate-800 px-3 py-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold"

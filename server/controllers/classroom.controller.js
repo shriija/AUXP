@@ -1,4 +1,5 @@
 const Classroom = require('../models/Classroom');
+const { awardXP } = require('../utils/gamification');
 
 const createClassroom = async (req, res) => {
     try {
@@ -11,6 +12,10 @@ const createClassroom = async (req, res) => {
             creator: req.user._id,
             members: [req.user._id]
         });
+        
+        // Gamification: Classroom created (+20 XP)
+        await awardXP(req.user._id, 'CLASSROOM_CREATE');
+        
         res.status(201).json(classroom);
     } catch (error) {
         res.status(500).json({ message: 'Failed to create classroom', error: error.message });
@@ -56,6 +61,8 @@ const joinClassroom = async (req, res) => {
         if (!classroom.members.includes(req.user._id)) {
             classroom.members.push(req.user._id);
             await classroom.save();
+            // Gamification: Classroom joined (+5 XP)
+            await awardXP(req.user._id, 'CLASSROOM_JOIN');
         }
         res.json(classroom);
     } catch (error) {

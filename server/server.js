@@ -57,6 +57,10 @@ io.on('connection', (socket) => {
         socket.to(data.roomId).emit('update-paths', data.paths);
         try {
             await Classroom.findByIdAndUpdate(data.roomId, { whiteboardPaths: data.paths });
+            if (data.userId) {
+                const { checkAchievements } = require('./utils/gamification');
+                await checkAchievements(data.userId, 'WHITEBOARD');
+            }
         } catch (error) {
             console.error('Save paths error:', error);
         }
@@ -95,6 +99,10 @@ io.on('connection', (socket) => {
             await Classroom.findByIdAndUpdate(data.roomId, {
                 $push: { snapshots: snapshot }
             });
+            if (data.userId) {
+                const { checkAchievements } = require('./utils/gamification');
+                await checkAchievements(data.userId, 'WHITEBOARD');
+            }
         } catch (error) {
             console.error('Save snapshot error:', error);
         }

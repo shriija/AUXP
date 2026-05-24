@@ -25,7 +25,14 @@ const userSchema = new mongoose.Schema({
     },
     badges: [{
         type: String
-    }]
+    }],
+    lastLoginDate: {
+        type: Date
+    },
+    loginStreak: {
+        type: Number,
+        default: 0
+    }
 }, {
     timestamps: true
 });
