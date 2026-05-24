@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
-import { FileText, Loader2, Sparkles, AlertCircle, ArrowLeft, RefreshCw, Trash2, Eye } from 'lucide-react';
+import { FileText, Loader2, Sparkles, AlertCircle, ArrowLeft, RefreshCw, Trash2, Eye, Edit3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import EditModal from '../components/EditModal';
 
 export default function Profile() {
   const { user, getMe } = useAuthStore();
   const [uploads, setUploads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedResource, setSelectedResource] = useState(null);
 
   useEffect(() => {
     fetchProfileData();
@@ -179,16 +182,29 @@ export default function Profile() {
 
                     <div className="flex items-center gap-2 md:self-center shrink-0">
                       {!upload.isDeleted && (
-                        <a 
-                          href={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${upload.fileUrl}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="bg-slate-50 hover:bg-slate-100 text-slate-800 p-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold"
-                          title="View Uploaded File"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          VIEW
-                        </a>
+                        <>
+                          <button
+                            onClick={() => {
+                              setSelectedResource(upload);
+                              setIsEditOpen(true);
+                            }}
+                            className="bg-[#ffb800] hover:bg-[#e0a200] text-slate-950 px-3 py-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold cursor-pointer"
+                            title="Edit Resource Details"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            EDIT
+                          </button>
+                          <a 
+                            href={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${upload.fileUrl}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="bg-slate-50 hover:bg-slate-100 text-slate-800 px-3 py-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold"
+                            title="View Uploaded File"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            VIEW
+                          </a>
+                        </>
                       )}
                       
                       {upload.isDeleted ? (
@@ -227,6 +243,16 @@ export default function Profile() {
         </div>
 
       </div>
+
+      <EditModal 
+        isOpen={isEditOpen} 
+        onClose={() => {
+          setIsEditOpen(false);
+          setSelectedResource(null);
+        }}
+        onEditSuccess={fetchProfileData}
+        resource={selectedResource}
+      />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
-import { FileText, ThumbsUp, ThumbsDown, Loader2, Sparkles, Upload } from 'lucide-react';
+import { FileText, ThumbsUp, ThumbsDown, Loader2, Sparkles, Upload, Edit3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import UploadModal from '../components/UploadModal';
+import EditModal from '../components/EditModal';
 
 export default function Dashboard() {
   const { user, getMe } = useAuthStore();
@@ -16,6 +17,8 @@ export default function Dashboard() {
   const [subject, setSubject] = useState('');
   const [topic, setTopic] = useState('');
   const [myUploads, setMyUploads] = useState([]);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedResource, setSelectedResource] = useState(null);
 
   useEffect(() => {
     if (category && category !== 'All' && !year) {
@@ -117,6 +120,19 @@ export default function Dashboard() {
         }} 
       />
 
+      <EditModal 
+        isOpen={isEditOpen} 
+        onClose={() => {
+          setIsEditOpen(false);
+          setSelectedResource(null);
+        }}
+        onEditSuccess={() => {
+          fetchResources();
+          fetchMyUploads();
+        }}
+        resource={selectedResource}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         {/* Left Sidebar - Gamification Stats */}
@@ -167,13 +183,25 @@ export default function Dashboard() {
                         )
                       ) : (
                         (upload.uploadedBy?._id === user?._id || upload.uploadedBy === user?._id) && (
-                          <button
-                            onClick={() => handleDeleteResource(upload._id)}
-                            className="bg-red-55 hover:bg-red-100 text-red-700 px-2 py-0.5 text-[8px] font-bold border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
-                            title="Delete"
-                          >
-                            DELETE
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => {
+                                setSelectedResource(upload);
+                                setIsEditOpen(true);
+                              }}
+                              className="bg-[#ffb800] hover:bg-[#e0a200] text-slate-950 px-1.5 py-0.5 text-[8px] font-bold border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                              title="Edit"
+                            >
+                              EDIT
+                            </button>
+                            <button
+                              onClick={() => handleDeleteResource(upload._id)}
+                              className="bg-red-55 hover:bg-red-100 text-red-700 px-1.5 py-0.5 text-[8px] font-bold border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                              title="Delete"
+                            >
+                              DELETE
+                            </button>
+                          </div>
                         )
                       )}
                     </div>
@@ -288,12 +316,23 @@ export default function Dashboard() {
                           {resource.title.toUpperCase()}
                         </a>
                         {(resource.uploadedBy?._id === user?._id || resource.uploadedBy === user?._id) && (
-                          <button
-                            onClick={() => handleDeleteResource(resource._id)}
-                            className="bg-red-55 hover:bg-red-100 text-red-700 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all shrink-0 cursor-pointer"
-                          >
-                            DELETE
-                          </button>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              onClick={() => {
+                                setSelectedResource(resource);
+                                setIsEditOpen(true);
+                              }}
+                              className="bg-[#ffb800] hover:bg-[#e0a200] text-slate-950 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                            >
+                              EDIT
+                            </button>
+                            <button
+                              onClick={() => handleDeleteResource(resource._id)}
+                              className="bg-red-55 hover:bg-red-100 text-red-700 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                            >
+                              DELETE
+                            </button>
+                          </div>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2 text-[10px] font-bold mb-4">

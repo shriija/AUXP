@@ -8,6 +8,14 @@ const createResource = async (req, res) => {
         // Multer puts the file in req.file, and we serve it from /uploads/
         const fileUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
+        // Parse comma-separated tags if string
+        let parsedTags = [];
+        if (tags) {
+            parsedTags = typeof tags === 'string'
+                ? tags.split(',').map(t => t.trim()).filter(Boolean)
+                : tags;
+        }
+
         const resource = await Resource.create({
             title,
             category: category || 'Resources',
@@ -15,7 +23,7 @@ const createResource = async (req, res) => {
             subject,
             topic,
             fileUrl,
-            tags,
+            tags: parsedTags,
             uploadedBy: req.user._id
         });
 
@@ -140,4 +148,39 @@ const restoreResource = async (req, res) => {
     }
 };
 
-module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource };
+const updateResource = async (req, res) => {
+    try {
+        const { title, category, year, subject, topic, tags } = req.body;
+        const resource = await Resource.findById(req.params.id);
+        
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+        
+        // Authorization check
+        if (resource.uploadedBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Unauthorized to edit this resource' });
+        }
+        
+        // Update fields
+        resource.title = title || resource.title;
+        resource.category = category || resource.category;
+        resource.year = year || resource.year;
+        resource.subject = subject || resource.subject;
+        resource.topic = topic || resource.topic;
+        
+        if (tags !== undefined) {
+            resource.tags = typeof tags === 'string'
+                ? tags.split(',').map(t => t.trim()).filter(Boolean)
+                : tags;
+        }
+        
+        await resource.save();
+        
+        res.json({ message: 'Resource updated successfully', resource });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update resource', error: error.message });
+    }
+};
+
+module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource };
