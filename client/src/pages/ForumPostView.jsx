@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Loader2, ArrowLeft, ThumbsUp, ThumbsDown, Pencil, Trash2, X, Check } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useToastStore } from '../store/useToastStore';
 
 export default function ForumPostView() {
   const { id } = useParams();
@@ -81,8 +82,10 @@ export default function ForumPostView() {
       await api.post(`/forum/${id}/vote`, { type });
       fetchData();
       getMe();
+      useToastStore.getState().addToast(type === 'up' ? 'POST UPVOTED!' : 'POST DOWNVOTED!', 'success');
     } catch (error) {
       console.error(error);
+      useToastStore.getState().addToast('VOTE FAILED', 'error');
     }
   };
 
@@ -91,8 +94,10 @@ export default function ForumPostView() {
       await api.post(`/forum/replies/${replyId}/vote`, { type });
       fetchData();
       getMe();
+      useToastStore.getState().addToast(type === 'up' ? 'REPLY UPVOTED!' : 'REPLY DOWNVOTED!', 'success');
     } catch (error) {
       console.error(error);
+      useToastStore.getState().addToast('VOTE FAILED', 'error');
     }
   };
 
@@ -103,8 +108,10 @@ export default function ForumPostView() {
       setReplyContent('');
       fetchData();
       getMe();
+      useToastStore.getState().addToast('REPLY POSTED SUCCESSFULLY!', 'success');
     } catch (error) {
       console.error(error);
+      useToastStore.getState().addToast('FAILED TO POST REPLY', 'error');
     }
   };
 

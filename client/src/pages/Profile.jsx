@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
+import { useToastStore } from '../store/useToastStore';
 import { FileText, Loader2, Sparkles, AlertCircle, ArrowLeft, RefreshCw, Trash2, Eye, Edit3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -253,6 +254,7 @@ export default function Profile() {
                             href={`${import.meta.env.VITE_API_URL}/resources/${upload._id}/download?token=${token}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
+                            onClick={() => useToastStore.getState().addToast('STARTING DOWNLOAD...', 'info')}
                             className="bg-slate-50 hover:bg-slate-100 text-slate-800 px-3 py-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold"
                             title="View Uploaded File"
                           >

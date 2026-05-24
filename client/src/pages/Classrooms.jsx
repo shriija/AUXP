@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Users, Plus, Loader2, Lock } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useToastStore } from '../store/useToastStore';
 
 export default function Classrooms() {
   const [classrooms, setClassrooms] = useState([]);
@@ -40,9 +41,11 @@ export default function Classrooms() {
         code: isPrivate ? code : undefined
       });
       getMe();
+      useToastStore.getState().addToast('CLASSROOM CREATED SUCCESSFULLY!', 'success');
       navigate(`/classrooms/${res.data._id}`);
     } catch (error) {
       console.error(error);
+      useToastStore.getState().addToast('FAILED TO CREATE CLASSROOM', 'error');
     }
   };
 
@@ -55,12 +58,15 @@ export default function Classrooms() {
       }
       await api.post(`/classrooms/${room._id}/join`, { code: joinCode });
       getMe();
+      useToastStore.getState().addToast(`SUCCESSFULLY JOINED CLASSROOM: ${room.name.toUpperCase()}!`, 'success');
       navigate(`/classrooms/${room._id}`);
     } catch (error) {
       if (error.response?.status === 403) {
         alert('Incorrect access code.');
+        useToastStore.getState().addToast('INCORRECT ACCESS CODE', 'error');
       } else {
         console.error(error);
+        useToastStore.getState().addToast('FAILED TO JOIN CLASSROOM', 'error');
       }
     }
   };

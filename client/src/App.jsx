@@ -11,6 +11,7 @@ import Classrooms from './pages/Classrooms';
 import ClassroomRoom from './pages/ClassroomRoom';
 import Landing from './pages/Landing';
 import Profile from './pages/Profile';
+import ToastContainer from './components/ToastContainer';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -24,6 +25,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 flex flex-col">
       {!isLandingPage && <Navbar />}
+      <ToastContainer />
       <main className="flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={<Landing />} />

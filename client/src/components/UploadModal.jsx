@@ -2,6 +2,7 @@ import { useState } from 'react';
 import api from '../services/api';
 import { X, UploadCloud, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToastStore } from '../store/useToastStore';
 
 export default function UploadModal({ isOpen, onClose, onUploadSuccess }) {
   const [file, setFile] = useState(null);
@@ -40,11 +41,13 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }) {
         }
       });
       
+      useToastStore.getState().addToast('RESOURCE UPLOADED SUCCESSFULLY!', 'success');
       onUploadSuccess(); // Refresh dashboard list
       onClose(); // Close modal
     } catch (err) {
       console.error(err);
       setError('Upload failed. Please check your connection.');
+      useToastStore.getState().addToast('UPLOAD FAILED!', 'error');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
+import { useToastStore } from '../store/useToastStore';
 import { FileText, ThumbsUp, ThumbsDown, Loader2, Sparkles, Upload, Edit3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import UploadModal from '../components/UploadModal';
@@ -68,11 +69,13 @@ export default function Dashboard() {
     if (!window.confirm('Are you sure you want to delete this resource?')) return;
     try {
       await api.delete(`/resources/${resourceId}`);
+      useToastStore.getState().addToast('RESOURCE DELETED!', 'info');
       fetchResources();
       fetchMyUploads();
       getMe();
     } catch (error) {
       console.error('Failed to delete resource', error);
+      useToastStore.getState().addToast('FAILED TO DELETE RESOURCE', 'error');
     }
   };
 
@@ -80,22 +83,26 @@ export default function Dashboard() {
     if (!window.confirm('Are you sure you want to re-upload / restore this resource?')) return;
     try {
       await api.post(`/resources/${resourceId}/restore`);
+      useToastStore.getState().addToast('RESOURCE RESTORED!', 'success');
       fetchResources();
       fetchMyUploads();
       getMe();
     } catch (error) {
       console.error('Failed to restore resource', error);
+      useToastStore.getState().addToast('FAILED TO RESTORE RESOURCE', 'error');
     }
   };
 
   const handleVote = async (resourceId, type) => {
     try {
       await api.post('/votes', { resourceId, type });
+      useToastStore.getState().addToast(type === 'up' ? 'VOTED UP!' : 'VOTED DOWN!', 'success');
       // Reload resources to sync state
       fetchResources();
       getMe();
     } catch (error) {
       console.error('Voting failed', error);
+      useToastStore.getState().addToast('VOTING FAILED', 'error');
     }
   };
 
@@ -338,7 +345,13 @@ export default function Dashboard() {
                     {/* Content Column */}
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2 gap-4">
-                        <a href={`${import.meta.env.VITE_API_URL}/resources/${resource._id}/download?token=${token}`} target="_blank" rel="noopener noreferrer" className="font-bold text-base text-slate-850 hover:text-primary transition-colors line-clamp-1 hover:underline">
+                        <a 
+                          href={`${import.meta.env.VITE_API_URL}/resources/${resource._id}/download?token=${token}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          onClick={() => useToastStore.getState().addToast('STARTING DOWNLOAD...', 'info')}
+                          className="font-bold text-base text-slate-850 hover:text-primary transition-colors line-clamp-1 hover:underline"
+                        >
                           {resource.title.toUpperCase()}
                         </a>
                         {(resource.uploadedBy?._id === user?._id || resource.uploadedBy === user?._id) && (

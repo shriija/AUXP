@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { MessageSquare, Plus, Loader2, ThumbsUp } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useToastStore } from '../store/useToastStore';
 
 export default function Forum() {
   const { getMe } = useAuthStore();
@@ -42,8 +43,10 @@ export default function Forum() {
       setNewTags('');
       fetchPosts();
       getMe();
+      useToastStore.getState().addToast('FORUM POST CREATED SUCCESSFULLY!', 'success');
     } catch (error) {
       console.error(error);
+      useToastStore.getState().addToast('FAILED TO CREATE FORUM POST', 'error');
     }
   };
 
