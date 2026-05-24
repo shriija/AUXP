@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { MessageSquare, Plus, Loader2, ThumbsUp } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function Forum() {
+  const { getMe } = useAuthStore();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -39,6 +41,7 @@ export default function Forum() {
       setNewDesc('');
       setNewTags('');
       fetchPosts();
+      getMe();
     } catch (error) {
       console.error(error);
     }

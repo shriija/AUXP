@@ -93,6 +93,7 @@ export default function Dashboard() {
       await api.post('/votes', { resourceId, type });
       // Reload resources to sync state
       fetchResources();
+      getMe();
     } catch (error) {
       console.error('Voting failed', error);
     }

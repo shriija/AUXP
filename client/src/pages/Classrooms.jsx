@@ -12,7 +12,7 @@ export default function Classrooms() {
   const [newDesc, setNewDesc] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [code, setCode] = useState('');
-  const { user } = useAuthStore();
+  const { user, getMe } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,6 +39,7 @@ export default function Classrooms() {
         isPrivate,
         code: isPrivate ? code : undefined
       });
+      getMe();
       navigate(`/classrooms/${res.data._id}`);
     } catch (error) {
       console.error(error);
@@ -53,6 +54,7 @@ export default function Classrooms() {
         if (joinCode === null) return; // User cancelled
       }
       await api.post(`/classrooms/${room._id}/join`, { code: joinCode });
+      getMe();
       navigate(`/classrooms/${room._id}`);
     } catch (error) {
       if (error.response?.status === 403) {

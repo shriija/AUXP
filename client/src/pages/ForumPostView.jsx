@@ -9,7 +9,7 @@ export default function ForumPostView() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [replyContent, setReplyContent] = useState('');
-  const { user } = useAuthStore();
+  const { user, getMe } = useAuthStore();
   const navigate = useNavigate();
 
   // Edit states
@@ -80,6 +80,7 @@ export default function ForumPostView() {
     try {
       await api.post(`/forum/${id}/vote`, { type });
       fetchData();
+      getMe();
     } catch (error) {
       console.error(error);
     }
@@ -89,6 +90,7 @@ export default function ForumPostView() {
     try {
       await api.post(`/forum/replies/${replyId}/vote`, { type });
       fetchData();
+      getMe();
     } catch (error) {
       console.error(error);
     }
@@ -100,6 +102,7 @@ export default function ForumPostView() {
       await api.post(`/forum/${id}/replies`, { content: replyContent });
       setReplyContent('');
       fetchData();
+      getMe();
     } catch (error) {
       console.error(error);
     }

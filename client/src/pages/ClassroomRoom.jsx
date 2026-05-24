@@ -15,7 +15,7 @@ export default function ClassroomRoom() {
   const [loading, setLoading] = useState(true);
   const [chat, setChat] = useState([]);
   const [msg, setMsg] = useState('');
-  const { user } = useAuthStore();
+  const { user, getMe } = useAuthStore();
   
   const socketRef = useRef(null);
   const canvasRef = useRef(null);
@@ -135,6 +135,9 @@ export default function ClassroomRoom() {
       const snapshot = { dataUrl, createdBy: user.name, timestamp: new Date() };
       socketRef.current.emit('save-snapshot', { roomId: id, dataUrl, createdBy: user.name, userId: user?._id });
       setSnapshots(prev => [...prev, snapshot]);
+      setTimeout(() => {
+        getMe();
+      }, 500);
     } catch (e) {
       console.error(e);
     }
