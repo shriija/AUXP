@@ -28,7 +28,7 @@ export default {
         border: "var(--border)",
       },
       fontFamily: {
-        sans: ['"Pixelify Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
         press: ['"Press Start 2P"', 'monospace'],
       },
       boxShadow: {
