@@ -6,6 +6,7 @@ import { FileText, ThumbsUp, ThumbsDown, Loader2, Sparkles, Upload, Edit3, Bookm
 import { motion } from 'framer-motion';
 import UploadModal from '../components/UploadModal';
 import EditModal from '../components/EditModal';
+import PreviewModal from '../components/PreviewModal';
 
 export default function Dashboard() {
   const { user, token, getMe } = useAuthStore();
@@ -22,6 +23,8 @@ export default function Dashboard() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
   const [showRules, setShowRules] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewResource, setPreviewResource] = useState(null);
 
   useEffect(() => {
     if (category && category !== 'All' && !year) {
@@ -94,6 +97,24 @@ export default function Dashboard() {
     }
   };
 
+  const refreshPreviewResource = async (resourceId) => {
+    try {
+      const res = await api.get(`/resources/${resourceId}`);
+      const upvotes = res.data.upvotes || 0;
+      const downloads = res.data.downloadedBy ? res.data.downloadedBy.length : 0;
+      const bookmarks = res.data.bookmarkedBy ? res.data.bookmarkedBy.length : 0;
+      const score = (upvotes * 3) + downloads + bookmarks;
+      setPreviewResource({
+        ...res.data,
+        downloadsCount: downloads,
+        bookmarksCount: bookmarks,
+        score
+      });
+    } catch (err) {
+      console.error('Failed to refresh preview resource', err);
+    }
+  };
+
   const handleVote = async (resourceId, type) => {
     try {
       await api.post('/votes', { resourceId, type });
@@ -101,6 +122,9 @@ export default function Dashboard() {
       // Reload resources to sync state
       fetchResources();
       getMe();
+      if (previewResource && previewResource._id === resourceId) {
+        refreshPreviewResource(resourceId);
+      }
     } catch (error) {
       console.error('Voting failed', error);
       useToastStore.getState().addToast('VOTING FAILED', 'error');
@@ -115,6 +139,9 @@ export default function Dashboard() {
         res.data.bookmarked ? 'success' : 'info'
       );
       fetchResources();
+      if (previewResource && previewResource._id === resourceId) {
+        refreshPreviewResource(resourceId);
+      }
     } catch (error) {
       console.error('Failed to toggle bookmark:', error);
       useToastStore.getState().addToast('FAILED TO SAVE NOTE', 'error');
@@ -370,18 +397,15 @@ export default function Dashboard() {
                     {/* Content Column */}
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2 gap-4">
-                        <a 
-                          href={`${import.meta.env.VITE_API_URL}/resources/${resource._id}/download?token=${token}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
+                        <button 
                           onClick={() => {
-                            useToastStore.getState().addToast('STARTING DOWNLOAD...', 'info');
-                            setTimeout(fetchResources, 1500);
+                            setPreviewResource(resource);
+                            setIsPreviewOpen(true);
                           }}
-                          className="font-bold text-base text-slate-850 hover:text-primary transition-colors line-clamp-1 hover:underline"
+                          className="font-bold text-base text-slate-850 hover:text-primary transition-colors text-left line-clamp-1 hover:underline outline-none"
                         >
                           {resource.title.toUpperCase()}
-                        </a>
+                        </button>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="bg-[#ffb800] text-slate-950 px-2 py-0.5 border-2 border-slate-900 rounded-none shadow-neo-sm text-[9px] font-black uppercase whitespace-nowrap">
                             ⭐ QUALITY: {resource.score || 0}
@@ -453,6 +477,28 @@ export default function Dashboard() {
         </div>
 
       </div>
+      
+      <PreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => {
+          setIsPreviewOpen(false);
+          setPreviewResource(null);
+        }}
+        resource={previewResource}
+        user={user}
+        token={token}
+        onBookmark={handleBookmark}
+        onVote={handleVote}
+        onDownloadSuccess={() => {
+          useToastStore.getState().addToast('STARTING DOWNLOAD...', 'info');
+          setTimeout(() => {
+            fetchResources();
+            if (previewResource) {
+              refreshPreviewResource(previewResource._id);
+            }
+          }, 1500);
+        }}
+      />
     </div>
   );
 }

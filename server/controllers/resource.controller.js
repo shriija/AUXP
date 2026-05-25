@@ -242,4 +242,19 @@ const bookmarkResource = async (req, res) => {
     }
 };
 
-module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource, downloadResource, bookmarkResource };
+const previewResource = async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+        
+        const path = require('path');
+        const filePath = path.join(__dirname, '..', resource.fileUrl);
+        res.sendFile(filePath);
+    } catch (error) {
+        res.status(500).json({ message: 'Preview failed', error: error.message });
+    }
+};
+
+module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource, downloadResource, bookmarkResource, previewResource };
