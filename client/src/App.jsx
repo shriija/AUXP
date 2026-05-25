@@ -11,6 +11,7 @@ import Classrooms from './pages/Classrooms';
 import ClassroomRoom from './pages/ClassroomRoom';
 import Landing from './pages/Landing';
 import Profile from './pages/Profile';
+import Leaderboard from './pages/Leaderboard';
 import ToastContainer from './components/ToastContainer';
 
 const ProtectedRoute = ({ children }) => {
@@ -76,6 +77,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <ProtectedRoute>
+                <Leaderboard />
               </ProtectedRoute>
             }
           />

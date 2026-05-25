@@ -34,6 +34,9 @@ export default function Navbar() {
                     {user?.name?.charAt(0).toUpperCase()}
                   </div>
                 </Link>
+                <Link to="/leaderboard" className="px-3.5 py-1.5 text-xs font-bold text-slate-800 hover:text-primary hover:bg-white/40 border-2 border-transparent hover:border-slate-900 rounded-none transition-all">
+                  LEADERBOARDS
+                </Link>
                 <Link to="/forum" className="px-3.5 py-1.5 text-xs font-bold text-slate-800 hover:text-primary hover:bg-white/40 border-2 border-transparent hover:border-slate-900 rounded-none transition-all">
                   FORUM
                 </Link>

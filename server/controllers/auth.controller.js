@@ -10,13 +10,13 @@ const generateToken = (id) => {
 const { updateLoginStreak, syncUserAchievements } = require('../utils/gamification');
 
 const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, department } = req.body;
     try {
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
-        const user = await User.create({ name, email, password });
+        const user = await User.create({ name, email, password, department });
         if (user) {
             await updateLoginStreak(user);
             await syncUserAchievements(user._id);
@@ -28,6 +28,8 @@ const registerUser = async (req, res) => {
                 xp: updatedUser.xp,
                 level: updatedUser.level,
                 badges: updatedUser.badges,
+                department: updatedUser.department,
+                weeklyXp: updatedUser.weeklyXp,
                 token: generateToken(updatedUser._id),
             });
         } else {
@@ -53,6 +55,8 @@ const loginUser = async (req, res) => {
                 xp: updatedUser.xp,
                 level: updatedUser.level,
                 badges: updatedUser.badges,
+                department: updatedUser.department,
+                weeklyXp: updatedUser.weeklyXp,
                 token: generateToken(updatedUser._id),
             });
         } else {
@@ -79,5 +83,37 @@ const getCurrentUser = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, getCurrentUser };
+const updateUserProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.email = req.body.email || user.email;
+            if (req.body.department) {
+                user.department = req.body.department;
+            }
+            if (req.body.password) {
+                user.password = req.body.password;
+            }
+            const updatedUser = await user.save();
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                xp: updatedUser.xp,
+                level: updatedUser.level,
+                badges: updatedUser.badges,
+                department: updatedUser.department,
+                weeklyXp: updatedUser.weeklyXp,
+                token: generateToken(updatedUser._id),
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, getCurrentUser, updateUserProfile };
 

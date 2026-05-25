@@ -23,6 +23,15 @@ const BADGES = {
     SCHOLAR_10: 'Level 10 Scholar'
 };
 
+const getStartOfThisWeek = () => {
+    const now = new Date();
+    const day = now.getDay(); // 0 is Sunday, 1 is Monday...
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(now.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+};
+
 async function awardXP(userId, action, amountMultiplier = 1) {
     try {
         const xpAmount = XP_REWARDS[action] * amountMultiplier;
@@ -31,7 +40,15 @@ async function awardXP(userId, action, amountMultiplier = 1) {
         const user = await User.findById(userId);
         if (!user) return null;
 
+        // Check if weekly reset is needed
+        const startOfWeek = getStartOfThisWeek();
+        if (!user.lastWeeklyReset || user.lastWeeklyReset < startOfWeek) {
+            user.weeklyXp = 0;
+            user.lastWeeklyReset = startOfWeek;
+        }
+
         user.xp = Math.max(0, user.xp + xpAmount);
+        user.weeklyXp = Math.max(0, user.weeklyXp + xpAmount);
         user.level = Math.floor(user.xp / 100) + 1;
 
         // Level 10 Scholar check
@@ -103,10 +120,20 @@ async function updateLoginStreak(user) {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         
+        const startOfWeek = getStartOfThisWeek();
+        const checkReset = () => {
+            if (!user.lastWeeklyReset || user.lastWeeklyReset < startOfWeek) {
+                user.weeklyXp = 0;
+                user.lastWeeklyReset = startOfWeek;
+            }
+        };
+
         if (!user.lastLoginDate) {
             user.lastLoginDate = today;
             user.loginStreak = 1;
+            checkReset();
             user.xp += XP_REWARDS.DAILY_LOGIN;
+            user.weeklyXp += XP_REWARDS.DAILY_LOGIN;
             user.level = Math.floor(user.xp / 100) + 1;
             
             // Streak badge check
@@ -126,7 +153,9 @@ async function updateLoginStreak(user) {
         if (diffDays === 1) {
             user.loginStreak += 1;
             user.lastLoginDate = today;
+            checkReset();
             user.xp += XP_REWARDS.DAILY_LOGIN;
+            user.weeklyXp += XP_REWARDS.DAILY_LOGIN;
             user.level = Math.floor(user.xp / 100) + 1;
             
             // Streak badge check
@@ -138,7 +167,9 @@ async function updateLoginStreak(user) {
         } else if (diffDays > 1) {
             user.loginStreak = 1;
             user.lastLoginDate = today;
+            checkReset();
             user.xp += XP_REWARDS.DAILY_LOGIN;
+            user.weeklyXp += XP_REWARDS.DAILY_LOGIN;
             user.level = Math.floor(user.xp / 100) + 1;
             await user.save();
             return true;
@@ -192,4 +223,4 @@ async function syncUserAchievements(userId) {
     }
 }
 
-module.exports = { awardXP, checkAchievements, updateLoginStreak, syncUserAchievements, XP_REWARDS, BADGES };
+module.exports = { awardXP, checkAchievements, updateLoginStreak, syncUserAchievements, XP_REWARDS, BADGES, getStartOfThisWeek };

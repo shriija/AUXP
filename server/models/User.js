@@ -32,6 +32,19 @@ const userSchema = new mongoose.Schema({
     loginStreak: {
         type: Number,
         default: 0
+    },
+    department: {
+        type: String,
+        enum: ['CSE', 'ECE', 'IT', 'EEE', 'AIML', 'AI'],
+        default: 'CSE'
+    },
+    weeklyXp: {
+        type: Number,
+        default: 0
+    },
+    lastWeeklyReset: {
+        type: Date,
+        default: Date.now
     }
 }, {
     timestamps: true

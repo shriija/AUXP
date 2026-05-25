@@ -17,17 +17,31 @@ const ALL_BADGES = [
 ];
 
 export default function Profile() {
-  const { user, token, getMe } = useAuthStore();
+  const { user, token, getMe, updateProfile } = useAuthStore();
   const [uploads, setUploads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
   const [showRules, setShowRules] = useState(false);
+  const [isEditingDept, setIsEditingDept] = useState(false);
+  const [tempDept, setTempDept] = useState('CSE');
 
   useEffect(() => {
     fetchProfileData();
   }, [user?._id]);
+
+  const handleSaveDept = async () => {
+    try {
+      setLoading(true);
+      await updateProfile({ department: tempDept });
+      setIsEditingDept(false);
+    } catch (err) {
+      console.error('Failed to save department', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchProfileData = async () => {
     try {
@@ -105,7 +119,54 @@ export default function Profile() {
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
               <h2 className="font-extrabold text-base text-slate-900 uppercase tracking-tight">{user?.name}</h2>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">{user?.email}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-2">{user?.email}</p>
+              
+              <div className="flex flex-col items-center gap-1.5 w-full">
+                <span className="text-[10px] bg-slate-900 text-white font-mono font-bold px-2 py-0.5 border border-slate-900 shadow-neo-sm uppercase">
+                  {user?.department || 'CSE'} DEPT
+                </span>
+                
+                {isEditingDept ? (
+                  <div className="flex items-center gap-1.5 mt-2 w-full max-w-[180px]">
+                    <select
+                      className="bg-white border-2 border-slate-900 rounded-none px-2 py-1 text-[10px] font-bold text-slate-850 flex-1 outline-none font-mono"
+                      value={tempDept}
+                      onChange={(e) => setTempDept(e.target.value)}
+                    >
+                      <option value="CSE">CSE</option>
+                      <option value="AIML">AIML</option>
+                      <option value="AI">AI</option>
+                      <option value="IT">IT</option>
+                      <option value="ECE">ECE</option>
+                      <option value="EEE">EEE</option>
+                    </select>
+                    <button
+                      onClick={handleSaveDept}
+                      className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-slate-900 px-2 py-1 text-[9px] font-black cursor-pointer shadow-neo-sm"
+                      title="Save"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={() => setIsEditingDept(false)}
+                      className="bg-red-50 hover:bg-red-100 text-red-800 border-2 border-slate-900 px-2 py-1 text-[9px] font-black cursor-pointer shadow-neo-sm"
+                      title="Cancel"
+                    >
+                      ✗
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setTempDept(user?.department || 'CSE');
+                      setIsEditingDept(true);
+                    }}
+                    className="text-[9px] font-extrabold text-slate-500 hover:text-primary underline flex items-center gap-1 cursor-pointer mt-1 font-mono"
+                  >
+                    CHANGE DEPARTMENT
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="border-t-2 border-slate-900/10 pt-4 space-y-4">

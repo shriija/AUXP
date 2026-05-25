@@ -9,6 +9,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [department, setDepartment] = useState('CSE');
   const { register, loading, error, clearError, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await register(name, email, password);
+    const success = await register(name, email, password, department);
     if (success) {
       navigate('/dashboard');
     }
@@ -92,6 +93,22 @@ export default function Register() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold mb-1.5 text-slate-700">DEPARTMENT</label>
+              <select
+                required
+                className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-bold text-xs text-slate-850"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+              >
+                <option value="CSE">CSE (Computer Science & Engineering)</option>
+                <option value="AIML">AIML (AI & Machine Learning)</option>
+                <option value="AI">AI (Artificial Intelligence)</option>
+                <option value="IT">IT (Information Technology)</option>
+                <option value="ECE">ECE (Electronics & Communication Engineering)</option>
+                <option value="EEE">EEE (Electrical & Electronics Engineering)</option>
+              </select>
             </div>
             <button
               type="submit"

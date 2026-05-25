@@ -13,6 +13,7 @@ const resourceRoutes = require('./routes/resource.routes');
 const voteRoutes = require('./routes/vote.routes');
 const forumRoutes = require('./routes/forum.routes');
 const classroomRoutes = require('./routes/classroom.routes');
+const leaderboardRoutes = require('./routes/leaderboard.routes');
 
 const app = express();
 const server = http.createServer(app);
@@ -39,6 +40,7 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/votes', voteRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/classrooms', classroomRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 app.get('/', (req, res) => {
     res.send('CSV API is running...');
