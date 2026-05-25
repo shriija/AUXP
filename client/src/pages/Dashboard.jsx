@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
 import { useToastStore } from '../store/useToastStore';
-import { FileText, ThumbsUp, ThumbsDown, Loader2, Sparkles, Upload, Edit3 } from 'lucide-react';
+import { FileText, ThumbsUp, ThumbsDown, Loader2, Sparkles, Upload, Edit3, Bookmark, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import UploadModal from '../components/UploadModal';
 import EditModal from '../components/EditModal';
@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [category, setCategory] = useState('');
   const [year, setYear] = useState('');
   const [search, setSearch] = useState('');
@@ -28,7 +29,7 @@ export default function Dashboard() {
       return;
     }
     fetchResources();
-  }, [category, year, search, subject, topic]);
+  }, [category, year, search, subject, topic, showSavedOnly]);
 
   useEffect(() => {
     if (user?._id) {
@@ -103,6 +104,20 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Voting failed', error);
       useToastStore.getState().addToast('VOTING FAILED', 'error');
+    }
+  };
+
+  const handleBookmark = async (resourceId) => {
+    try {
+      const res = await api.post(`/resources/${resourceId}/bookmark`);
+      useToastStore.getState().addToast(
+        res.data.bookmarked ? 'SAVED TO LIBRARY!' : 'REMOVED FROM LIBRARY',
+        res.data.bookmarked ? 'success' : 'info'
+      );
+      fetchResources();
+    } catch (error) {
+      console.error('Failed to toggle bookmark:', error);
+      useToastStore.getState().addToast('FAILED TO SAVE NOTE', 'error');
     }
   };
 
@@ -255,17 +270,27 @@ export default function Dashboard() {
         {/* Main Feed - Resources */}
         <div className="lg:col-span-3">
           <div className="bg-white border-2 border-slate-900 rounded-none shadow-neo overflow-hidden min-h-[500px]">
-            {/* Category Tabs */}
-            <div className="p-4 border-b-2 border-slate-900 bg-[#cbe3db]/55 sticky top-0 z-10 flex gap-3 overflow-x-auto">
+            <div className="p-4 border-b-2 border-slate-900 bg-[#cbe3db]/55 sticky top-0 z-10 flex gap-3 overflow-x-auto items-center">
               {['All', 'Class Notes', 'Past Papers', 'Resources'].map(cat => (
                 <button 
                   key={cat}
-                  onClick={() => { setCategory(cat); setYear(''); }}
-                  className={`px-4 py-1.5 rounded-none text-xs font-bold border-2 border-slate-900 shadow-neo-sm whitespace-nowrap transition-all ${category === cat || (!category && cat === 'All') ? 'bg-primary text-white' : 'bg-white text-slate-800 hover:bg-slate-50 hover:translate-y-[1px] hover:shadow-none'}`}
+                  onClick={() => { setCategory(cat); setYear(''); setShowSavedOnly(false); }}
+                  className={`px-4 py-1.5 rounded-none text-xs font-bold border-2 border-slate-900 shadow-neo-sm whitespace-nowrap transition-all ${!showSavedOnly && (category === cat || (!category && cat === 'All')) ? 'bg-primary text-white' : 'bg-white text-slate-800 hover:bg-slate-50 hover:translate-y-[1px] hover:shadow-none'}`}
                 >
                   {cat.toUpperCase()}
                 </button>
               ))}
+              
+              <button 
+                onClick={() => {
+                  setShowSavedOnly(!showSavedOnly);
+                  setCategory('');
+                  setYear('');
+                }}
+                className={`px-4 py-1.5 rounded-none text-xs font-bold border-2 border-slate-900 shadow-neo-sm whitespace-nowrap transition-all flex items-center gap-1 hover:translate-y-[1px] hover:shadow-none ${showSavedOnly ? 'bg-[#ffb800] text-slate-950' : 'bg-white text-slate-800 hover:bg-slate-50'}`}
+              >
+                ⭐ SAVED LIBRARY
+              </button>
             </div>
             
             {/* Year Filters */}
@@ -323,7 +348,7 @@ export default function Dashboard() {
                   <p>NO RESOURCES FOUND. BE THE FIRST TO UPLOAD!</p>
                 </div>
               ) : (
-                resources.map((resource, i) => (
+                (showSavedOnly ? resources.filter(r => r.bookmarkedBy?.includes(user?._id)) : resources).map((resource, i) => (
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -349,41 +374,75 @@ export default function Dashboard() {
                           href={`${import.meta.env.VITE_API_URL}/resources/${resource._id}/download?token=${token}`} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          onClick={() => useToastStore.getState().addToast('STARTING DOWNLOAD...', 'info')}
+                          onClick={() => {
+                            useToastStore.getState().addToast('STARTING DOWNLOAD...', 'info');
+                            setTimeout(fetchResources, 1500);
+                          }}
                           className="font-bold text-base text-slate-850 hover:text-primary transition-colors line-clamp-1 hover:underline"
                         >
                           {resource.title.toUpperCase()}
                         </a>
-                        {(resource.uploadedBy?._id === user?._id || resource.uploadedBy === user?._id) && (
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <button
-                              onClick={() => {
-                                setSelectedResource(resource);
-                                setIsEditOpen(true);
-                              }}
-                              className="bg-[#ffb800] hover:bg-[#e0a200] text-slate-950 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
-                            >
-                              EDIT
-                            </button>
-                            <button
-                              onClick={() => handleDeleteResource(resource._id)}
-                              className="bg-red-55 hover:bg-red-100 text-red-700 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
-                            >
-                              DELETE
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="bg-[#ffb800] text-slate-950 px-2 py-0.5 border-2 border-slate-900 rounded-none shadow-neo-sm text-[9px] font-black uppercase whitespace-nowrap">
+                            ⭐ QUALITY: {resource.score || 0}
+                          </span>
+                          {(resource.uploadedBy?._id === user?._id || resource.uploadedBy === user?._id) && (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  setSelectedResource(resource);
+                                  setIsEditOpen(true);
+                                }}
+                                className="bg-[#ffb800] hover:bg-[#e0a200] text-slate-950 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                              >
+                                EDIT
+                              </button>
+                              <button
+                                onClick={() => handleDeleteResource(resource._id)}
+                                className="bg-red-55 hover:bg-red-100 text-red-700 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                              >
+                                DELETE
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2 text-[10px] font-bold mb-4">
                         {resource.year && <span className="bg-emerald-50 text-emerald-800 px-2 py-0.5 border-2 border-slate-900 rounded-none shadow-neo-sm">{resource.year.toUpperCase()}</span>}
                         <span className="bg-teal-50 text-teal-800 px-2 py-0.5 border-2 border-slate-900 rounded-none shadow-neo-sm">{resource.subject.toUpperCase()}</span>
                         <span className="bg-pink-50 text-pink-850 px-2 py-0.5 border-2 border-slate-900 rounded-none shadow-neo-sm">{resource.topic.toUpperCase()}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600">
-                        <div className="h-6 w-6 rounded-none bg-white flex items-center justify-center text-[10px] text-primary font-extrabold border-2 border-slate-900 shadow-neo-sm">
-                          {resource.uploadedBy?.name?.charAt(0).toUpperCase()}
+                      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-900/10 pt-3 mt-4">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600">
+                          <div className="h-6 w-6 rounded-none bg-white flex items-center justify-center text-[10px] text-primary font-extrabold border-2 border-slate-900 shadow-neo-sm">
+                            {resource.uploadedBy?.name?.charAt(0).toUpperCase()}
+                          </div>
+                          <span>UPLOADED BY <span className="text-slate-800 font-bold">{resource.uploadedBy?.name?.toUpperCase()}</span></span>
                         </div>
-                        <span>UPLOADED BY <span className="text-slate-800 font-bold">{resource.uploadedBy?.name?.toUpperCase()}</span></span>
+                        
+                        <div className="flex items-center gap-4 font-mono">
+                          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-650" title="Downloads">
+                            <Download className="w-3.5 h-3.5" />
+                            <span>{resource.downloadsCount || 0}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-650" title="Bookmarks">
+                            <Bookmark className="w-3.5 h-3.5" />
+                            <span>{resource.bookmarksCount || 0}</span>
+                          </div>
+
+                          <button
+                            onClick={() => handleBookmark(resource._id)}
+                            className={`px-2.5 py-1 text-[9px] font-black border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1 cursor-pointer ${
+                              resource.bookmarkedBy?.includes(user?._id)
+                                ? 'bg-[#ffb800] text-slate-950'
+                                : 'bg-white text-slate-700 hover:bg-slate-50'
+                            }`}
+                          >
+                            <Bookmark className="w-3 h-3 fill-current" />
+                            {resource.bookmarkedBy?.includes(user?._id) ? 'SAVED' : 'SAVE FOR LATER'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </motion.div>

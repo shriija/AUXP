@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource, downloadResource } = require('../controllers/resource.controller');
+const { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource, downloadResource, bookmarkResource } = require('../controllers/resource.controller');
 const { protect } = require('../middleware/auth.middleware');
 const upload = require('../config/multer');
 
@@ -18,5 +18,8 @@ router.route('/:id/restore')
 
 router.route('/:id/download')
     .get(protect, downloadResource);
+
+router.route('/:id/bookmark')
+    .post(protect, bookmarkResource);
 
 module.exports = router;

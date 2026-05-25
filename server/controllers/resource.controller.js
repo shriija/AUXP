@@ -64,9 +64,26 @@ const getResources = async (req, res) => {
 
         // Populating the uploader details to render in the frontend UI
         const resources = await Resource.find(query)
-            .populate('uploadedBy', 'name xp level badges')
-            .sort({ createdAt: -1 });
-        res.json(resources);
+            .populate('uploadedBy', 'name xp level badges');
+
+        // Calculate score and map resources
+        const resourcesWithScore = resources.map(resource => {
+            const upvotes = resource.upvotes || 0;
+            const downloads = resource.downloadedBy ? resource.downloadedBy.length : 0;
+            const bookmarks = resource.bookmarkedBy ? resource.bookmarkedBy.length : 0;
+            const score = (upvotes * 3) + downloads + bookmarks;
+            return {
+                ...resource.toObject(),
+                downloadsCount: downloads,
+                bookmarksCount: bookmarks,
+                score
+            };
+        });
+
+        // Sort descending by score, then by createdAt descending
+        resourcesWithScore.sort((a, b) => b.score - a.score || b.createdAt - a.createdAt);
+
+        res.json(resourcesWithScore);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch resources', error: error.message });
     }
@@ -179,6 +196,12 @@ const downloadResource = async (req, res) => {
             return res.status(404).json({ message: 'Resource not found' });
         }
         
+        // Add downloader to downloadedBy array if not already present
+        if (req.user && !resource.downloadedBy.includes(req.user._id)) {
+            resource.downloadedBy.push(req.user._id);
+            await resource.save();
+        }
+        
         // If downloader is not the owner, award +2 XP to the owner!
         if (resource.uploadedBy.toString() !== req.user._id.toString()) {
             await awardXP(resource.uploadedBy, 'DOWNLOAD_RECEIVED');
@@ -192,4 +215,31 @@ const downloadResource = async (req, res) => {
     }
 };
 
-module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource, downloadResource };
+const bookmarkResource = async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+
+        const userId = req.user._id;
+        const isBookmarked = resource.bookmarkedBy.includes(userId);
+
+        if (isBookmarked) {
+            resource.bookmarkedBy = resource.bookmarkedBy.filter(id => id.toString() !== userId.toString());
+        } else {
+            resource.bookmarkedBy.push(userId);
+        }
+
+        await resource.save();
+        res.json({
+            message: isBookmarked ? 'Resource unbookmarked' : 'Resource bookmarked',
+            bookmarked: !isBookmarked,
+            bookmarkedBy: resource.bookmarkedBy
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to bookmark resource', error: error.message });
+    }
+};
+
+module.exports = { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource, downloadResource, bookmarkResource };
