@@ -6,8 +6,8 @@ const createResource = async (req, res) => {
     try {
         const { title, category, year, subject, topic, tags } = req.body;
         
-        // Multer puts the file in req.file, and we serve it from /uploads/
-        const fileUrl = req.file ? `/uploads/${req.file.filename}` : null;
+        // Multer puts the file in req.file, and we serve it from /uploads/ or Cloudinary path
+        const fileUrl = req.file ? (req.file.path && req.file.path.startsWith('http') ? req.file.path : `/uploads/${req.file.filename}`) : null;
 
         // Parse comma-separated tags if string
         let parsedTags = [];
@@ -208,8 +208,19 @@ const downloadResource = async (req, res) => {
         }
         
         const path = require('path');
-        const filePath = path.join(__dirname, '..', resource.fileUrl);
-        res.download(filePath, resource.title + path.extname(resource.fileUrl));
+        if (resource.fileUrl.startsWith('http')) {
+            const axios = require('axios');
+            const response = await axios({
+                method: 'get',
+                url: resource.fileUrl,
+                responseType: 'stream'
+            });
+            res.setHeader('Content-Disposition', `attachment; filename="${resource.title}${path.extname(resource.fileUrl)}"`);
+            response.data.pipe(res);
+        } else {
+            const filePath = path.join(__dirname, '..', resource.fileUrl);
+            res.download(filePath, resource.title + path.extname(resource.fileUrl));
+        }
     } catch (error) {
         res.status(500).json({ message: 'Download failed', error: error.message });
     }
@@ -250,8 +261,19 @@ const previewResource = async (req, res) => {
         }
         
         const path = require('path');
-        const filePath = path.join(__dirname, '..', resource.fileUrl);
-        res.sendFile(filePath);
+        if (resource.fileUrl.startsWith('http')) {
+            const axios = require('axios');
+            const response = await axios({
+                method: 'get',
+                url: resource.fileUrl,
+                responseType: 'stream'
+            });
+            res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+            response.data.pipe(res);
+        } else {
+            const filePath = path.join(__dirname, '..', resource.fileUrl);
+            res.sendFile(filePath);
+        }
     } catch (error) {
         res.status(500).json({ message: 'Preview failed', error: error.message });
     }

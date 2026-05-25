@@ -1,0 +1,5 @@
+AUXP Cloudinary Upload and Serving Test.
+Author: Leaderboard Test User.
+This note file is stored directly on Cloudinary!
+The backend downloads and streams it securely to ensure previewing and unique downloads tracking still function properly.
+Let's share notes globally!
