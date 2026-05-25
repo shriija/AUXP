@@ -360,7 +360,7 @@ export default function Dashboard() {
               />
             </div>
             
-            <div className="p-6 space-y-5">
+            <div className="p-6 space-y-5 max-h-[800px] overflow-y-auto pr-2">
               {category && category !== 'All' && !year ? (
                 <div className="text-center py-20 text-slate-500 border-2 border-dashed border-slate-900 rounded-none bg-slate-50/50 font-bold text-sm">
                   <p>PLEASE SELECT AN ACADEMIC YEAR TO VIEW THESE RESOURCES.</p>
