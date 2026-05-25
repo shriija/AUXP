@@ -17,12 +17,10 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && proce
     storage = new CloudinaryStorage({
         cloudinary: cloudinary,
         params: async (req, file) => {
-            const fileExt = path.extname(file.originalname).substring(1);
             return {
                 folder: 'auxp_vault',
-                resource_type: 'raw', // support all file types (pdf, docx, txt, etc.)
-                public_id: Date.now() + '-' + Math.round(Math.random() * 1E9),
-                format: fileExt // retain original file extension in Cloudinary url
+                resource_type: 'auto',
+                public_id: Date.now() + '-' + Math.round(Math.random() * 1E9)
             };
         }
     });
