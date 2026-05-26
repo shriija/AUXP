@@ -55,3 +55,37 @@
   z-index: 9999;
 }
 
+/* Custom subtle scrollbar that blends with the theme */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.15) transparent;
+  transition: scrollbar-color 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar:hover {
+  scrollbar-color: rgba(15, 23, 42, 0.35) transparent;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.6) !important;
+}
+
+

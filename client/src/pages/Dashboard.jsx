@@ -212,7 +212,7 @@ export default function Dashboard() {
             <div className="absolute -top-3 left-4 bg-[#1b355a] px-2 py-0.5 text-[9px] text-white border-2 border-slate-900 uppercase font-bold">
               MY_UPLOADS
             </div>
-            <div className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-1">
+            <div className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
               {myUploads.length === 0 ? (
                 <p className="text-[10px] font-bold text-slate-500 uppercase">No uploads yet.</p>
               ) : (
@@ -360,7 +360,7 @@ export default function Dashboard() {
               />
             </div>
             
-            <div className="p-6 space-y-5 max-h-[800px] overflow-y-auto pr-2">
+            <div className="p-6 space-y-5 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
               {category && category !== 'All' && !year ? (
                 <div className="text-center py-20 text-slate-500 border-2 border-dashed border-slate-900 rounded-none bg-slate-50/50 font-bold text-sm">
                   <p>PLEASE SELECT AN ACADEMIC YEAR TO VIEW THESE RESOURCES.</p>
