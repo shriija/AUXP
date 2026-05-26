@@ -257,7 +257,7 @@ export default function Profile() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 max-h-[800px] overflow-y-auto pr-2">
               {loading ? (
                 <div className="flex justify-center items-center py-20">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
