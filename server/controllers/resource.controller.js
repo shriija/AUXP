@@ -56,9 +56,17 @@ const getResources = async (req, res) => {
         }
 
         if (search) {
+            const matchingUsers = await User.find({ name: new RegExp(search, 'i') }, '_id');
+            const userIds = matchingUsers.map(u => u._id);
+
             query.$or = [
                 { title: new RegExp(search, 'i') },
-                { tags: new RegExp(search, 'i') }
+                { tags: new RegExp(search, 'i') },
+                { subject: new RegExp(search, 'i') },
+                { topic: new RegExp(search, 'i') },
+                { category: new RegExp(search, 'i') },
+                { year: new RegExp(search, 'i') },
+                { uploadedBy: { $in: userIds } }
             ];
         }
 
