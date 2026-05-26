@@ -1,6 +1,7 @@
 const ForumPost = require('../models/ForumPost');
 const ForumReply = require('../models/ForumReply');
 const { awardXP, checkAchievements } = require('../utils/gamification');
+const Notification = require('../models/Notification');
 
 const createPost = async (req, res) => {
     try {
@@ -56,6 +57,18 @@ const addReply = async (req, res) => {
         // Gamification: Forum reply (+5 XP) and check achievements
         await awardXP(req.user._id, 'FORUM_REPLY');
         await checkAchievements(req.user._id, 'REPLY');
+
+        // Create Notification
+        const postObj = await ForumPost.findById(req.params.id);
+        if (postObj && postObj.author.toString() !== req.user._id.toString()) {
+            await Notification.create({
+                recipient: postObj.author,
+                sender: req.user._id,
+                type: 'FORUM_REPLY',
+                relatedItem: postObj._id,
+                message: `${req.user.name} replied to your post "${postObj.title}"`
+            });
+        }
         
         res.status(201).json(reply);
     } catch (error) {

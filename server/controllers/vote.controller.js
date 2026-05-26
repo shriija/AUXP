@@ -1,6 +1,7 @@
 const Vote = require('../models/Vote');
 const Resource = require('../models/Resource');
 const { awardXP } = require('../utils/gamification');
+const Notification = require('../models/Notification');
 
 const toggleVote = async (req, res) => {
     const { resourceId, type } = req.body; // type: 'up' or 'down'
@@ -33,6 +34,17 @@ const toggleVote = async (req, res) => {
                 if (type === 'up') {
                     // Switched from Down to Up, award +5 XP
                     await awardXP(uploaderId, 'UPVOTE_RECEIVED', 1);
+
+                    // Create Notification
+                    if (uploaderId.toString() !== req.user._id.toString()) {
+                        await Notification.create({
+                            recipient: uploaderId,
+                            sender: req.user._id,
+                            type: 'RESOURCE_UPVOTE',
+                            relatedItem: resourceId,
+                            message: `${req.user.name} upvoted your notes "${resource.title}"`
+                        });
+                    }
                 } else {
                     // Switched from Up to Down, deduct -5 XP
                     await awardXP(uploaderId, 'UPVOTE_RECEIVED', -1);
@@ -49,6 +61,17 @@ const toggleVote = async (req, res) => {
         if (type === 'up') {
             // Fresh upvote, award +5 XP
             await awardXP(uploaderId, 'UPVOTE_RECEIVED', 1);
+
+            // Create Notification
+            if (uploaderId.toString() !== req.user._id.toString()) {
+                await Notification.create({
+                    recipient: uploaderId,
+                    sender: req.user._id,
+                    type: 'RESOURCE_UPVOTE',
+                    relatedItem: resourceId,
+                    message: `${req.user.name} upvoted your notes "${resource.title}"`
+                });
+            }
         }
         
         res.status(201).json({ message: `Voted ${type}` });

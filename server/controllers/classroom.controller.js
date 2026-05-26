@@ -1,5 +1,6 @@
 const Classroom = require('../models/Classroom');
 const { awardXP } = require('../utils/gamification');
+const Notification = require('../models/Notification');
 
 const createClassroom = async (req, res) => {
     try {
@@ -63,6 +64,17 @@ const joinClassroom = async (req, res) => {
             await classroom.save();
             // Gamification: Classroom joined (+5 XP)
             await awardXP(req.user._id, 'CLASSROOM_JOIN');
+
+            // Create Notification
+            if (classroom.creator.toString() !== req.user._id.toString()) {
+                await Notification.create({
+                    recipient: classroom.creator,
+                    sender: req.user._id,
+                    type: 'CLASSROOM_JOIN',
+                    relatedItem: classroom._id,
+                    message: `${req.user.name} joined your classroom "${classroom.name}"`
+                });
+            }
         }
         res.json(classroom);
     } catch (error) {
