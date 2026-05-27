@@ -37,6 +37,7 @@ export default function ClassroomRoom() {
   const [fullscreenSnapshot, setFullscreenSnapshot] = useState(null);
   
   const [activeTab, setActiveTab] = useState('chat');
+  const [showPomodoro, setShowPomodoro] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
@@ -60,6 +61,7 @@ export default function ClassroomRoom() {
       setSessionDuration(res.data.duration);
       setSessionEndedAt(res.data.endedAt);
       setSessionTitle(res.data.sessionTitle);
+      setShowPomodoro(res.data.pomodoroEnabled || false);
       if (res.data.startTime) {
         const d = new Date(res.data.startTime);
         const tzoffset = d.getTimezoneOffset() * 60000;
@@ -162,6 +164,13 @@ export default function ClassroomRoom() {
       setSessionEndedAt(data.endedAt);
       useToastStore.getState().addToast('STUDY SESSION HAS ENDED', 'error');
     });
+    socketRef.current.on('pomodoro-toggled', ({ enabled }) => {
+      setShowPomodoro(enabled);
+      useToastStore.getState().addToast(
+        enabled ? 'POMODORO TIMER ENABLED FOR THE ROOM 🍅' : 'POMODORO TIMER DISABLED FOR THE ROOM 🍅', 
+        enabled ? 'success' : 'info'
+      );
+    });
   };
 
   const handleStartSessionManual = () => {
@@ -181,6 +190,12 @@ export default function ClassroomRoom() {
     const confirmEnd = window.confirm("Are you sure you want to end this study session? This will end the session for all participants.");
     if (confirmEnd && socketRef.current) {
       socketRef.current.emit('end-session-manual', { roomId: id, userId: user?._id });
+    }
+  };
+
+  const handleTogglePomodoro = () => {
+    if (socketRef.current) {
+      socketRef.current.emit('toggle-pomodoro', { roomId: id, enabled: !showPomodoro });
     }
   };
 
@@ -472,6 +487,26 @@ export default function ClassroomRoom() {
 
         {/* Sidebar */}
         <div className="w-80 bg-white border-2 border-slate-900 rounded-none shadow-neo flex flex-col overflow-hidden font-mono">
+          {/* Pomodoro Panel Toggle */}
+          <div className="p-3 border-b-2 border-slate-900 bg-slate-50/50 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black text-slate-700 uppercase tracking-wide flex items-center gap-1">
+                🍅 POMODORO TIMER
+              </span>
+              <button
+                onClick={handleTogglePomodoro}
+                className={`px-2 py-0.5 text-[8px] font-black uppercase rounded-none border-2 border-slate-900 transition-all hover:translate-y-[1px] hover:shadow-none ${
+                  showPomodoro 
+                    ? 'bg-red-500 text-white shadow-neo-sm' 
+                    : 'bg-white text-slate-800 shadow-neo-sm'
+                }`}
+              >
+                {showPomodoro ? 'ENABLED' : 'DISABLED'}
+              </button>
+            </div>
+            {showPomodoro && <PomodoroTimer startTime={sessionStartTime} />}
+          </div>
+
           {/* Tabs */}
           <div className="flex border-b-2 border-slate-900">
             <button
@@ -673,4 +708,75 @@ function ActiveRemainingCountdown({ startTime, duration }) {
   }, [startTime, duration]);
 
   return <span className="font-mono font-black text-red-500 bg-red-50 border border-red-500/20 px-2 py-0.5 ml-1.5">{timeLeft}</span>;
+}
+
+// Pomodoro Timer Component
+function PomodoroTimer({ startTime }) {
+  const [mode, setMode] = useState('focus'); // 'focus' or 'break'
+  const [timeLeft, setTimeLeft] = useState('');
+  const [progressPercent, setProgressPercent] = useState(100);
+
+  useEffect(() => {
+    const updateTimer = () => {
+      const startMs = new Date(startTime).getTime();
+      const nowMs = Date.now();
+      const elapsedMs = Math.max(0, nowMs - startMs);
+      
+      const cycleMs = 30 * 60 * 1000; // 30 mins cycle (25 focus + 5 break)
+      const focusMs = 25 * 60 * 1000; // 25 mins focus
+      const breakMs = 5 * 60 * 1000;  // 5 mins break
+      
+      const cycleElapsedMs = elapsedMs % cycleMs;
+      
+      let currentMode = 'focus';
+      let remainingMs = 0;
+      let totalModeMs = focusMs;
+      
+      if (cycleElapsedMs < focusMs) {
+        currentMode = 'focus';
+        remainingMs = focusMs - cycleElapsedMs;
+        totalModeMs = focusMs;
+      } else {
+        currentMode = 'break';
+        remainingMs = cycleMs - cycleElapsedMs;
+        totalModeMs = breakMs;
+      }
+      
+      setMode(currentMode);
+      
+      const mins = Math.floor(remainingMs / 1000 / 60);
+      const secs = Math.floor((remainingMs / 1000) % 60);
+      setTimeLeft(`${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
+      
+      const pct = (remainingMs / totalModeMs) * 100;
+      setProgressPercent(pct);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [startTime]);
+
+  return (
+    <div className="bg-white border-2 border-slate-900 p-3 shadow-neo-sm font-mono flex flex-col gap-2 relative mt-2">
+      <div className="flex justify-between items-center">
+        <span className="text-[10px] font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+          🍅 {mode === 'focus' ? '🔴 FOCUS MODE' : '🟢 BREAK TIME'}
+        </span>
+        <span className="font-black text-sm text-slate-850 bg-slate-50 border border-slate-200 px-1.5 py-0.5">{timeLeft}</span>
+      </div>
+      
+      {/* Progress Bar */}
+      <div className="w-full h-2.5 bg-slate-100 border-2 border-slate-900 rounded-none overflow-hidden">
+        <div 
+          className={`h-full transition-all duration-1000 ${mode === 'focus' ? 'bg-red-500' : 'bg-emerald-500'}`} 
+          style={{ width: `${progressPercent}%` }} 
+        />
+      </div>
+      
+      <p className="text-[8px] font-bold text-slate-400 uppercase text-center tracking-wider">
+        {mode === 'focus' ? 'STAY CONCENTRATED WITH YOUR GROUP!' : 'TIME TO STRETCH & GRAB WATER!'}
+      </p>
+    </div>
+  );
 }

@@ -72,6 +72,10 @@ const classroomSchema = new mongoose.Schema({
     },
     endedAt: {
         type: Date
+    },
+    pomodoroEnabled: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

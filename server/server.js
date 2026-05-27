@@ -183,6 +183,18 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('toggle-pomodoro', async (data) => {
+        try {
+            const room = await Classroom.findByIdAndUpdate(data.roomId, { pomodoroEnabled: data.enabled }, { new: true });
+            if (room) {
+                io.to(data.roomId).emit('pomodoro-toggled', { enabled: room.pomodoroEnabled });
+                console.log(`Pomodoro status toggled to ${room.pomodoroEnabled} for classroom: ${room.name}`);
+            }
+        } catch (error) {
+            console.error('Toggle pomodoro error:', error);
+        }
+    });
+
     socket.on('disconnect', async () => {
         console.log('User disconnected:', socket.id);
         if (socket.userId && socket.joinTime) {
