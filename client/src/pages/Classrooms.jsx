@@ -73,7 +73,11 @@ export default function Classrooms() {
       }
       await api.post(`/classrooms/${room._id}/join`, { code: joinCode });
       getMe();
-      useToastStore.getState().addToast(`SUCCESSFULLY JOINED CLASSROOM: ${room.name.toUpperCase()}!`, 'success');
+      if (room.sessionStatus === 'ended') {
+        useToastStore.getState().addToast('SESSION SUMMARY RETRIEVED SUCCESSFULLY!', 'success');
+      } else {
+        useToastStore.getState().addToast(`SUCCESSFULLY JOINED CLASSROOM: ${room.name.toUpperCase()}!`, 'success');
+      }
       navigate(`/classrooms/${room._id}`);
     } catch (error) {
       if (error.response?.status === 403) {
@@ -224,7 +228,7 @@ export default function Classrooms() {
                 
                 {/* Session Panel */}
                 <div className="mb-6 flex flex-col gap-1 text-[10px] font-bold text-slate-700 bg-slate-50 border-2 border-slate-900 p-2.5 relative font-mono">
-                  <div className="absolute top-0 right-2 -translate-y-1/2 bg-primary/10 border-2 border-slate-900 text-primary px-1.5 py-0.5 text-[8px] font-black">
+                  <div className="absolute top-0 right-2 -translate-y-1/2 bg-white border-2 border-slate-900 text-slate-800 px-1.5 py-0.5 text-[8px] font-black">
                     SESSION_INFO
                   </div>
                   <p className="line-clamp-1 pt-1"><span className="text-slate-400 font-extrabold">TOPIC:</span> {room.sessionTitle.toUpperCase()}</p>

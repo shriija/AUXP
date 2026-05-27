@@ -379,7 +379,13 @@ export default function ClassroomRoom() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-extrabold text-slate-900 uppercase">{room.name}</h1>
-              <span className="bg-[#cbe3db] text-primary border border-slate-900 px-1.5 py-0.5 text-[8.5px] font-black uppercase">LIVE NOW</span>
+              <span className="bg-[#cbe3db] text-primary border border-slate-900 px-1.5 py-0.25 text-[7px] font-black uppercase inline-flex items-center gap-1.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
+                </span>
+                <span>LIVE</span>
+              </span>
             </div>
             <div className="flex items-center gap-3 text-[10px] font-bold text-slate-600 mt-0.5">
               <p className="hidden sm:block"><span className="text-slate-400 font-extrabold">TOPIC:</span> {sessionTitle.toUpperCase()}</p>
