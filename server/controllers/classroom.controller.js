@@ -62,8 +62,7 @@ const joinClassroom = async (req, res) => {
         if (!classroom.members.includes(req.user._id)) {
             classroom.members.push(req.user._id);
             await classroom.save();
-            // Gamification: Classroom joined (+5 XP)
-            await awardXP(req.user._id, 'CLASSROOM_JOIN');
+            // Gamification: Classroom joined (Disabled immediate XP to prevent exploit)
 
             // Create Notification
             if (classroom.creator.toString() !== req.user._id.toString()) {

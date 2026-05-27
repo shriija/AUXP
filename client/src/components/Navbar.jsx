@@ -1,12 +1,13 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { LogOut, LayoutDashboard, BrainCircuit, Bell, Trash2, CheckCheck, X, MessageSquare, ArrowBigUpDash, Users } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useNotificationStore } from '../store/useNotificationStore';
 
 export default function Navbar() {
-  const { user, logout, isAuthenticated } = useAuthStore();
+  const { user, logout, isAuthenticated, getMe } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const { notifications, unreadCount, fetchNotifications, markAllRead, markAsRead, deleteNotification, clearAllNotifications } = useNotificationStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -25,6 +26,12 @@ export default function Navbar() {
       return () => clearInterval(interval);
     }
   }, [isAuthenticated, fetchNotifications]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getMe();
+    }
+  }, [location.pathname, isAuthenticated, getMe]);
 
   useEffect(() => {
     function handleClickOutside(event) {

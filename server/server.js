@@ -52,9 +52,16 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    socket.on('join-room', (roomId) => {
+    socket.on('join-room', (data) => {
+        const roomId = typeof data === 'string' ? data : data?.roomId;
+        const userId = typeof data === 'object' ? data?.userId : null;
+        
         socket.join(roomId);
-        console.log(`User ${socket.id} joined room ${roomId}`);
+        socket.roomId = roomId;
+        socket.userId = userId;
+        socket.joinTime = new Date();
+        
+        console.log(`User ${userId || socket.id} joined room ${roomId}`);
     });
 
     socket.on('update-paths', async (data) => {
@@ -123,8 +130,42 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('disconnect', () => {
+    socket.on('update-tasks', async (data) => {
+        socket.to(data.roomId).emit('update-tasks', data.tasks);
+        try {
+            await Classroom.findByIdAndUpdate(data.roomId, { tasks: data.tasks });
+        } catch (error) {
+            console.error('Update tasks error:', error);
+        }
+    });
+
+    socket.on('disconnect', async () => {
         console.log('User disconnected:', socket.id);
+        if (socket.userId && socket.joinTime) {
+            const durationMs = new Date() - socket.joinTime;
+            const durationMins = durationMs / (1000 * 60);
+            
+            let action = null;
+            if (durationMins >= 60) {
+                action = 'CLASSROOM_STUDY_60_PLUS';
+            } else if (durationMins >= 30) {
+                action = 'CLASSROOM_STUDY_30_60';
+            } else if (durationMins >= 15) {
+                action = 'CLASSROOM_STUDY_15_30';
+            } else if (durationMins >= 5) {
+                action = 'CLASSROOM_STUDY_5_15';
+            }
+            
+            if (action) {
+                try {
+                    const { awardXP } = require('./utils/gamification');
+                    await awardXP(socket.userId, action);
+                    console.log(`Awarded ${action} to user ${socket.userId}`);
+                } catch (error) {
+                    console.error('Error awarding study XP on disconnect:', error);
+                }
+            }
+        }
     });
 });
 

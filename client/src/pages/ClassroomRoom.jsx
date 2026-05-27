@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { io } from 'socket.io-client';
 import { ReactSketchCanvas } from 'react-sketch-canvas';
-import { Loader2, Send, Trash2, ArrowLeft, Undo, Redo, Eraser, PenTool, Camera, X, Expand, Download } from 'lucide-react';
+import { Loader2, Send, Trash2, ArrowLeft, Undo, Redo, Eraser, PenTool, Camera, X, Expand, Download, Plus, Check } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
@@ -27,6 +27,10 @@ export default function ClassroomRoom() {
   const [cursors, setCursors] = useState({});
   const [showSnapshots, setShowSnapshots] = useState(false);
   const [fullscreenSnapshot, setFullscreenSnapshot] = useState(null);
+  
+  const [activeTab, setActiveTab] = useState('chat');
+  const [tasks, setTasks] = useState([]);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
 
   useEffect(() => {
     fetchRoom();
@@ -49,6 +53,9 @@ export default function ClassroomRoom() {
       if (res.data.snapshots) {
         setSnapshots(res.data.snapshots);
       }
+      if (res.data.tasks) {
+        setTasks(res.data.tasks);
+      }
       if (res.data.whiteboardPaths && res.data.whiteboardPaths.length > 0) {
         setTimeout(() => {
           if (canvasRef.current) {
@@ -70,7 +77,8 @@ export default function ClassroomRoom() {
     socketRef.current = io(SOCKET_URL);
     
     socketRef.current.on('connect', () => {
-      socketRef.current.emit('join-room', id);
+      const currentUserId = useAuthStore.getState().user?._id;
+      socketRef.current.emit('join-room', { roomId: id, userId: currentUserId });
     });
 
     socketRef.current.on('chat-message', (data) => {
@@ -111,6 +119,10 @@ export default function ClassroomRoom() {
       if (canvasRef.current) {
         canvasRef.current.clearCanvas();
       }
+    });
+
+    socketRef.current.on('update-tasks', (updatedTasks) => {
+      setTasks(updatedTasks);
     });
   };
 
@@ -155,6 +167,27 @@ export default function ClassroomRoom() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  const handleAddTask = (e) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim()) return;
+    const newTasks = [...tasks, { title: newTaskTitle.trim(), completed: false }];
+    setTasks(newTasks);
+    socketRef.current?.emit('update-tasks', { roomId: id, tasks: newTasks });
+    setNewTaskTitle('');
+  };
+
+  const handleToggleTask = (index) => {
+    const newTasks = tasks.map((t, idx) => idx === index ? { ...t, completed: !t.completed } : t);
+    setTasks(newTasks);
+    socketRef.current?.emit('update-tasks', { roomId: id, tasks: newTasks });
+  };
+
+  const handleDeleteTask = (index) => {
+    const newTasks = tasks.filter((_, idx) => idx !== index);
+    setTasks(newTasks);
+    socketRef.current?.emit('update-tasks', { roomId: id, tasks: newTasks });
   };
 
   if (loading) return <div className="flex justify-center items-center h-screen bg-slate-50"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
@@ -238,35 +271,102 @@ export default function ClassroomRoom() {
           />
         </div>
 
-        {/* Chat Sidebar */}
+        {/* Sidebar */}
         <div className="w-80 bg-white border-2 border-slate-900 rounded-none shadow-neo flex flex-col overflow-hidden font-mono">
-          <div className="p-4 border-b-2 border-slate-900 bg-[#cbe3db]/40">
-            <h2 className="font-extrabold text-xs text-slate-800 uppercase">LIVE CHAT</h2>
-          </div>
-          
-          <div className="flex-1 p-4 overflow-y-auto space-y-4">
-            {chat.map((c, i) => (
-              <div key={i} className={`flex flex-col ${c.sender === user.name ? 'items-end' : 'items-start'}`}>
-                <span className="text-[9px] font-bold text-slate-500 mb-1">{c.sender.toUpperCase()}</span>
-                <div className={`px-3 py-1.5 rounded-none text-xs font-bold border-2 border-slate-900 shadow-neo-sm ${c.sender === user.name ? 'bg-primary text-white' : 'bg-slate-50 text-slate-800'}`}>
-                  {c.text}
-                </div>
-              </div>
-            ))}
+          {/* Tabs */}
+          <div className="flex border-b-2 border-slate-900">
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`flex-1 py-3 text-xs font-extrabold uppercase transition-all border-r-2 border-slate-900 ${
+                activeTab === 'chat'
+                  ? 'bg-[#cbe3db]/40 text-slate-800'
+                  : 'bg-white text-slate-400 hover:bg-slate-50'
+              }`}
+            >
+              Live Chat
+            </button>
+            <button
+              onClick={() => setActiveTab('todo')}
+              className={`flex-1 py-3 text-xs font-extrabold uppercase transition-all ${
+                activeTab === 'todo'
+                  ? 'bg-[#cbe3db]/40 text-slate-800'
+                  : 'bg-white text-slate-400 hover:bg-slate-50'
+              }`}
+            >
+              To-Do Board
+            </button>
           </div>
 
-          <form onSubmit={sendMessage} className="p-3 border-t-2 border-slate-900 bg-slate-50/20 flex gap-2">
-            <input 
-              type="text" 
-              value={msg} 
-              onChange={e => setMsg(e.target.value)} 
-              className="flex-1 bg-white border-2 border-slate-900 rounded-none px-3 py-1.5 outline-none font-bold text-xs text-slate-800 placeholder:text-slate-400" 
-              placeholder="MESSAGE..." 
-            />
-            <button type="submit" className="bg-[#ffb800] text-slate-950 p-2 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo-sm">
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
+          {activeTab === 'chat' ? (
+            <>
+              <div className="flex-1 p-4 overflow-y-auto space-y-4 custom-scrollbar">
+                {chat.map((c, i) => (
+                  <div key={i} className={`flex flex-col ${c.sender === user.name ? 'items-end' : 'items-start'}`}>
+                    <span className="text-[9px] font-bold text-slate-500 mb-1">{c.sender.toUpperCase()}</span>
+                    <div className={`px-3 py-1.5 rounded-none text-xs font-bold border-2 border-slate-900 shadow-neo-sm ${c.sender === user.name ? 'bg-primary text-white' : 'bg-slate-50 text-slate-800'}`}>
+                      {c.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <form onSubmit={sendMessage} className="p-3 border-t-2 border-slate-900 bg-slate-50/20 flex gap-2">
+                <input 
+                  type="text" 
+                  value={msg} 
+                  onChange={e => setMsg(e.target.value)} 
+                  className="flex-1 bg-white border-2 border-slate-900 rounded-none px-3 py-1.5 outline-none font-bold text-xs text-slate-800 placeholder:text-slate-400" 
+                  placeholder="MESSAGE..." 
+                />
+                <button type="submit" className="bg-[#ffb800] text-slate-950 p-2 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo-sm">
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <div className="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar">
+                {tasks.length === 0 ? (
+                  <p className="text-slate-400 font-bold text-center mt-10 text-xs uppercase">No tasks yet.</p>
+                ) : (
+                  tasks.map((task, idx) => (
+                    <div key={idx} className="flex items-center gap-3 bg-slate-50/50 border-2 border-slate-900 p-2.5 shadow-neo-sm rounded-none">
+                      <button
+                        onClick={() => handleToggleTask(idx)}
+                        className={`w-5 h-5 border-2 border-slate-900 flex items-center justify-center transition-all ${
+                          task.completed ? 'bg-primary text-white' : 'bg-white hover:bg-slate-50'
+                        }`}
+                      >
+                        {task.completed && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      </button>
+                      <span className={`flex-1 font-bold text-xs ${task.completed ? 'line-through text-slate-400' : 'text-slate-850'}`}>
+                        {task.title}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteTask(idx)}
+                        className="p-1 hover:bg-red-50 text-red-650 hover:text-red-700 transition-all border border-transparent hover:border-slate-900"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <form onSubmit={handleAddTask} className="p-3 border-t-2 border-slate-900 bg-slate-50/20 flex gap-2">
+                <input 
+                  type="text" 
+                  value={newTaskTitle} 
+                  onChange={e => setNewTaskTitle(e.target.value)} 
+                  className="flex-1 bg-white border-2 border-slate-900 rounded-none px-3 py-1.5 outline-none font-bold text-xs text-slate-800 placeholder:text-slate-400" 
+                  placeholder="ADD TASK..." 
+                />
+                <button type="submit" className="bg-[#ffb800] text-slate-950 p-2 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo-sm">
+                  <Plus className="w-4 h-4" />
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </div>
 
