@@ -239,9 +239,14 @@ export default function Classrooms() {
                     </p>
                   )}
                   {room.sessionStatus === 'ended' && (
-                    <p className="text-red-500 font-black">
-                      <span className="text-slate-400 font-extrabold">ENDED AT:</span> {new Date(room.endedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                    <>
+                      <p className="text-slate-700 font-bold">
+                        <span className="text-slate-400 font-extrabold">STARTED AT:</span> {new Date(room.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <p className="text-red-500 font-black">
+                        <span className="text-slate-400 font-extrabold">ENDED AT:</span> {new Date(room.endedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </>
                   )}
                 </div>
               </div>

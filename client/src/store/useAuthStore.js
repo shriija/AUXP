@@ -3,8 +3,13 @@ import { persist } from 'zustand/middleware';
 import api from '../services/api';
 import { useToastStore } from './useToastStore';
 
+let lastProcessedXp = null;
+
 const triggerGamificationToasts = (oldUser, newUser) => {
   if (!oldUser || !newUser) return;
+  if (oldUser.xp === newUser.xp) return;
+  if (lastProcessedXp === newUser.xp) return;
+  lastProcessedXp = newUser.xp;
   
   // 1. XP changes
   if (newUser.xp > oldUser.xp) {
