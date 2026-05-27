@@ -16,6 +16,14 @@ export default function ClassroomRoom() {
   const [chat, setChat] = useState([]);
   const [msg, setMsg] = useState('');
   const { user, getMe } = useAuthStore();
+
+  // Study Session States
+  const [sessionStatus, setSessionStatus] = useState('scheduled');
+  const [sessionStartTime, setSessionStartTime] = useState(null);
+  const [sessionDuration, setSessionDuration] = useState(60);
+  const [sessionEndedAt, setSessionEndedAt] = useState(null);
+  const [sessionTitle, setSessionTitle] = useState('');
+  const [editStartTime, setEditStartTime] = useState('');
   
   const socketRef = useRef(null);
   const canvasRef = useRef(null);
@@ -47,6 +55,16 @@ export default function ClassroomRoom() {
     try {
       const res = await api.get(`/classrooms/${id}`);
       setRoom(res.data);
+      setSessionStatus(res.data.sessionStatus);
+      setSessionStartTime(res.data.startTime);
+      setSessionDuration(res.data.duration);
+      setSessionEndedAt(res.data.endedAt);
+      setSessionTitle(res.data.sessionTitle);
+      if (res.data.startTime) {
+        const d = new Date(res.data.startTime);
+        const tzoffset = d.getTimezoneOffset() * 60000;
+        setEditStartTime(new Date(d.getTime() - tzoffset).toISOString().slice(0, 16));
+      }
       if (res.data.chatMessages) {
         setChat(res.data.chatMessages);
       }
@@ -124,6 +142,46 @@ export default function ClassroomRoom() {
     socketRef.current.on('update-tasks', (updatedTasks) => {
       setTasks(updatedTasks);
     });
+
+    socketRef.current.on('session-started', (data) => {
+      setSessionStatus('active');
+      setSessionStartTime(data.startTime);
+      useToastStore.getState().addToast('STUDY SESSION HAS STARTED!', 'success');
+    });
+
+    socketRef.current.on('start-time-changed', (data) => {
+      setSessionStartTime(data.startTime);
+      const d = new Date(data.startTime);
+      const tzoffset = d.getTimezoneOffset() * 60000;
+      setEditStartTime(new Date(d.getTime() - tzoffset).toISOString().slice(0, 16));
+      useToastStore.getState().addToast('SESSION START TIME UPDATED', 'info');
+    });
+
+    socketRef.current.on('session-ended', (data) => {
+      setSessionStatus('ended');
+      setSessionEndedAt(data.endedAt);
+      useToastStore.getState().addToast('STUDY SESSION HAS ENDED', 'error');
+    });
+  };
+
+  const handleStartSessionManual = () => {
+    if (socketRef.current) {
+      socketRef.current.emit('start-session-manual', { roomId: id, userId: user?._id });
+    }
+  };
+
+  const handleChangeStartTime = (newTimeStr) => {
+    if (socketRef.current) {
+      const utcTime = new Date(newTimeStr).toISOString();
+      socketRef.current.emit('change-start-time', { roomId: id, userId: user?._id, newStartTime: utcTime });
+    }
+  };
+
+  const handleEndSessionManual = () => {
+    const confirmEnd = window.confirm("Are you sure you want to end this study session? This will end the session for all participants.");
+    if (confirmEnd && socketRef.current) {
+      socketRef.current.emit('end-session-manual', { roomId: id, userId: user?._id });
+    }
   };
 
   const sendMessage = (e) => {
@@ -192,6 +250,124 @@ export default function ClassroomRoom() {
 
   if (loading) return <div className="flex justify-center items-center h-screen bg-slate-50"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
+  if (sessionStatus === 'scheduled') {
+    const isCreator = room?.creator?._id === user?._id || room?.creator === user?._id;
+    return (
+      <div className="flex flex-col h-screen bg-background p-4 gap-4 items-center justify-center font-mono">
+        <div className="bg-white border-4 border-slate-900 p-8 rounded-none shadow-neo max-w-xl w-full relative pt-12">
+          <div className="absolute -top-5 left-6 bg-[#228be6] text-white px-4 py-1.5 text-xs font-black uppercase border-2 border-slate-900">
+            WAITING ROOM
+          </div>
+          
+          <h2 className="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight">Scheduled Study Session</h2>
+          <p className="text-sm text-slate-600 font-bold mb-6">TOPIC: {sessionTitle.toUpperCase()}</p>
+          
+          <div className="bg-slate-50 border-2 border-slate-900 p-5 mb-6 text-center">
+            <p className="text-xs text-slate-500 font-black mb-2 uppercase">SESSION STARTS IN</p>
+            <ScheduledCountdown startTime={sessionStartTime} />
+            <p className="text-[10px] text-slate-400 font-bold mt-2 uppercase">
+              Scheduled for: {new Date(sessionStartTime).toLocaleString()}
+            </p>
+          </div>
+          
+          {isCreator ? (
+             <div className="space-y-4 border-t-2 border-slate-200 pt-5">
+               <p className="text-xs font-black text-slate-800 uppercase tracking-wider">Host Controls</p>
+               
+               <div>
+                 <label className="block text-[9px] font-bold mb-1.5 text-slate-500 uppercase">CHANGE START TIME</label>
+                 <div className="flex gap-2">
+                   <input 
+                     type="datetime-local" 
+                     value={editStartTime} 
+                     onChange={(e) => setEditStartTime(e.target.value)} 
+                     className="bg-white border-2 border-slate-900 rounded-none px-3 py-1.5 outline-none font-bold text-slate-800 text-xs flex-1" 
+                   />
+                   <button 
+                     onClick={() => handleChangeStartTime(editStartTime)} 
+                     className="bg-white hover:bg-slate-50 text-slate-950 font-bold py-1.5 px-4 rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all text-xs"
+                   >
+                     UPDATE
+                   </button>
+                 </div>
+               </div>
+               
+               <button 
+                 onClick={handleStartSessionManual} 
+                 className="w-full bg-primary text-white font-black py-3 rounded-none border-2 border-slate-900 shadow-neo hover:translate-y-[1px] hover:shadow-none transition-all text-sm uppercase tracking-wider"
+               >
+                 START STUDY SESSION NOW 🚀
+               </button>
+             </div>
+          ) : (
+            <div className="text-center border-t-2 border-slate-200 pt-5">
+              <div className="inline-block animate-bounce mb-3 text-2xl">⏳</div>
+              <p className="text-sm font-black text-slate-800 uppercase">Waiting for host to start...</p>
+              <p className="text-[10px] font-bold text-slate-500 mt-1">Grab some water, get your notes, and we'll begin shortly!</p>
+            </div>
+          )}
+          
+          <button 
+            onClick={() => navigate('/classrooms')} 
+            className="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all text-xs uppercase"
+          >
+            BACK TO CLASSROOMS
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (sessionStatus === 'ended') {
+    const completedTasksCount = tasks.filter(t => t.completed).length;
+    const totalTasksCount = tasks.length;
+    return (
+      <div className="flex flex-col h-screen bg-background p-4 gap-4 items-center justify-center font-mono">
+        <div className="bg-white border-4 border-slate-900 p-8 rounded-none shadow-neo max-w-xl w-full relative pt-12">
+          <div className="absolute -top-5 left-6 bg-red-500 text-white px-4 py-1.5 text-xs font-black uppercase border-2 border-slate-900">
+            SESSION COMPLETED
+          </div>
+          
+          <h2 className="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight">Study Session Has Ended</h2>
+          <p className="text-sm text-slate-600 font-bold mb-6">TOPIC: {sessionTitle.toUpperCase()}</p>
+          
+          <div className="bg-slate-50 border-2 border-slate-900 p-5 mb-6">
+            <h3 className="text-xs text-slate-500 font-black mb-3 uppercase tracking-wider text-center">Session Summary Stats</h3>
+            <div className="grid grid-cols-2 gap-4 text-xs font-bold text-slate-800">
+              <div className="bg-white border border-slate-900/10 p-3 text-center">
+                <p className="text-slate-400 text-[10px]">TASKS COMPLETED</p>
+                <p className="text-lg font-black pt-1">{completedTasksCount} / {totalTasksCount}</p>
+              </div>
+              <div className="bg-white border border-slate-900/10 p-3 text-center">
+                <p className="text-slate-400 text-[10px]">CHAT MESSAGES</p>
+                <p className="text-lg font-black pt-1">{chat.length}</p>
+              </div>
+              <div className="bg-white border border-slate-900/10 p-3 text-center">
+                <p className="text-slate-400 text-[10px]">BOARD SNAPSHOTS</p>
+                <p className="text-lg font-black pt-1">{snapshots.length}</p>
+              </div>
+              <div className="bg-white border border-slate-900/10 p-3 text-center">
+                <p className="text-slate-400 text-[10px]">SESSION DURATION</p>
+                <p className="text-lg font-black pt-1">{sessionDuration} MINS</p>
+              </div>
+            </div>
+          </div>
+          
+          <p className="text-center text-[10px] text-slate-500 font-semibold mb-6">
+            * This room will remain visible in the dashboard for 5 minutes after ending.
+          </p>
+
+          <button 
+            onClick={() => navigate('/classrooms')} 
+            className="w-full bg-primary text-white font-black py-3 rounded-none border-2 border-slate-900 shadow-neo hover:translate-y-[1px] hover:shadow-none transition-all text-sm uppercase tracking-wider"
+          >
+            RETURN TO CLASSROOMS
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-background p-4 gap-4">
       {/* Top Header Panel */}
@@ -201,8 +377,20 @@ export default function ClassroomRoom() {
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-lg font-extrabold text-slate-900 uppercase">{room.name}</h1>
-            <p className="text-[10px] font-bold text-slate-500">{room.members.length} MEMBERS IN ROOM</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-extrabold text-slate-900 uppercase">{room.name}</h1>
+              <span className="bg-[#cbe3db] text-primary border border-slate-900 px-1.5 py-0.5 text-[8.5px] font-black uppercase">LIVE NOW</span>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] font-bold text-slate-600 mt-0.5">
+              <p className="hidden sm:block"><span className="text-slate-400 font-extrabold">TOPIC:</span> {sessionTitle.toUpperCase()}</p>
+              <p className="hidden sm:block">•</p>
+              <div className="flex items-center">
+                <span className="text-slate-400 font-extrabold uppercase">REMAINING:</span> 
+                <ActiveRemainingCountdown startTime={sessionStartTime} duration={sessionDuration} />
+              </div>
+              <p>•</p>
+              <p>{room.members.length} MEMBERS</p>
+            </div>
           </div>
         </div>
         <div className="flex gap-2">
@@ -212,6 +400,11 @@ export default function ClassroomRoom() {
           <button onClick={handleClear} className="bg-white hover:bg-red-50 text-red-650 px-4 py-2 border-2 border-slate-900 rounded-none font-bold flex items-center gap-2 shadow-neo hover:translate-y-[1px] hover:shadow-none transition-all text-xs">
             <Trash2 className="w-4 h-4" /> CLEAR BOARD
           </button>
+          {(room?.creator?._id === user?._id || room?.creator === user?._id) && (
+            <button onClick={handleEndSessionManual} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 border-2 border-slate-900 rounded-none font-bold flex items-center gap-2 shadow-neo hover:translate-y-[1px] hover:shadow-none transition-all text-xs uppercase">
+              END SESSION
+            </button>
+          )}
         </div>
       </div>
 
@@ -419,4 +612,59 @@ export default function ClassroomRoom() {
       )}
     </div>
   );
+}
+
+// Scheduled Countdown Helper Component
+function ScheduledCountdown({ startTime }) {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const difference = new Date(startTime) - new Date();
+      if (difference <= 0) {
+        setTimeLeft('00h 00m 00s');
+        return;
+      }
+      const hrs = Math.floor(difference / (1000 * 60 * 60));
+      const mins = Math.floor((difference / 1000 / 60) % 60);
+      const secs = Math.floor((difference / 1000) % 60);
+      
+      const format = (num) => String(num).padStart(2, '0');
+      setTimeLeft(`${format(hrs)}h ${format(mins)}m ${format(secs)}s`);
+    };
+
+    calculateTimeLeft();
+    const interval = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(interval);
+  }, [startTime]);
+
+  return <span className="font-mono font-black text-2xl tracking-widest text-[#228be6]">{timeLeft}</span>;
+}
+
+// Active Study Session Countdown Banner Component
+function ActiveRemainingCountdown({ startTime, duration }) {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const start = new Date(startTime).getTime();
+      const expiry = start + duration * 60000;
+      const difference = expiry - new Date().getTime();
+      if (difference <= 0) {
+        setTimeLeft('00:00');
+        return;
+      }
+      const mins = Math.floor(difference / 1000 / 60);
+      const secs = Math.floor((difference / 1000) % 60);
+      
+      const format = (num) => String(num).padStart(2, '0');
+      setTimeLeft(`${format(mins)}:${format(secs)}`);
+    };
+
+    calculateTimeLeft();
+    const interval = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(interval);
+  }, [startTime, duration]);
+
+  return <span className="font-mono font-black text-red-500 bg-red-50 border border-red-500/20 px-2 py-0.5 ml-1.5">{timeLeft}</span>;
 }

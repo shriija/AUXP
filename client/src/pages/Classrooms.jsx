@@ -13,6 +13,17 @@ export default function Classrooms() {
   const [newDesc, setNewDesc] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [code, setCode] = useState('');
+  
+  // Study Session States
+  const [sessionTitle, setSessionTitle] = useState('');
+  const [startImmediately, setStartImmediately] = useState(true);
+  const [startTime, setStartTime] = useState(() => {
+    const future = new Date(Date.now() + 60 * 60 * 1000);
+    const tzoffset = future.getTimezoneOffset() * 60000;
+    return new Date(future.getTime() - tzoffset).toISOString().slice(0, 16);
+  });
+  const [duration, setDuration] = useState(60);
+
   const { user, getMe } = useAuthStore();
   const navigate = useNavigate();
 
@@ -38,10 +49,14 @@ export default function Classrooms() {
         name: newName,
         description: newDesc,
         isPrivate,
-        code: isPrivate ? code : undefined
+        code: isPrivate ? code : undefined,
+        sessionTitle: sessionTitle || newName,
+        startTime: startImmediately ? new Date().toISOString() : new Date(startTime).toISOString(),
+        duration: Number(duration),
+        sessionStatus: startImmediately ? 'active' : 'scheduled'
       });
       getMe();
-      useToastStore.getState().addToast('CLASSROOM CREATED SUCCESSFULLY!', 'success');
+      useToastStore.getState().addToast('STUDY SESSION CREATED SUCCESSFULLY!', 'success');
       navigate(`/classrooms/${res.data._id}`);
     } catch (error) {
       console.error(error);
@@ -68,6 +83,32 @@ export default function Classrooms() {
         console.error(error);
         useToastStore.getState().addToast('FAILED TO JOIN CLASSROOM', 'error');
       }
+    }
+  };
+
+  const getStatusBadge = (room) => {
+    switch (room.sessionStatus) {
+      case 'active':
+        return <span className="bg-[#cbe3db] text-primary border-2 border-slate-900 px-2 py-0.5 text-[9px] font-black uppercase">LIVE NOW</span>;
+      case 'scheduled':
+        return <span className="bg-[#d0ebff] text-[#228be6] border-2 border-slate-900 px-2 py-0.5 text-[9px] font-black uppercase">SCHEDULED</span>;
+      case 'ended':
+        return <span className="bg-[#ffe3e3] text-[#fa5252] border-2 border-slate-900 px-2 py-0.5 text-[9px] font-black uppercase">ENDED</span>;
+      default:
+        return null;
+    }
+  };
+
+  const getButtonText = (room) => {
+    switch (room.sessionStatus) {
+      case 'active':
+        return 'JOIN LIVE SESSION';
+      case 'scheduled':
+        return 'ENTER WAITING ROOM';
+      case 'ended':
+        return 'VIEW SESSION SUMMARY';
+      default:
+        return 'JOIN ROOM';
     }
   };
 
@@ -107,7 +148,46 @@ export default function Classrooms() {
               <input required type="text" maxLength={6} value={code} onChange={e => setCode(e.target.value)} className="w-full max-w-[200px] bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-black text-center tracking-widest text-lg text-slate-800 placeholder:text-slate-400" placeholder="000000" />
             </div>
           )}
-          <button type="submit" className="bg-[#ffb800] text-slate-950 font-bold py-2 px-5 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs">
+
+          <div className="pt-4 border-t-2 border-slate-200">
+            <h4 className="text-xs font-black text-slate-800 mb-3 uppercase tracking-wider">Study Session Settings</h4>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-750">SESSION TOPIC / TITLE</label>
+                <input type="text" value={sessionTitle} onChange={e => setSessionTitle(e.target.value)} className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-bold text-slate-800 placeholder:text-slate-400 text-xs" placeholder="e.g. DSA Heap Trees Revision (default: same as room name)" />
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="startNow" checked={startImmediately} onChange={e => setStartImmediately(e.target.checked)} className="w-4 h-4 border-2 border-slate-900 rounded-none accent-primary cursor-pointer" />
+                  <label htmlFor="startNow" className="text-xs font-bold text-slate-750 cursor-pointer">START SESSION NOW</label>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-bold text-slate-750">DURATION</label>
+                  <select value={duration} onChange={e => setDuration(Number(e.target.value))} className="bg-white border-2 border-slate-900 rounded-none px-3 py-1.5 outline-none font-bold text-slate-800 text-xs">
+                    <option value={1}>1 MIN (TESTING)</option>
+                    <option value={5}>5 MINS</option>
+                    <option value={15}>15 MINS</option>
+                    <option value={30}>30 MINS</option>
+                    <option value={60}>60 MINS</option>
+                    <option value={90}>90 MINS</option>
+                    <option value={120}>120 MINS</option>
+                  </select>
+                </div>
+              </div>
+
+              {!startImmediately && (
+                <div className="pt-1 animate-fadeIn">
+                  <label className="block text-xs font-bold mb-1.5 text-slate-750">SCHEDULED START TIME</label>
+                  <input required={!startImmediately} type="datetime-local" value={startTime} onChange={e => setStartTime(e.target.value)} className="bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-bold text-slate-800 text-xs" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button type="submit" className="bg-[#ffb800] text-slate-950 font-bold py-2 px-5 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs mt-2">
             START CLASSROOM
           </button>
         </form>
@@ -127,18 +207,51 @@ export default function Classrooms() {
           {classrooms.map(room => (
             <div key={room._id} className="bg-white border-2 border-slate-900 rounded-none p-5 shadow-neo flex flex-col justify-between hover:translate-y-[1px] hover:shadow-neo-sm transition-all relative font-mono">
               <div className="relative">
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-2.5">
                   <h3 className="text-base font-extrabold text-slate-850 line-clamp-1 pr-6 uppercase">{room.name}</h3>
                   {room.isPrivate && <Lock className="w-4 h-4 text-slate-500 absolute top-0 right-0" />}
                 </div>
+                
+                <div className="mb-3.5 flex items-center justify-between">
+                  {getStatusBadge(room)}
+                  <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-500">
+                    <Users className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{room.members.length} JOINED</span>
+                  </div>
+                </div>
+
                 <p className="text-slate-650 font-semibold text-xs line-clamp-2 mb-4 h-10">{room.description}</p>
-                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 mb-6">
-                  <Users className="w-4 h-4 text-slate-400" />
-                  <span>{room.members.length} MEMBERS JOINED</span>
+                
+                {/* Session Panel */}
+                <div className="mb-6 flex flex-col gap-1 text-[10px] font-bold text-slate-700 bg-slate-50 border-2 border-slate-900 p-2.5 relative font-mono">
+                  <div className="absolute top-0 right-2 -translate-y-1/2 bg-primary/10 border-2 border-slate-900 text-primary px-1.5 py-0.5 text-[8px] font-black">
+                    SESSION_INFO
+                  </div>
+                  <p className="line-clamp-1 pt-1"><span className="text-slate-400 font-extrabold">TOPIC:</span> {room.sessionTitle.toUpperCase()}</p>
+                  <p><span className="text-slate-400 font-extrabold">DURATION:</span> {room.duration} MINS</p>
+                  {room.sessionStatus === 'scheduled' && (
+                    <p className="text-[#228be6] font-black">
+                      <span className="text-slate-400 font-extrabold">STARTS:</span> {new Date(room.startTime).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  )}
+                  {room.sessionStatus === 'ended' && (
+                    <p className="text-red-500 font-black">
+                      <span className="text-slate-400 font-extrabold">ENDED AT:</span> {new Date(room.endedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  )}
                 </div>
               </div>
-              <button onClick={() => handleJoin(room)} className="w-full bg-primary text-white font-bold py-2.5 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs">
-                JOIN ROOM
+              <button 
+                onClick={() => handleJoin(room)} 
+                className={`w-full font-bold py-2.5 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs ${
+                  room.sessionStatus === 'ended' 
+                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-750' 
+                    : room.sessionStatus === 'scheduled'
+                    ? 'bg-[#d0ebff] hover:bg-[#d0ebff]/90 text-[#228be6]'
+                    : 'bg-primary text-white hover:bg-primary/95'
+                }`}
+              >
+                {getButtonText(room)}
               </button>
             </div>
           ))}

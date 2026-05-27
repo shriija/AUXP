@@ -52,7 +52,27 @@ const classroomSchema = new mongoose.Schema({
             type: Boolean,
             default: false
         }
-    }]
+    }],
+    sessionTitle: {
+        type: String,
+        required: true
+    },
+    startTime: {
+        type: Date,
+        required: true
+    },
+    duration: {
+        type: Number,
+        required: true
+    },
+    sessionStatus: {
+        type: String,
+        enum: ['scheduled', 'active', 'ended'],
+        default: 'scheduled'
+    },
+    endedAt: {
+        type: Date
+    }
 }, { timestamps: true });
 
 const Classroom = mongoose.model('Classroom', classroomSchema);

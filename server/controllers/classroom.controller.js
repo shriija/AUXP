@@ -4,14 +4,18 @@ const Notification = require('../models/Notification');
 
 const createClassroom = async (req, res) => {
     try {
-        const { name, description, isPrivate, code } = req.body;
+        const { name, description, isPrivate, code, sessionTitle, startTime, duration, sessionStatus } = req.body;
         const classroom = await Classroom.create({
             name,
             description,
             isPrivate: isPrivate || false,
             code: isPrivate ? code : undefined,
             creator: req.user._id,
-            members: [req.user._id]
+            members: [req.user._id],
+            sessionTitle: sessionTitle || name,
+            startTime: startTime ? new Date(startTime) : new Date(),
+            duration: duration ? Number(duration) : 60,
+            sessionStatus: sessionStatus || 'scheduled'
         });
         
         // Gamification: Classroom created (+20 XP)
@@ -25,10 +29,30 @@ const createClassroom = async (req, res) => {
 
 const getClassrooms = async (req, res) => {
     try {
-        const classrooms = await Classroom.find()
-            .select('-code')
-            .populate('creator', 'name')
-            .sort({ createdAt: -1 });
+        const now = new Date();
+        
+        // 1. Auto-end active classrooms that have expired
+        const activeClassrooms = await Classroom.find({ sessionStatus: 'active' });
+        for (const room of activeClassrooms) {
+            const expiryTime = new Date(room.startTime.getTime() + room.duration * 60000);
+            if (now >= expiryTime) {
+                room.sessionStatus = 'ended';
+                room.endedAt = now;
+                await room.save();
+            }
+        }
+
+        // 2. Fetch rooms: exclude rooms that ended more than 5 minutes ago
+        const fiveMinsAgo = new Date(now.getTime() - 5 * 60000);
+        const classrooms = await Classroom.find({
+            $or: [
+                { sessionStatus: { $in: ['scheduled', 'active'] } },
+                { sessionStatus: 'ended', endedAt: { $gte: fiveMinsAgo } }
+            ]
+        })
+        .populate('creator', 'name')
+        .sort({ createdAt: -1 });
+
         res.json(classrooms);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch classrooms', error: error.message });
@@ -40,7 +64,20 @@ const getClassroomById = async (req, res) => {
         const classroom = await Classroom.findById(req.params.id)
             .populate('creator', 'name')
             .populate('members', 'name');
+            
         if (!classroom) return res.status(404).json({ message: 'Classroom not found' });
+        
+        // Auto-end if active but expired
+        if (classroom.sessionStatus === 'active') {
+            const now = new Date();
+            const expiryTime = new Date(classroom.startTime.getTime() + classroom.duration * 60000);
+            if (now >= expiryTime) {
+                classroom.sessionStatus = 'ended';
+                classroom.endedAt = now;
+                await classroom.save();
+            }
+        }
+        
         res.json(classroom);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch classroom', error: error.message });

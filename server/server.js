@@ -139,6 +139,50 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('start-session-manual', async (data) => {
+        try {
+            const room = await Classroom.findById(data.roomId);
+            if (room && room.creator.toString() === data.userId) {
+                room.sessionStatus = 'active';
+                room.startTime = new Date();
+                await room.save();
+                io.to(data.roomId).emit('session-started', { startTime: room.startTime });
+                console.log(`Session manually started for classroom: ${room.name}`);
+            }
+        } catch (error) {
+            console.error('Start session manual error:', error);
+        }
+    });
+
+    socket.on('change-start-time', async (data) => {
+        try {
+            const room = await Classroom.findById(data.roomId);
+            if (room && room.creator.toString() === data.userId) {
+                room.startTime = new Date(data.newStartTime);
+                await room.save();
+                io.to(data.roomId).emit('start-time-changed', { startTime: room.startTime });
+                console.log(`Start time changed for classroom: ${room.name}`);
+            }
+        } catch (error) {
+            console.error('Change start time error:', error);
+        }
+    });
+
+    socket.on('end-session-manual', async (data) => {
+        try {
+            const room = await Classroom.findById(data.roomId);
+            if (room && room.creator.toString() === data.userId) {
+                room.sessionStatus = 'ended';
+                room.endedAt = new Date();
+                await room.save();
+                io.to(data.roomId).emit('session-ended', { endedAt: room.endedAt });
+                console.log(`Session manually ended for classroom: ${room.name}`);
+            }
+        } catch (error) {
+            console.error('End session manual error:', error);
+        }
+    });
+
     socket.on('disconnect', async () => {
         console.log('User disconnected:', socket.id);
         if (socket.userId && socket.joinTime) {
@@ -168,6 +212,26 @@ io.on('connection', (socket) => {
         }
     });
 });
+
+// Background job to check for expired study sessions every 15 seconds
+setInterval(async () => {
+    try {
+        const now = new Date();
+        const activeClassrooms = await Classroom.find({ sessionStatus: 'active' });
+        for (const room of activeClassrooms) {
+            const expiryTime = new Date(room.startTime.getTime() + room.duration * 60000);
+            if (now >= expiryTime) {
+                room.sessionStatus = 'ended';
+                room.endedAt = now;
+                await room.save();
+                io.to(room._id.toString()).emit('session-ended', { endedAt: now });
+                console.log(`Session automatically ended for classroom: ${room.name}`);
+            }
+        }
+    } catch (error) {
+        console.error('Error in background session check:', error);
+    }
+}, 15000);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
