@@ -21,7 +21,7 @@ const getPendingItems = async (req, res) => {
                 populate: { path: 'author', select: 'name' }
             });
             
-        const classrooms = await Classroom.find({ approvalStatus: 'pending' })
+        const classrooms = await Classroom.find({ approvalStatus: 'pending', isDeleted: { $ne: true } })
             .populate('creator', 'name email');
             
         res.json({
@@ -47,6 +47,7 @@ const approveItem = async (req, res) => {
             item = await Resource.findById(itemId);
             if (!item) return res.status(404).json({ message: 'Resource not found' });
             item.approvalStatus = 'approved';
+            item.rejectionCount = 0;
             await item.save();
             ownerId = item.uploadedBy;
             title = item.title;
@@ -61,6 +62,7 @@ const approveItem = async (req, res) => {
             item = await ForumPost.findById(itemId);
             if (!item) return res.status(404).json({ message: 'Post not found' });
             item.approvalStatus = 'approved';
+            item.rejectionCount = 0;
             await item.save();
             ownerId = item.author;
             title = item.title;
@@ -138,26 +140,45 @@ const rejectItem = async (req, res) => {
         let ownerId;
         let title = '';
         let message = '';
+        let wasDeletedPermanently = false;
 
         if (itemType === 'resource') {
             item = await Resource.findById(itemId);
             if (!item) return res.status(404).json({ message: 'Resource not found' });
-            item.approvalStatus = 'rejected';
-            item.rejectionReason = rejectionReason;
-            await item.save();
             ownerId = item.uploadedBy;
             title = item.title;
-            message = `Your Vault notes upload "${title}" was rejected. Reason: ${rejectionReason}`;
+
+            const count = (item.rejectionCount || 0) + 1;
+            if (count >= 2) {
+                await Resource.findByIdAndDelete(itemId);
+                message = `Your Vault notes upload "${title}" was rejected for the second time and has been permanently deleted. Reason: ${rejectionReason}`;
+                wasDeletedPermanently = true;
+            } else {
+                item.approvalStatus = 'rejected';
+                item.rejectionReason = rejectionReason;
+                item.rejectionCount = count;
+                await item.save();
+                message = `Your Vault notes upload "${title}" was rejected. Reason: ${rejectionReason}`;
+            }
 
         } else if (itemType === 'post') {
             item = await ForumPost.findById(itemId);
             if (!item) return res.status(404).json({ message: 'Post not found' });
-            item.approvalStatus = 'rejected';
-            item.rejectionReason = rejectionReason;
-            await item.save();
             ownerId = item.author;
             title = item.title;
-            message = `Your forum post "${title}" was rejected. Reason: ${rejectionReason}`;
+
+            const count = (item.rejectionCount || 0) + 1;
+            if (count >= 2) {
+                await ForumPost.findByIdAndDelete(itemId);
+                message = `Your forum post "${title}" was rejected for the second time and has been permanently deleted. Reason: ${rejectionReason}`;
+                wasDeletedPermanently = true;
+            } else {
+                item.approvalStatus = 'rejected';
+                item.rejectionReason = rejectionReason;
+                item.rejectionCount = count;
+                await item.save();
+                message = `Your forum post "${title}" was rejected. Reason: ${rejectionReason}`;
+            }
 
         } else if (itemType === 'reply') {
             item = await ForumReply.findById(itemId);
@@ -173,10 +194,11 @@ const rejectItem = async (req, res) => {
             if (!item) return res.status(404).json({ message: 'Classroom not found' });
             item.approvalStatus = 'rejected';
             item.rejectionReason = rejectionReason;
+            item.isDeleted = true;
             await item.save();
             ownerId = item.creator;
             title = item.name;
-            message = `Your classroom study room "${title}" was rejected. Reason: ${rejectionReason}`;
+            message = `Your classroom study room "${title}" was rejected and has been removed. Reason: ${rejectionReason}`;
             
         } else {
             return res.status(400).json({ message: 'Invalid item type' });
@@ -191,7 +213,7 @@ const rejectItem = async (req, res) => {
             message
         });
 
-        res.json({ message: `${itemType} rejected successfully`, item });
+        res.json({ message: `${itemType} rejected successfully`, item: wasDeletedPermanently ? null : item, wasDeletedPermanently });
     } catch (error) {
         res.status(500).json({ message: 'Failed to reject item', error: error.message });
     }

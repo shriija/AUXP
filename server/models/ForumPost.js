@@ -45,6 +45,10 @@ const forumPostSchema = new mongoose.Schema({
     rejectionReason: {
         type: String,
         default: ''
+    },
+    rejectionCount: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 

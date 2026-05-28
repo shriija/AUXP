@@ -219,6 +219,11 @@ const updateResource = async (req, res) => {
                 : tags;
         }
         
+        if (resource.approvalStatus === 'rejected') {
+            resource.approvalStatus = 'pending';
+            resource.rejectionReason = '';
+        }
+        
         await resource.save();
         
         res.json({ message: 'Resource updated successfully', resource });

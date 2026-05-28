@@ -209,6 +209,11 @@ const editPost = async (req, res) => {
         post.title = title || post.title;
         post.description = description || post.description;
         post.isEdited = true;
+        if (post.approvalStatus === 'rejected') {
+            post.approvalStatus = 'pending';
+            post.rejectionReason = '';
+        }
+
         await post.save();
         res.json(post);
     } catch (error) {

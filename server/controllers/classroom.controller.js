@@ -30,7 +30,7 @@ const getClassrooms = async (req, res) => {
         const now = new Date();
         
         // 1. Auto-end active classrooms that have expired
-        const activeClassrooms = await Classroom.find({ sessionStatus: 'active' });
+        const activeClassrooms = await Classroom.find({ sessionStatus: 'active', isDeleted: { $ne: true } });
         for (const room of activeClassrooms) {
             const expiryTime = new Date(room.startTime.getTime() + room.duration * 60000);
             if (now >= expiryTime) {
@@ -63,6 +63,7 @@ const getClassrooms = async (req, res) => {
 
         const classrooms = await Classroom.find({
             $and: [
+                { isDeleted: { $ne: true } },
                 approvalQuery,
                 timeQuery
             ]
@@ -82,7 +83,7 @@ const getClassroomById = async (req, res) => {
             .populate('creator', 'name')
             .populate('members', 'name email');
             
-        if (!classroom) return res.status(404).json({ message: 'Classroom not found' });
+        if (!classroom || classroom.isDeleted) return res.status(404).json({ message: 'Classroom not found' });
 
         if (classroom.approvalStatus !== 'approved') {
             if (!req.user || (req.user.role !== 'admin' && classroom.creator._id.toString() !== req.user._id.toString())) {
@@ -111,7 +112,7 @@ const joinClassroom = async (req, res) => {
     try {
         const { code } = req.body;
         const classroom = await Classroom.findById(req.params.id);
-        if (!classroom) return res.status(404).json({ message: 'Classroom not found' });
+        if (!classroom || classroom.isDeleted) return res.status(404).json({ message: 'Classroom not found' });
 
         if (classroom.isPrivate && classroom.creator.toString() !== req.user._id.toString()) {
             if (classroom.code !== code) {

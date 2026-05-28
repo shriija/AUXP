@@ -88,6 +88,10 @@ const classroomSchema = new mongoose.Schema({
     rejectionReason: {
         type: String,
         default: ''
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 
