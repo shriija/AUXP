@@ -76,7 +76,10 @@ const classroomSchema = new mongoose.Schema({
     pomodoroEnabled: {
         type: Boolean,
         default: false
-    }
+    },
+    boardElements: [{
+        type: mongoose.Schema.Types.Mixed
+    }]
 }, { timestamps: true });
 
 const Classroom = mongoose.model('Classroom', classroomSchema);

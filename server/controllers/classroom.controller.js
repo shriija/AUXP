@@ -63,7 +63,7 @@ const getClassroomById = async (req, res) => {
     try {
         const classroom = await Classroom.findById(req.params.id)
             .populate('creator', 'name')
-            .populate('members', 'name');
+            .populate('members', 'name email');
             
         if (!classroom) return res.status(404).json({ message: 'Classroom not found' });
         

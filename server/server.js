@@ -80,9 +80,46 @@ io.on('connection', (socket) => {
     socket.on('clear-canvas', async (roomId) => {
         socket.to(roomId).emit('clear-canvas');
         try {
-            await Classroom.findByIdAndUpdate(roomId, { whiteboardPaths: [] });
+            await Classroom.findByIdAndUpdate(roomId, { whiteboardPaths: [], boardElements: [] });
         } catch (error) {
             console.error('Clear canvas error:', error);
+        }
+    });
+
+    socket.on('add-element', async (data) => {
+        try {
+            await Classroom.findByIdAndUpdate(data.roomId, {
+                $push: { boardElements: data.element }
+            });
+            socket.to(data.roomId).emit('element-added', data.element);
+        } catch (err) {
+            console.error('Add element error:', err);
+        }
+    });
+
+    socket.on('update-element', async (data) => {
+        try {
+            const classroom = await Classroom.findById(data.roomId);
+            if (classroom) {
+                classroom.boardElements = classroom.boardElements.map(el => 
+                    el.id === data.elementId ? { ...el, ...data.updates } : el
+                );
+                await classroom.save();
+                socket.to(data.roomId).emit('element-updated', { elementId: data.elementId, ...data.updates });
+            }
+        } catch (err) {
+            console.error('Update element error:', err);
+        }
+    });
+
+    socket.on('delete-element', async (data) => {
+        try {
+            await Classroom.findByIdAndUpdate(data.roomId, {
+                $pull: { boardElements: { id: data.elementId } }
+            });
+            socket.to(data.roomId).emit('element-deleted', { elementId: data.elementId });
+        } catch (err) {
+            console.error('Delete element error:', err);
         }
     });
 

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { io } from 'socket.io-client';
 import { ReactSketchCanvas } from 'react-sketch-canvas';
-import { Loader2, Send, Trash2, ArrowLeft, Undo, Redo, Eraser, PenTool, Camera, X, Expand, Download, Plus, Check } from 'lucide-react';
+import { Loader2, Send, Trash2, ArrowLeft, Undo, Redo, Eraser, PenTool, Camera, X, Expand, Download, Plus, Check, Square, Circle, StickyNote } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
@@ -37,6 +37,7 @@ export default function ClassroomRoom() {
   const [fullscreenSnapshot, setFullscreenSnapshot] = useState(null);
   
   const [activeTab, setActiveTab] = useState('chat');
+  const [boardElements, setBoardElements] = useState([]);
   const [showPomodoro, setShowPomodoro] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -75,6 +76,9 @@ export default function ClassroomRoom() {
       }
       if (res.data.tasks) {
         setTasks(res.data.tasks);
+      }
+      if (res.data.boardElements) {
+        setBoardElements(res.data.boardElements);
       }
       if (res.data.whiteboardPaths && res.data.whiteboardPaths.length > 0) {
         setTimeout(() => {
@@ -139,6 +143,22 @@ export default function ClassroomRoom() {
       if (canvasRef.current) {
         canvasRef.current.clearCanvas();
       }
+      setBoardElements([]);
+    });
+
+    socketRef.current.on('element-added', (newElement) => {
+      setBoardElements(prev => {
+        if (prev.some(el => el.id === newElement.id)) return prev;
+        return [...prev, newElement];
+      });
+    });
+
+    socketRef.current.on('element-updated', ({ elementId, ...updates }) => {
+      setBoardElements(prev => prev.map(el => el.id === elementId ? { ...el, ...updates } : el));
+    });
+
+    socketRef.current.on('element-deleted', ({ elementId }) => {
+      setBoardElements(prev => prev.filter(el => el.id !== elementId));
     });
 
     socketRef.current.on('update-tasks', (updatedTasks) => {
@@ -211,7 +231,67 @@ export default function ClassroomRoom() {
 
   const handleClear = () => {
     canvasRef.current.clearCanvas();
+    setBoardElements([]);
     socketRef.current.emit('clear-canvas', id);
+  };
+
+  const addElement = (type) => {
+    const stickyColors = ['#fff9db', '#ffe3e3', '#e2f9ff', '#e3faf2'];
+    const randomColor = stickyColors[Math.floor(Math.random() * stickyColors.length)];
+    
+    const newElement = {
+      id: `el_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type,
+      x: 100 + boardElements.length * 15,
+      y: 100 + boardElements.length * 15,
+      width: type === 'sticky' ? 140 : 100,
+      height: type === 'sticky' ? 140 : 100,
+      color: type === 'sticky' ? randomColor : strokeColor,
+      text: type === 'sticky' ? 'Double click to edit note' : '',
+      creatorName: user.name,
+    };
+    
+    setBoardElements(prev => [...prev, newElement]);
+    socketRef.current?.emit('add-element', { roomId: id, element: newElement });
+  };
+
+  const handleDeleteElement = (elementId) => {
+    setBoardElements(prev => prev.filter(el => el.id !== elementId));
+    socketRef.current?.emit('delete-element', { roomId: id, elementId });
+  };
+
+  const handleUpdateElementText = (elementId, text) => {
+    setBoardElements(prev => prev.map(el => el.id === elementId ? { ...el, text } : el));
+    socketRef.current?.emit('update-element', { roomId: id, elementId, updates: { text } });
+  };
+
+  const handlePointerDown = (e, elementId) => {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+    
+    const element = boardElements.find(el => el.id === elementId);
+    if (!element) return;
+    
+    const startX = e.clientX - element.x;
+    const startY = e.clientY - element.y;
+    
+    const handlePointerMove = (moveEvent) => {
+      const container = document.getElementById('whiteboard-container');
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const newX = Math.max(0, Math.min(rect.width - element.width, moveEvent.clientX - startX));
+      const newY = Math.max(0, Math.min(rect.height - element.height, moveEvent.clientY - startY));
+      
+      setBoardElements(prev => prev.map(el => el.id === elementId ? { ...el, x: newX, y: newY } : el));
+      socketRef.current?.emit('update-element', { roomId: id, elementId, updates: { x: newX, y: newY } });
+    };
+    
+    const handlePointerUp = () => {
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerup', handlePointerUp);
+    };
+    
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
   };
 
   const handleSnapshot = async () => {
@@ -432,6 +512,7 @@ export default function ClassroomRoom() {
       <div className="flex flex-1 gap-4 overflow-hidden relative">
         {/* Whiteboard */}
         <div 
+          id="whiteboard-container"
           className="flex-1 bg-white border-2 border-slate-900 rounded-none shadow-neo overflow-hidden relative"
           style={{ cursor: isErasing ? "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" style=\"font-size:24px\"><text y=\"24\">🧽</text></svg>') 0 24, auto" : "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" style=\"font-size:24px\"><text y=\"24\">🖍️</text></svg>') 0 24, auto" }}
           onPointerMove={(e) => {
@@ -441,6 +522,59 @@ export default function ClassroomRoom() {
             socketRef.current?.emit('cursor-move', { roomId: id, name: user.name, x, y, isErasing });
           }}
         >
+          {/* Draggable Board Elements */}
+          {boardElements.map((el) => {
+            return (
+              <div
+                key={el.id}
+                onPointerDown={(e) => handlePointerDown(e, el.id)}
+                className={`absolute select-none cursor-move flex flex-col justify-between border-2 border-slate-900 shadow-neo-sm hover:shadow-neo`}
+                style={{
+                  left: el.x,
+                  top: el.y,
+                  width: el.width,
+                  height: el.height,
+                  backgroundColor: el.type === 'sticky' ? el.color : 'transparent',
+                  borderColor: el.type !== 'sticky' ? el.color : 'rgb(15, 23, 42)',
+                  borderRadius: el.type === 'circle' ? '50%' : '0px',
+                  zIndex: 10,
+                }}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteElement(el.id);
+                  }}
+                  className="absolute -top-2.5 -right-2.5 w-5 h-5 bg-white border-2 border-slate-900 rounded-none flex items-center justify-center text-[10px] font-black text-red-500 hover:bg-red-50 cursor-pointer shadow-sm z-25"
+                  title="Delete element"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+
+                {el.type === 'sticky' ? (
+                  <>
+                    <textarea
+                      value={el.text}
+                      onChange={(e) => handleUpdateElementText(el.id, e.target.value)}
+                      className="w-full h-full bg-transparent resize-none outline-none font-bold text-[10px] p-2 text-slate-800 border-none cursor-text leading-tight custom-scrollbar"
+                      placeholder="Type a note..."
+                    />
+                    <div className="bg-white border-t-2 border-slate-900 px-2 py-0.5 text-[7px] font-black text-slate-600 font-mono tracking-wider flex flex-col justify-center leading-none">
+                      <span className="truncate">PASTED BY:</span>
+                      <span className="truncate text-primary">{el.creatorName.toUpperCase()}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+                    <span className="bg-white/95 border border-slate-900 text-[6px] font-black px-1 py-0.5 rounded-none text-slate-500 font-mono tracking-wide uppercase">
+                      {el.type}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
           {/* Live Cursors */}
           {Object.values(cursors).map(c => (
             <div key={c.socketId} className="absolute pointer-events-none z-20 flex flex-col items-center transition-all duration-75" style={{ left: c.x, top: c.y }}>
@@ -468,6 +602,28 @@ export default function ClassroomRoom() {
                   style={{ backgroundColor: c }} 
                 />
               ))}
+              <div className="w-full border-t border-slate-200 my-1" />
+              <button 
+                onClick={() => addElement('sticky')} 
+                className="p-2 hover:bg-slate-50 text-slate-700 rounded-none border border-transparent hover:border-slate-900 transition-all"
+                title="Add Sticky Note"
+              >
+                <StickyNote className="w-4 h-4 text-amber-500" />
+              </button>
+              <button 
+                onClick={() => addElement('rectangle')} 
+                className="p-2 hover:bg-slate-50 text-slate-700 rounded-none border border-transparent hover:border-slate-900 transition-all"
+                title="Add Rectangle Shape"
+              >
+                <Square className="w-4 h-4 text-blue-500" />
+              </button>
+              <button 
+                onClick={() => addElement('circle')} 
+                className="p-2 hover:bg-slate-50 text-slate-700 rounded-none border border-transparent hover:border-slate-900 transition-all"
+                title="Add Circle Shape"
+              >
+                <Circle className="w-4 h-4 text-emerald-500" />
+              </button>
             </div>
           </div>
 
@@ -511,23 +667,33 @@ export default function ClassroomRoom() {
           <div className="flex border-b-2 border-slate-900">
             <button
               onClick={() => setActiveTab('chat')}
-              className={`flex-1 py-3 text-xs font-extrabold uppercase transition-all border-r-2 border-slate-900 ${
+              className={`flex-1 py-3 text-[10px] font-extrabold uppercase transition-all border-r-2 border-slate-900 ${
                 activeTab === 'chat'
                   ? 'bg-[#cbe3db]/40 text-slate-800'
                   : 'bg-white text-slate-400 hover:bg-slate-50'
               }`}
             >
-              Live Chat
+              Chat
             </button>
             <button
               onClick={() => setActiveTab('todo')}
-              className={`flex-1 py-3 text-xs font-extrabold uppercase transition-all ${
+              className={`flex-1 py-3 text-[10px] font-extrabold uppercase transition-all border-r-2 border-slate-900 ${
                 activeTab === 'todo'
                   ? 'bg-[#cbe3db]/40 text-slate-800'
                   : 'bg-white text-slate-400 hover:bg-slate-50'
               }`}
             >
-              To-Do Board
+              To-Do
+            </button>
+            <button
+              onClick={() => setActiveTab('members')}
+              className={`flex-1 py-3 text-[10px] font-extrabold uppercase transition-all ${
+                activeTab === 'members'
+                  ? 'bg-[#cbe3db]/40 text-slate-800'
+                  : 'bg-white text-slate-400 hover:bg-slate-50'
+              }`}
+            >
+              Members
             </button>
           </div>
 
@@ -557,7 +723,7 @@ export default function ClassroomRoom() {
                 </button>
               </form>
             </>
-          ) : (
+          ) : activeTab === 'todo' ? (
             <>
               <div className="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar">
                 {tasks.length === 0 ? (
@@ -595,11 +761,40 @@ export default function ClassroomRoom() {
                   className="flex-1 bg-white border-2 border-slate-900 rounded-none px-3 py-1.5 outline-none font-bold text-xs text-slate-800 placeholder:text-slate-400" 
                   placeholder="ADD TASK..." 
                 />
-                <button type="submit" className="bg-[#ffb800] text-slate-950 p-2 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo-sm">
+                <button type="submit" className="bg-[#ffb800] text-slate-955 p-2 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo-sm">
                   <Plus className="w-4 h-4" />
                 </button>
               </form>
             </>
+          ) : (
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                  Active Members ({room?.members?.length || 0})
+                </span>
+              </div>
+              
+              {!room?.members || room.members.length === 0 ? (
+                <p className="text-slate-400 font-bold text-center mt-10 text-xs uppercase">No members joined.</p>
+              ) : (
+                room.members.map((member, idx) => (
+                  <div 
+                    key={idx} 
+                    className="flex flex-col bg-slate-50 border-2 border-slate-900 p-2.5 shadow-neo-sm rounded-none font-mono text-left"
+                  >
+                    <span className="font-extrabold text-xs text-slate-850 flex items-center justify-between">
+                      <span>{member.name.toUpperCase()}</span>
+                      {(member._id === room.creator?._id || member._id === room.creator || member._id === room.creator?.toString()) && (
+                        <span className="text-[8px] bg-amber-100 text-amber-700 border border-amber-400 px-1 py-0.2 uppercase font-black tracking-wider">HOST 👑</span>
+                      )}
+                    </span>
+                    <span className="text-[9px] font-bold text-slate-400 mt-0.5">
+                      {member.email}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </div>
       </div>
