@@ -220,6 +220,20 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('extend-session', async (data) => {
+        try {
+            const room = await Classroom.findById(data.roomId);
+            if (room && room.creator.toString() === data.userId) {
+                room.duration = data.duration;
+                await room.save();
+                io.to(data.roomId).emit('session-extended', { duration: room.duration });
+                console.log(`Session duration extended/changed to ${room.duration} minutes for classroom: ${room.name}`);
+            }
+        } catch (error) {
+            console.error('Extend session error:', error);
+        }
+    });
+
     socket.on('toggle-pomodoro', async (data) => {
         try {
             const room = await Classroom.findByIdAndUpdate(data.roomId, { pomodoroEnabled: data.enabled }, { new: true });

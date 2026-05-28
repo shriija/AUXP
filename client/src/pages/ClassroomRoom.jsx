@@ -191,6 +191,10 @@ export default function ClassroomRoom() {
         enabled ? 'success' : 'info'
       );
     });
+    socketRef.current.on('session-extended', (data) => {
+      setSessionDuration(data.duration);
+      useToastStore.getState().addToast(`STUDY SESSION DURATION UPDATED TO ${data.duration} MINS!`, 'success');
+    });
   };
 
   const handleStartSessionManual = () => {
@@ -216,6 +220,12 @@ export default function ClassroomRoom() {
   const handleTogglePomodoro = () => {
     if (socketRef.current) {
       socketRef.current.emit('toggle-pomodoro', { roomId: id, enabled: !showPomodoro });
+    }
+  };
+
+  const handleExtendSession = (newDuration) => {
+    if (socketRef.current) {
+      socketRef.current.emit('extend-session', { roomId: id, userId: user?._id, duration: newDuration });
     }
   };
 
@@ -489,6 +499,34 @@ export default function ClassroomRoom() {
                 <span className="text-slate-400 font-extrabold uppercase">REMAINING:</span> 
                 <ActiveRemainingCountdown startTime={sessionStartTime} duration={sessionDuration} />
               </div>
+              {(room?.creator?._id === user?._id || room?.creator === user?._id) && (
+                <>
+                  <p className="hidden sm:block">•</p>
+                  <div className="flex items-center gap-1 bg-slate-50 border border-slate-900/20 px-1.5 py-0.5">
+                    <span className="text-[8px] font-black text-slate-400 uppercase">EXTEND:</span>
+                    <select 
+                      value={sessionDuration} 
+                      onChange={(e) => handleExtendSession(parseInt(e.target.value))} 
+                      className="bg-white border border-slate-900 rounded-none px-1 py-0.5 font-bold text-[9px] text-slate-800 outline-none cursor-pointer"
+                    >
+                      <option value={sessionDuration}>CURRENT: {sessionDuration} MINS</option>
+                      <optgroup label="ADD TIME (RELATIVE)">
+                        <option value={sessionDuration + 15}>+15 MINS (TOTAL: {sessionDuration + 15} MINS)</option>
+                        <option value={sessionDuration + 30}>+30 MINS (TOTAL: {sessionDuration + 30} MINS)</option>
+                        <option value={sessionDuration + 60}>+60 MINS (TOTAL: {sessionDuration + 60} MINS)</option>
+                      </optgroup>
+                      <optgroup label="SET TOTAL TIME (ABSOLUTE)">
+                        <option value={15}>15 MINS</option>
+                        <option value={30}>30 MINS</option>
+                        <option value={45}>45 MINS</option>
+                        <option value={60}>60 MINS</option>
+                        <option value={90}>90 MINS</option>
+                        <option value={120}>120 MINS</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                </>
+              )}
               <p>•</p>
               <p>{room.members.length} MEMBERS</p>
             </div>
