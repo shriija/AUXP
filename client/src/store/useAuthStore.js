@@ -56,7 +56,7 @@ export const useAuthStore = create(
         set({ loading: true, error: null });
         try {
           const res = await api.post('/auth/login', { email, password });
-          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
+          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
           set({
             user: newUser,
             token: res.data.token,
@@ -77,7 +77,7 @@ export const useAuthStore = create(
         set({ loading: true, error: null });
         try {
           const res = await api.post('/auth/register', { name, email, password, department });
-          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
+          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
           set({
             user: newUser,
             token: res.data.token,
@@ -103,7 +103,7 @@ export const useAuthStore = create(
         try {
           const oldUser = useAuthStore.getState().user;
           const res = await api.get('/auth/me');
-          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
+          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
           set({ user: newUser });
           triggerGamificationToasts(oldUser, newUser);
           return res.data;
@@ -117,7 +117,7 @@ export const useAuthStore = create(
         set({ loading: true, error: null });
         try {
           const res = await api.put('/auth/update', profileData);
-          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
+          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
           set({
             user: newUser,
             loading: false

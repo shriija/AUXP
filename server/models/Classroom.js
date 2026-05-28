@@ -79,7 +79,16 @@ const classroomSchema = new mongoose.Schema({
     },
     boardElements: [{
         type: mongoose.Schema.Types.Mixed
-    }]
+    }],
+    approvalStatus: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    rejectionReason: {
+        type: String,
+        default: ''
+    }
 }, { timestamps: true });
 
 const Classroom = mongoose.model('Classroom', classroomSchema);

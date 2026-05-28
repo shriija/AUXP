@@ -36,6 +36,15 @@ const forumPostSchema = new mongoose.Schema({
     isEdited: {
         type: Boolean,
         default: false
+    },
+    approvalStatus: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    rejectionReason: {
+        type: String,
+        default: ''
     }
 }, { timestamps: true });
 

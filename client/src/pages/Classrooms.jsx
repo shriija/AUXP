@@ -56,8 +56,14 @@ export default function Classrooms() {
         sessionStatus: startImmediately ? 'active' : 'scheduled'
       });
       getMe();
-      useToastStore.getState().addToast('STUDY SESSION CREATED SUCCESSFULLY!', 'success');
-      navigate(`/classrooms/${res.data._id}`);
+      useToastStore.getState().addToast('CLASSROOM SUBMITTED FOR ADMIN REVIEW!', 'success');
+      setShowCreate(false);
+      setNewName('');
+      setNewDesc('');
+      setIsPrivate(false);
+      setCode('');
+      setSessionTitle('');
+      fetchClassrooms();
     } catch (error) {
       console.error(error);
       useToastStore.getState().addToast('FAILED TO CREATE CLASSROOM', 'error');
@@ -91,6 +97,12 @@ export default function Classrooms() {
   };
 
   const getStatusBadge = (room) => {
+    if (room.approvalStatus === 'pending') {
+      return <span className="bg-amber-100 text-amber-800 border-2 border-slate-900 px-2 py-0.5 text-[9px] font-black uppercase animate-pulse">⏳ IN REVIEW</span>;
+    }
+    if (room.approvalStatus === 'rejected') {
+      return <span className="bg-red-100 text-red-800 border-2 border-slate-900 px-2 py-0.5 text-[9px] font-black uppercase" title={`Reason: ${room.rejectionReason}`}>❌ REJECTED</span>;
+    }
     switch (room.sessionStatus) {
       case 'active':
         return <span className="bg-[#cbe3db] text-primary border-2 border-slate-900 px-2 py-0.5 text-[9px] font-black uppercase">LIVE NOW</span>;
@@ -250,18 +262,17 @@ export default function Classrooms() {
                   )}
                 </div>
               </div>
-              <button 
-                onClick={() => handleJoin(room)} 
-                className={`w-full font-bold py-2.5 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs ${
-                  room.sessionStatus === 'ended' 
-                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-750' 
-                    : room.sessionStatus === 'scheduled'
-                    ? 'bg-[#d0ebff] hover:bg-[#d0ebff]/90 text-[#228be6]'
-                    : 'bg-primary text-white hover:bg-primary/95'
-                }`}
-              >
-                {getButtonText(room)}
-              </button>
+                <button 
+                  disabled={room.approvalStatus !== 'approved'}
+                  onClick={() => handleJoin(room)}
+                  className={`w-full py-2.5 rounded-none border-2 border-slate-900 font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 ${
+                    room.approvalStatus !== 'approved'
+                      ? 'bg-slate-100 text-slate-450 border-slate-400 cursor-not-allowed shadow-none'
+                      : 'shadow-neo hover:translate-y-[1px] hover:shadow-none bg-primary text-white hover:bg-primary/95'
+                  }`}
+                >
+                  {room.approvalStatus === 'pending' ? '⏳ PENDING REVIEW' : room.approvalStatus === 'rejected' ? '❌ REJECTED' : getButtonText(room)}
+                </button>
             </div>
           ))}
         </div>

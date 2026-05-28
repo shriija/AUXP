@@ -108,7 +108,7 @@ export default function ForumPostView() {
       setReplyContent('');
       fetchData();
       getMe();
-      useToastStore.getState().addToast('REPLY POSTED SUCCESSFULLY!', 'success');
+      useToastStore.getState().addToast('REPLY SUBMITTED FOR ADMIN REVIEW!', 'success');
     } catch (error) {
       console.error(error);
       useToastStore.getState().addToast('FAILED TO POST REPLY', 'error');
@@ -150,7 +150,19 @@ export default function ForumPostView() {
           ) : (
             <>
               <div className="flex justify-between items-start mb-4">
-                <h1 className="text-xl font-extrabold text-slate-900">{post.title.toUpperCase()}</h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl font-extrabold text-slate-900">{post.title.toUpperCase()}</h1>
+                  {post.approvalStatus === 'pending' && (
+                    <span className="bg-amber-100 text-amber-800 border border-slate-900 px-2 py-0.5 text-[9px] font-black uppercase animate-pulse">
+                      ⏳ IN REVIEW
+                    </span>
+                  )}
+                  {post.approvalStatus === 'rejected' && (
+                    <span className="bg-red-100 text-red-850 border border-slate-900 px-2 py-0.5 text-[9px] font-black uppercase" title={`Reason: ${post.rejectionReason}`}>
+                      ❌ REJECTED (REASON: {post.rejectionReason || 'None specified'})
+                    </span>
+                  )}
+                </div>
                 {user && user._id === post.author?._id && (
                   <div className="flex gap-2">
                     <button onClick={() => { setPostEditing(true); setEditTitle(post.title); setEditDesc(post.description); }} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-slate-50 text-slate-700 hover:text-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Edit Post"><Pencil className="w-4 h-4" /></button>
@@ -189,7 +201,19 @@ export default function ForumPostView() {
               ) : (
                 <>
                   <div className="flex justify-between items-start mb-2">
-                    <p className="whitespace-pre-wrap font-medium text-slate-700 text-sm leading-relaxed">{reply.content}</p>
+                    <div>
+                      <p className="whitespace-pre-wrap font-medium text-slate-700 text-sm leading-relaxed">{reply.content}</p>
+                      {reply.approvalStatus === 'pending' && (
+                        <div className="mt-2 text-[9px] bg-amber-50 text-amber-700 px-1.5 py-0.5 border border-amber-300 inline-block font-black uppercase animate-pulse">
+                          ⏳ REPLY IN REVIEW
+                        </div>
+                      )}
+                      {reply.approvalStatus === 'rejected' && (
+                        <div className="mt-2 text-[9px] bg-red-50 text-red-700 px-1.5 py-0.5 border border-red-300 inline-block font-black uppercase" title={`Reason: ${reply.rejectionReason}`}>
+                          ❌ REPLY REJECTED (REASON: {reply.rejectionReason || 'None specified'})
+                        </div>
+                      )}
+                    </div>
                     {user && user._id === reply.author?._id && (
                       <div className="flex gap-2">
                         <button onClick={() => { setReplyEditingId(reply._id); setEditReplyContent(reply.content); }} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-slate-50 text-slate-600 hover:text-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Edit Reply"><Pencil className="w-3.5 h-3.5" /></button>

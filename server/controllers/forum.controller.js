@@ -13,9 +13,7 @@ const createPost = async (req, res) => {
             author: req.user._id
         });
         
-        // Gamification: Forum post (+10 XP)
-        await awardXP(req.user._id, 'FORUM_POST');
-        
+        // XP will be awarded only after admin approval in the admin controller.
         res.status(201).json(post);
     } catch (error) {
         res.status(500).json({ message: 'Failed to create post', error: error.message });
@@ -24,7 +22,19 @@ const createPost = async (req, res) => {
 
 const getPosts = async (req, res) => {
     try {
-        const posts = await ForumPost.find({ isDeleted: { $ne: true } })
+        let query = { isDeleted: { $ne: true } };
+        if (req.user) {
+            if (req.user.role !== 'admin') {
+                query.$or = [
+                    { approvalStatus: 'approved' },
+                    { author: req.user._id }
+                ];
+            }
+        } else {
+            query.approvalStatus = 'approved';
+        }
+
+        const posts = await ForumPost.find(query)
             .populate('author', 'name level')
             .sort({ createdAt: -1 });
         res.json(posts);
@@ -38,7 +48,25 @@ const getPostById = async (req, res) => {
         const post = await ForumPost.findOne({ _id: req.params.id, isDeleted: { $ne: true } }).populate('author', 'name level');
         if (!post) return res.status(404).json({ message: 'Post not found or has been deleted' });
         
-        const replies = await ForumReply.find({ post: req.params.id, isDeleted: { $ne: true } }).populate('author', 'name level').sort({ createdAt: 1 });
+        if (post.approvalStatus !== 'approved') {
+            if (!req.user || (req.user.role !== 'admin' && post.author._id.toString() !== req.user._id.toString())) {
+                return res.status(403).json({ message: 'Post is pending approval' });
+            }
+        }
+
+        let replyQuery = { post: req.params.id, isDeleted: { $ne: true } };
+        if (req.user) {
+            if (req.user.role !== 'admin') {
+                replyQuery.$or = [
+                    { approvalStatus: 'approved' },
+                    { author: req.user._id }
+                ];
+            }
+        } else {
+            replyQuery.approvalStatus = 'approved';
+        }
+
+        const replies = await ForumReply.find(replyQuery).populate('author', 'name level').sort({ createdAt: 1 });
         res.json({ post, replies });
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch post', error: error.message });
@@ -54,22 +82,7 @@ const addReply = async (req, res) => {
             author: req.user._id
         });
         
-        // Gamification: Forum reply (+5 XP) and check achievements
-        await awardXP(req.user._id, 'FORUM_REPLY');
-        await checkAchievements(req.user._id, 'REPLY');
-
-        // Create Notification
-        const postObj = await ForumPost.findById(req.params.id);
-        if (postObj && postObj.author.toString() !== req.user._id.toString()) {
-            await Notification.create({
-                recipient: postObj.author,
-                sender: req.user._id,
-                type: 'FORUM_REPLY',
-                relatedItem: postObj._id,
-                message: `${req.user.name} replied to your post "${postObj.title}"`
-            });
-        }
-        
+        // XP and notification to post author will be triggered after admin approves this reply.
         res.status(201).json(reply);
     } catch (error) {
         res.status(500).json({ message: 'Failed to add reply', error: error.message });

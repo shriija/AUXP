@@ -13,6 +13,8 @@ import Landing from './pages/Landing';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
 import ToastContainer from './components/ToastContainer';
+import AdminRoute from './components/AdminRoute';
+import AdminDashboard from './pages/AdminDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -86,6 +88,14 @@ function AppContent() {
               <ProtectedRoute>
                 <Leaderboard />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
             }
           />
           <Route path="*" element={<div className="flex flex-1 items-center justify-center"><h1 className="text-3xl font-bold tracking-tight">404 - Not Found</h1></div>} />

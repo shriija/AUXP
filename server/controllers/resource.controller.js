@@ -28,10 +28,7 @@ const createResource = async (req, res) => {
             uploadedBy: req.user._id
         });
 
-        // Gamification: Add 40 XP and check achievements
-        await awardXP(req.user._id, 'UPLOAD');
-        await checkAchievements(req.user._id, 'UPLOAD');
-
+        // Gamification XP will be awarded only after admin approval in the admin controller.
         res.status(201).json(resource);
     } catch (error) {
         res.status(500).json({ message: 'Failed to create resource', error: error.message });
@@ -70,6 +67,29 @@ const getResources = async (req, res) => {
             ];
         }
 
+        // Apply approval status filtering
+        if (req.user) {
+            if (req.user.role !== 'admin') {
+                const approvalCondition = {
+                    $or: [
+                        { approvalStatus: 'approved' },
+                        { uploadedBy: req.user._id }
+                    ]
+                };
+                if (query.$or) {
+                    query.$and = [
+                        { $or: query.$or },
+                        approvalCondition
+                    ];
+                    delete query.$or;
+                } else {
+                    query.$or = approvalCondition.$or;
+                }
+            }
+        } else {
+            query.approvalStatus = 'approved';
+        }
+
         // Populating the uploader details to render in the frontend UI
         const resources = await Resource.find(query)
             .populate('uploadedBy', 'name xp level badges');
@@ -103,6 +123,12 @@ const getResourceById = async (req, res) => {
             .populate('uploadedBy', 'name xp level badges');
         
         if (resource) {
+            // If resource is not approved, only the uploader or admin can view it
+            if (resource.approvalStatus !== 'approved') {
+                if (!req.user || (req.user.role !== 'admin' && resource.uploadedBy._id.toString() !== req.user._id.toString())) {
+                    return res.status(403).json({ message: 'Resource is pending approval' });
+                }
+            }
             res.json(resource);
         } else {
             res.status(404).json({ message: 'Resource not found' });
@@ -127,9 +153,11 @@ const deleteResource = async (req, res) => {
         resource.isDeleted = true;
         await resource.save();
         
-        // Gamification: Deduct 40 XP and re-check achievements
-        await awardXP(req.user._id, 'UPLOAD', -1);
-        await checkAchievements(req.user._id, 'UPLOAD');
+        // Gamification: Deduct 40 XP and re-check achievements only if it was approved
+        if (resource.approvalStatus === 'approved') {
+            await awardXP(req.user._id, 'UPLOAD', -1);
+            await checkAchievements(req.user._id, 'UPLOAD');
+        }
         
         res.json({ message: 'Resource soft-deleted successfully', resource });
     } catch (error) {
@@ -152,9 +180,11 @@ const restoreResource = async (req, res) => {
         resource.isDeleted = false;
         await resource.save();
         
-        // Gamification: Add 40 XP and check achievements
-        await awardXP(req.user._id, 'UPLOAD');
-        await checkAchievements(req.user._id, 'UPLOAD');
+        // Gamification: Add 40 XP and check achievements only if it was approved
+        if (resource.approvalStatus === 'approved') {
+            await awardXP(req.user._id, 'UPLOAD');
+            await checkAchievements(req.user._id, 'UPLOAD');
+        }
         
         res.json({ message: 'Resource restored successfully', resource });
     } catch (error) {

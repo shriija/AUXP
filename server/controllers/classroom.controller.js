@@ -18,9 +18,7 @@ const createClassroom = async (req, res) => {
             sessionStatus: sessionStatus || 'scheduled'
         });
         
-        // Gamification: Classroom created (+20 XP)
-        await awardXP(req.user._id, 'CLASSROOM_CREATE');
-        
+        // XP will be awarded only after admin approval in the admin controller.
         res.status(201).json(classroom);
     } catch (error) {
         res.status(500).json({ message: 'Failed to create classroom', error: error.message });
@@ -42,12 +40,31 @@ const getClassrooms = async (req, res) => {
             }
         }
 
-        // 2. Fetch rooms: exclude rooms that ended more than 5 minutes ago
+        // 2. Fetch rooms: exclude rooms that ended more than 5 minutes ago and check approval status
+        let approvalQuery = {};
+        if (req.user) {
+            if (req.user.role !== 'admin') {
+                approvalQuery.$or = [
+                    { approvalStatus: 'approved' },
+                    { creator: req.user._id }
+                ];
+            }
+        } else {
+            approvalQuery.approvalStatus = 'approved';
+        }
+
         const fiveMinsAgo = new Date(now.getTime() - 5 * 60000);
-        const classrooms = await Classroom.find({
+        const timeQuery = {
             $or: [
                 { sessionStatus: { $in: ['scheduled', 'active'] } },
                 { sessionStatus: 'ended', endedAt: { $gte: fiveMinsAgo } }
+            ]
+        };
+
+        const classrooms = await Classroom.find({
+            $and: [
+                approvalQuery,
+                timeQuery
             ]
         })
         .populate('creator', 'name')
@@ -66,6 +83,12 @@ const getClassroomById = async (req, res) => {
             .populate('members', 'name email');
             
         if (!classroom) return res.status(404).json({ message: 'Classroom not found' });
+
+        if (classroom.approvalStatus !== 'approved') {
+            if (!req.user || (req.user.role !== 'admin' && classroom.creator._id.toString() !== req.user._id.toString())) {
+                return res.status(403).json({ message: 'Classroom is pending approval' });
+            }
+        }
         
         // Auto-end if active but expired
         if (classroom.sessionStatus === 'active') {

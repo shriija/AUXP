@@ -256,12 +256,22 @@ export default function Dashboard() {
                         )
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 mt-1 text-[8px] font-bold text-slate-500 uppercase">
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[8px] font-bold text-slate-500 uppercase">
                       <span>{upload.category}</span>
                       <span>•</span>
-                      <span className={upload.isDeleted ? 'text-red-600' : 'text-emerald-700'}>
-                        {upload.isDeleted ? 'DELETED' : 'ACTIVE'}
-                      </span>
+                      {upload.isDeleted ? (
+                        <span className="text-red-600">DELETED</span>
+                      ) : (
+                        <>
+                          {upload.approvalStatus === 'pending' && <span className="text-amber-600 bg-amber-50 px-1 border border-amber-500 rounded-none font-black animate-pulse">IN REVIEW</span>}
+                          {upload.approvalStatus === 'rejected' && (
+                            <span className="text-red-650 bg-red-50 px-1 border border-red-500 rounded-none font-black" title={`Rejection reason: ${upload.rejectionReason || 'No reason provided'}`}>
+                              REJECTED (HOVER REASON)
+                            </span>
+                          )}
+                          {upload.approvalStatus === 'approved' && <span className="text-emerald-700 bg-emerald-50 px-1 border border-emerald-500 rounded-none font-black">APPROVED</span>}
+                        </>
+                      )}
                     </div>
                   </div>
                 ))
@@ -406,7 +416,17 @@ export default function Dashboard() {
                         >
                           {resource.title.toUpperCase()}
                         </button>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                          {resource.approvalStatus === 'pending' && (
+                            <span className="bg-amber-100 text-amber-800 border-2 border-slate-900 px-2 py-0.5 rounded-none shadow-neo-sm text-[9px] font-black uppercase whitespace-nowrap animate-pulse">
+                              ⏳ IN REVIEW
+                            </span>
+                          )}
+                          {resource.approvalStatus === 'rejected' && (
+                            <span className="bg-red-100 text-red-800 border-2 border-slate-900 px-2 py-0.5 rounded-none shadow-neo-sm text-[9px] font-black uppercase whitespace-nowrap" title={`Reason: ${resource.rejectionReason}`}>
+                              ❌ REJECTED
+                            </span>
+                          )}
                           <span className="bg-[#ffb800] text-slate-950 px-2 py-0.5 border-2 border-slate-900 rounded-none shadow-neo-sm text-[9px] font-black uppercase whitespace-nowrap">
                             ⭐ QUALITY: {resource.score || 0}
                           </span>

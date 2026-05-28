@@ -43,7 +43,7 @@ export default function Forum() {
       setNewTags('');
       fetchPosts();
       getMe();
-      useToastStore.getState().addToast('FORUM POST CREATED SUCCESSFULLY!', 'success');
+      useToastStore.getState().addToast('FORUM POST SUBMITTED FOR ADMIN REVIEW!', 'success');
     } catch (error) {
       console.error(error);
       useToastStore.getState().addToast('FAILED TO CREATE FORUM POST', 'error');
@@ -101,7 +101,19 @@ export default function Forum() {
             <Link to={`/forum/${post._id}`} key={post._id} className="block bg-white border-2 border-slate-900 rounded-none p-5 shadow-neo hover:translate-y-[1px] hover:shadow-neo-sm transition-all group">
               <div className="flex items-start justify-between">
                 <div className="flex-1 pr-4">
-                  <h3 className="text-lg font-bold text-slate-800 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors">{post.title.toUpperCase()}</h3>
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    <h3 className="text-lg font-bold text-slate-800 group-hover:text-primary transition-colors">{post.title.toUpperCase()}</h3>
+                    {post.approvalStatus === 'pending' && (
+                      <span className="bg-amber-100 text-amber-800 border border-slate-900 px-1.5 py-0.25 text-[8px] font-black uppercase animate-pulse">
+                        ⏳ IN REVIEW
+                      </span>
+                    )}
+                    {post.approvalStatus === 'rejected' && (
+                      <span className="bg-red-100 text-red-850 border border-slate-900 px-1.5 py-0.25 text-[8px] font-black uppercase" title={`Reason: ${post.rejectionReason}`}>
+                        ❌ REJECTED (HOVER REASON)
+                      </span>
+                    )}
+                  </div>
                   <p className="text-slate-650 font-medium text-sm line-clamp-2 mb-3">{post.description}</p>
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 mt-1">
                     <span>ASKED BY <span className="text-slate-850 font-extrabold">{post.author?.name?.toUpperCase()}</span> ON {new Date(post.createdAt).toLocaleDateString()} AT {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()} {post.isEdited && <span className="italic text-[9px] ml-1 text-primary">(EDITED)</span>}</span>

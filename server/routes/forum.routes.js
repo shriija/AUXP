@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { createPost, getPosts, getPostById, addReply, votePost, voteReply, editPost, deletePost, editReply, deleteReply } = require('../controllers/forum.controller');
-const { protect } = require('../middleware/auth.middleware');
+const { protect, optionalProtect } = require('../middleware/auth.middleware');
 
 router.post('/', protect, createPost);
-router.get('/', getPosts);
-router.get('/:id', getPostById);
+router.get('/', optionalProtect, getPosts);
+router.get('/:id', optionalProtect, getPostById);
 router.put('/:id', protect, editPost);
 router.delete('/:id', protect, deletePost);
 router.post('/:id/replies', protect, addReply);

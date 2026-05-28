@@ -57,6 +57,8 @@ export default function Navbar() {
       navigate('/profile');
     } else if (notif.type === 'CLASSROOM_JOIN') {
       navigate(`/classrooms/${notif.relatedItem}`);
+    } else if (notif.type === 'APPROVAL_STATUS') {
+      navigate('/dashboard');
     }
   };
 
@@ -78,6 +80,12 @@ export default function Navbar() {
         return (
           <div className="p-1.5 bg-violet-100 border border-slate-900 text-violet-600 flex items-center justify-center">
             <Users className="h-4 w-4" />
+          </div>
+        );
+      case 'APPROVAL_STATUS':
+        return (
+          <div className="p-1.5 bg-amber-100 border border-slate-900 text-amber-650 flex items-center justify-center">
+            <Bell className="h-4 w-4" />
           </div>
         );
       default:
@@ -134,6 +142,11 @@ export default function Navbar() {
                 <Link to="/classrooms" className="px-3.5 py-1.5 text-xs font-bold text-slate-800 hover:text-primary hover:bg-white/40 border-2 border-transparent hover:border-slate-900 rounded-none transition-all">
                   CLASSROOMS
                 </Link>
+                {user?.role === 'admin' && (
+                  <Link to="/admin" className="px-3.5 py-1.5 text-xs font-bold text-red-650 hover:text-red-700 hover:bg-white/40 border-2 border-red-600 hover:border-slate-900 rounded-none transition-all shrink-0">
+                    🛡️ ADMIN
+                  </Link>
+                )}
                 <Link to="/dashboard" className="p-1.5 text-slate-700 hover:text-primary hover:bg-white/40 border-2 border-transparent hover:border-slate-900 rounded-none transition-all" title="Dashboard">
                   <LayoutDashboard className="h-4.5 w-4.5" />
                 </Link>

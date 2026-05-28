@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { createResource, getResources, getResourceById, deleteResource, restoreResource, updateResource, downloadResource, bookmarkResource, previewResource } = require('../controllers/resource.controller');
-const { protect } = require('../middleware/auth.middleware');
+const { protect, optionalProtect } = require('../middleware/auth.middleware');
 const upload = require('../config/multer');
 
 router.route('/')
-    .get(getResources)
+    .get(optionalProtect, getResources)
     .post(protect, upload.single('file'), createResource);
 
 router.route('/:id')
-    .get(getResourceById)
+    .get(optionalProtect, getResourceById)
     .delete(protect, deleteResource)
     .put(protect, updateResource);
 
