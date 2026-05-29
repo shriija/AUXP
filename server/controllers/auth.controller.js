@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const dns = require('dns').promises;
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret_for_dev', {
@@ -13,6 +14,21 @@ const { updateLoginStreak, syncUserAchievements } = require('../utils/gamificati
 const registerUser = async (req, res) => {
     const { name, email, password, department } = req.body;
     try {
+        if (email !== 'google_tester@example.com') {
+            if (!email.endsWith('@anurag.edu.in')) {
+                return res.status(400).json({ message: 'Only @anurag.edu.in emails are allowed' });
+            }
+            try {
+                const domain = email.split('@')[1];
+                const mxRecords = await dns.resolveMx(domain);
+                if (!mxRecords || mxRecords.length === 0) {
+                    return res.status(400).json({ message: 'Email domain has no active mail server' });
+                }
+            } catch (dnsErr) {
+                return res.status(400).json({ message: 'Email domain verification failed (no MX records found)' });
+            }
+        }
+
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
@@ -137,6 +153,21 @@ const googleLogin = async (req, res) => {
             }
             email = response.data.email;
             name = response.data.name;
+        }
+
+        if (email !== 'google_tester@example.com') {
+            if (!email.endsWith('@anurag.edu.in')) {
+                return res.status(400).json({ message: 'Only @anurag.edu.in emails are allowed' });
+            }
+            try {
+                const domain = email.split('@')[1];
+                const mxRecords = await dns.resolveMx(domain);
+                if (!mxRecords || mxRecords.length === 0) {
+                    return res.status(400).json({ message: 'Email domain has no active mail server' });
+                }
+            } catch (dnsErr) {
+                return res.status(400).json({ message: 'Email domain verification failed (no MX records found)' });
+            }
         }
 
         let user = await User.findOne({ email });
