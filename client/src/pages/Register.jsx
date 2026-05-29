@@ -40,13 +40,16 @@ export default function Register() {
 
     const initGoogle = () => {
       if (window.google?.accounts?.id) {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: handleGoogleSuccess,
-        });
+        if (!window.google._gsi_initialized) {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleGoogleSuccess,
+          });
+          window.google._gsi_initialized = true;
+        }
         window.google.accounts.id.renderButton(
           document.getElementById('google-signin-btn'),
-          { theme: 'outline', size: 'large', width: '100%' }
+          { theme: 'outline', size: 'large', width: '382' }
         );
       }
     };

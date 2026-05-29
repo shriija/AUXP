@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import UploadModal from '../components/UploadModal';
 import EditModal from '../components/EditModal';
 import PreviewModal from '../components/PreviewModal';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function Dashboard() {
   const { user, token, getMe } = useAuthStore();
@@ -18,6 +19,8 @@ export default function Dashboard() {
   const [year, setYear] = useState('');
   const [search, setSearch] = useState('');
   const [subject, setSubject] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [confirmRestoreId, setConfirmRestoreId] = useState(null);
   const [topic, setTopic] = useState('');
   const [myUploads, setMyUploads] = useState([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -61,18 +64,23 @@ export default function Dashboard() {
 
   const fetchMyUploads = async () => {
     try {
-      if (!user?._id) return;
-      const res = await api.get(`/resources?uploadedBy=${user._id}&includeDeleted=true`);
+      const currentUser = useAuthStore.getState().user;
+      if (!currentUser?._id) return;
+      const res = await api.get(`/resources?uploadedBy=${currentUser._id}&includeDeleted=true`);
       setMyUploads(res.data);
     } catch (error) {
       console.error('Failed to fetch user uploads', error);
     }
   };
 
-  const handleDeleteResource = async (resourceId) => {
-    if (!window.confirm('Are you sure you want to delete this resource?')) return;
+  const handleDeleteResource = (resourceId) => {
+    setConfirmDeleteId(resourceId);
+  };
+
+  const executeDeleteResource = async () => {
+    if (!confirmDeleteId) return;
     try {
-      await api.delete(`/resources/${resourceId}`);
+      await api.delete(`/resources/${confirmDeleteId}`);
       useToastStore.getState().addToast('RESOURCE DELETED!', 'info');
       fetchResources();
       fetchMyUploads();
@@ -83,10 +91,14 @@ export default function Dashboard() {
     }
   };
 
-  const handleRestoreResource = async (resourceId) => {
-    if (!window.confirm('Are you sure you want to re-upload / restore this resource?')) return;
+  const handleRestoreResource = (resourceId) => {
+    setConfirmRestoreId(resourceId);
+  };
+
+  const executeRestoreResource = async () => {
+    if (!confirmRestoreId) return;
     try {
-      await api.post(`/resources/${resourceId}/restore`);
+      await api.post(`/resources/${confirmRestoreId}/restore`);
       useToastStore.getState().addToast('RESOURCE RESTORED!', 'success');
       fetchResources();
       fetchMyUploads();
@@ -247,7 +259,7 @@ export default function Dashboard() {
                             </button>
                             <button
                               onClick={() => handleDeleteResource(upload._id)}
-                              className="bg-red-55 hover:bg-red-100 text-red-700 px-1.5 py-0.5 text-[8px] font-bold border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                              className="bg-red-100 hover:bg-red-200 text-red-700 px-1.5 py-0.5 text-[8px] font-bold border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
                               title="Delete"
                             >
                               DELETE
@@ -443,7 +455,7 @@ export default function Dashboard() {
                               </button>
                               <button
                                 onClick={() => handleDeleteResource(resource._id)}
-                                className="bg-red-55 hover:bg-red-100 text-red-700 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                                className="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
                               >
                                 DELETE
                               </button>
@@ -518,6 +530,28 @@ export default function Dashboard() {
             }
           }, 1500);
         }}
+      />
+      
+      <ConfirmModal
+        isOpen={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={executeDeleteResource}
+        title="Delete Resource"
+        message="Are you sure you want to delete this resource? This will hide it from the library."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
+      
+      <ConfirmModal
+        isOpen={!!confirmRestoreId}
+        onClose={() => setConfirmRestoreId(null)}
+        onConfirm={executeRestoreResource}
+        title="Restore Resource"
+        message="Are you sure you want to restore / re-upload this resource to the library?"
+        confirmText="Restore"
+        cancelText="Cancel"
+        type="success"
       />
     </div>
   );

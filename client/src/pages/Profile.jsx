@@ -6,6 +6,7 @@ import { FileText, Loader2, Sparkles, AlertCircle, ArrowLeft, RefreshCw, Trash2,
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import EditModal from '../components/EditModal';
+import ConfirmModal from '../components/ConfirmModal';
 
 const ALL_BADGES = [
   { key: 'First Upload', desc: 'Uploaded your first resource' },
@@ -23,6 +24,8 @@ export default function Profile() {
   const [actionLoading, setActionLoading] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [confirmRestoreId, setConfirmRestoreId] = useState(null);
   const [showRules, setShowRules] = useState(false);
   const [isEditingDept, setIsEditingDept] = useState(false);
   const [tempDept, setTempDept] = useState('CSE');
@@ -81,9 +84,10 @@ export default function Profile() {
   const fetchProfileData = async () => {
     try {
       setLoading(true);
-      await getMe(); // update user details from DB
-      if (user?._id) {
-        const res = await api.get(`/resources?uploadedBy=${user._id}&includeDeleted=true`);
+      const fetchedUser = await getMe(); // update user details from DB
+      const targetUserId = fetchedUser?._id || useAuthStore.getState().user?._id;
+      if (targetUserId) {
+        const res = await api.get(`/resources?uploadedBy=${targetUserId}&includeDeleted=true`);
         setUploads(res.data);
       }
     } catch (error) {
@@ -93,33 +97,53 @@ export default function Profile() {
     }
   };
 
-  const handleDeleteResource = async (resourceId) => {
-    if (!window.confirm('Are you sure you want to delete this resource? This will deduct 40 XP.')) return;
+  const handleDeleteResource = (resourceId) => {
+    setConfirmDeleteId(resourceId);
+  };
+
+  const executeDeleteResource = async () => {
+    if (!confirmDeleteId) return;
     try {
-      setActionLoading(resourceId);
-      await api.delete(`/resources/${resourceId}`);
+      setActionLoading(confirmDeleteId);
+      await api.delete(`/resources/${confirmDeleteId}`);
+      useToastStore.getState().addToast('RESOURCE DELETED SUCCESSFULLY!', 'info');
       await getMe(); // sync XP
       // Refresh local uploads list
-      const res = await api.get(`/resources?uploadedBy=${user._id}&includeDeleted=true`);
-      setUploads(res.data);
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?._id) {
+        const res = await api.get(`/resources?uploadedBy=${currentUser._id}&includeDeleted=true`);
+        setUploads(res.data);
+      }
     } catch (error) {
       console.error('Failed to delete resource', error);
+      const errMsg = error.response?.data?.message || 'FAILED TO DELETE RESOURCE';
+      useToastStore.getState().addToast(errMsg.toUpperCase(), 'error');
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleRestoreResource = async (resourceId) => {
-    if (!window.confirm('Are you sure you want to restore / re-upload this resource? This will add 40 XP back.')) return;
+  const handleRestoreResource = (resourceId) => {
+    setConfirmRestoreId(resourceId);
+  };
+
+  const executeRestoreResource = async () => {
+    if (!confirmRestoreId) return;
     try {
-      setActionLoading(resourceId);
-      await api.post(`/resources/${resourceId}/restore`);
+      setActionLoading(confirmRestoreId);
+      await api.post(`/resources/${confirmRestoreId}/restore`);
+      useToastStore.getState().addToast('RESOURCE RESTORED SUCCESSFULLY!', 'success');
       await getMe(); // sync XP
       // Refresh local uploads list
-      const res = await api.get(`/resources?uploadedBy=${user._id}&includeDeleted=true`);
-      setUploads(res.data);
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?._id) {
+        const res = await api.get(`/resources?uploadedBy=${currentUser._id}&includeDeleted=true`);
+        setUploads(res.data);
+      }
     } catch (error) {
       console.error('Failed to restore resource', error);
+      const errMsg = error.response?.data?.message || 'FAILED TO RESTORE RESOURCE';
+      useToastStore.getState().addToast(errMsg.toUpperCase(), 'error');
     } finally {
       setActionLoading(null);
     }
@@ -438,7 +462,7 @@ export default function Profile() {
                         <button
                           disabled={actionLoading === upload._id}
                           onClick={() => handleRestoreResource(upload._id)}
-                          className="bg-emerald-55 hover:bg-emerald-100 text-emerald-800 px-3 py-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold cursor-pointer disabled:opacity-50"
+                          className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold cursor-pointer disabled:opacity-50"
                         >
                           {actionLoading === upload._id ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -451,7 +475,7 @@ export default function Profile() {
                         <button
                           disabled={actionLoading === upload._id}
                           onClick={() => handleDeleteResource(upload._id)}
-                          className="bg-red-55 hover:bg-red-100 text-red-800 px-3 py-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold cursor-pointer disabled:opacity-50"
+                          className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 border border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center gap-1.5 text-[9px] font-bold cursor-pointer disabled:opacity-50"
                         >
                           {actionLoading === upload._id ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -479,6 +503,28 @@ export default function Profile() {
         }}
         onEditSuccess={fetchProfileData}
         resource={selectedResource}
+      />
+      
+      <ConfirmModal
+        isOpen={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={executeDeleteResource}
+        title="Delete Resource"
+        message="Are you sure you want to delete this resource? This will deduct 40 XP."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
+      
+      <ConfirmModal
+        isOpen={!!confirmRestoreId}
+        onClose={() => setConfirmRestoreId(null)}
+        onConfirm={executeRestoreResource}
+        title="Restore Resource"
+        message="Are you sure you want to restore / re-upload this resource? This will add 40 XP back."
+        confirmText="Restore"
+        cancelText="Cancel"
+        type="success"
       />
     </div>
   );

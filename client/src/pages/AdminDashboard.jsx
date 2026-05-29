@@ -252,7 +252,7 @@ export default function AdminDashboard() {
                         <span className="bg-violet-50 text-violet-850 border border-violet-300 px-1.5 py-0.5">
                           {item.isPrivate ? '🔒 PRIVATE' : '🌍 PUBLIC'}
                         </span>
-                        <span className="bg-orange-55 bg-orange-50 text-orange-850 border border-orange-300 px-1.5 py-0.5">
+                        <span className="bg-orange-50 text-orange-850 border border-orange-300 px-1.5 py-0.5">
                           ⏱️ {item.duration} MINS
                         </span>
                         <span className="bg-blue-50 text-blue-800 border border-blue-300 px-1.5 py-0.5">
@@ -270,8 +270,8 @@ export default function AdminDashboard() {
                         </span>
                         <span className={`px-2 py-0.5 text-[8px] font-black border ${
                           item.status === 'resolved' 
-                            ? 'bg-emerald-55 bg-emerald-50 text-emerald-800 border-emerald-300' 
-                            : 'bg-red-55 bg-red-50 text-red-800 border-red-300 animate-pulse'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+                            : 'bg-red-50 text-red-800 border-red-300 animate-pulse'
                         }`}>
                           {item.status?.toUpperCase()}
                         </span>

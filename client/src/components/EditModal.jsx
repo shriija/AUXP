@@ -72,7 +72,7 @@ export default function EditModal({ isOpen, onClose, onEditSuccess, resource }) 
           </div>
           
           <div className="p-6">
-            {error && <div className="bg-red-55 text-red-800 border border-slate-900 p-3 rounded-none mb-5 text-xs font-bold shadow-neo-sm">{error.toUpperCase()}</div>}
+            {error && <div className="bg-red-100 text-red-800 border border-slate-900 p-3 rounded-none mb-5 text-xs font-bold shadow-neo-sm">{error.toUpperCase()}</div>}
             
             <form onSubmit={handleUpdate} className="space-y-5">
               <div>
