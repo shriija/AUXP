@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-import { LogOut, LayoutDashboard, BrainCircuit, Bell, Trash2, CheckCheck, X, MessageSquare, ArrowBigUpDash, Users } from 'lucide-react';
+import { LogOut, LayoutDashboard, BrainCircuit, Bell, Trash2, CheckCheck, X, MessageSquare, ArrowBigUpDash, Users, ShieldAlert } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useNotificationStore } from '../store/useNotificationStore';
 
@@ -11,6 +11,8 @@ export default function Navbar() {
   const { notifications, unreadCount, fetchNotifications, markAllRead, markAsRead, deleteNotification, clearAllNotifications } = useNotificationStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const processedNotifIds = useRef(new Set());
+  const isInitialLoad = useRef(true);
 
   const handleLogout = () => {
     logout();
@@ -19,9 +21,22 @@ export default function Navbar() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchNotifications();
+      isInitialLoad.current = true;
+      
+      const runFetch = async () => {
+        const success = await fetchNotifications();
+        if (success && isInitialLoad.current) {
+          const initialNotifs = useNotificationStore.getState().notifications;
+          initialNotifs.forEach(n => {
+            if (n._id) processedNotifIds.current.add(n._id);
+          });
+          isInitialLoad.current = false;
+        }
+      };
+
+      runFetch();
       const interval = setInterval(() => {
-        fetchNotifications();
+        runFetch();
       }, 15000);
       return () => clearInterval(interval);
     }
@@ -45,6 +60,29 @@ export default function Navbar() {
     };
   }, [dropdownRef]);
 
+  useEffect(() => {
+    if (isInitialLoad.current) return;
+
+    if (notifications.length > 0) {
+      let hasNewApproval = false;
+      notifications.forEach(n => {
+        if (n.type === 'APPROVAL_STATUS' && !n.isRead && !processedNotifIds.current.has(n._id)) {
+          processedNotifIds.current.add(n._id);
+          hasNewApproval = true;
+        } else if (n._id) {
+          processedNotifIds.current.add(n._id);
+        }
+      });
+
+      if (hasNewApproval) {
+        getMe();
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    }
+  }, [notifications, getMe]);
+
   const handleNotificationClick = async (notif) => {
     setIsDropdownOpen(false);
     if (!notif.isRead) {
@@ -59,6 +97,8 @@ export default function Navbar() {
       navigate(`/classrooms/${notif.relatedItem}`);
     } else if (notif.type === 'APPROVAL_STATUS') {
       navigate('/dashboard');
+    } else if (notif.type === 'CONCERN_RAISED') {
+      navigate('/admin');
     }
   };
 
@@ -86,6 +126,12 @@ export default function Navbar() {
         return (
           <div className="p-1.5 bg-amber-100 border border-slate-900 text-amber-650 flex items-center justify-center">
             <Bell className="h-4 w-4" />
+          </div>
+        );
+      case 'CONCERN_RAISED':
+        return (
+          <div className="p-1.5 bg-red-100 border border-slate-900 text-red-650 flex items-center justify-center">
+            <ShieldAlert className="h-4 w-4" />
           </div>
         );
       default:

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useToastStore } from '../store/useToastStore';
 import { useAuthStore } from '../store/useAuthStore';
-import { FileText, MessageSquare, Users, Check, X, ShieldAlert, FileDown, Eye, Loader2 } from 'lucide-react';
+import { FileText, MessageSquare, Users, Check, X, ShieldAlert, FileDown, Eye, Loader2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminDashboard() {
@@ -10,14 +10,31 @@ export default function AdminDashboard() {
   const [pendingData, setPendingData] = useState({ resources: [], posts: [], replies: [], classrooms: [] });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('resources');
+  const [concerns, setConcerns] = useState([]);
   
   // Rejection modal/state
   const [rejectingItem, setRejectingItem] = useState(null); // { id, type, title }
   const [rejectionReason, setRejectionReason] = useState('');
 
+  const getItemType = (tabId) => {
+    if (tabId === 'replies') return 'reply';
+    return tabId.slice(0, -1);
+  };
+
   useEffect(() => {
     fetchPending();
+    fetchConcerns();
   }, []);
+
+  const fetchConcerns = async () => {
+    try {
+      const res = await api.get('/concerns');
+      setConcerns(res.data.concerns || []);
+    } catch (error) {
+      console.error('Failed to fetch concerns', error);
+      useToastStore.getState().addToast('FAILED TO FETCH USER CONCERNS', 'error');
+    }
+  };
 
   const fetchPending = async () => {
     try {
@@ -29,6 +46,17 @@ export default function AdminDashboard() {
       useToastStore.getState().addToast('FAILED TO FETCH PENDING QUEUE', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResolveConcern = async (concernId) => {
+    try {
+      await api.put(`/concerns/${concernId}/resolve`);
+      useToastStore.getState().addToast('CONCERN RESOLVED!', 'success');
+      fetchConcerns();
+    } catch (error) {
+      console.error(error);
+      useToastStore.getState().addToast('FAILED TO RESOLVE CONCERN', 'error');
     }
   };
 
@@ -75,6 +103,7 @@ export default function AdminDashboard() {
     if (activeTab === 'posts') return pendingData.posts;
     if (activeTab === 'replies') return pendingData.replies;
     if (activeTab === 'classrooms') return pendingData.classrooms;
+    if (activeTab === 'concerns') return concerns;
     return [];
   };
 
@@ -82,7 +111,8 @@ export default function AdminDashboard() {
     { id: 'resources', label: 'Vault Uploads', icon: FileText, count: pendingData.resources?.length || 0 },
     { id: 'posts', label: 'Forum Questions', icon: ShieldAlert, count: pendingData.posts?.length || 0 },
     { id: 'replies', label: 'Forum Replies', icon: MessageSquare, count: pendingData.replies?.length || 0 },
-    { id: 'classrooms', label: 'Classrooms', icon: Users, count: pendingData.classrooms?.length || 0 }
+    { id: 'classrooms', label: 'Classrooms', icon: Users, count: pendingData.classrooms?.length || 0 },
+    { id: 'concerns', label: 'Concerns', icon: AlertTriangle, count: concerns.filter(c => c.status === 'pending').length }
   ];
 
   return (
@@ -102,7 +132,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-b-2 border-slate-900 pb-6 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 border-b-2 border-slate-900 pb-6 mb-6">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -152,7 +182,7 @@ export default function AdminDashboard() {
                   {/* Meta info */}
                   <div className="flex justify-between items-start border-b border-slate-100 pb-2.5 mb-3.5 text-[10px] font-bold text-slate-500 uppercase">
                     <span>
-                      Submitted by: <strong className="text-slate-800">{item.uploadedBy?.name || item.author?.name || item.creator?.name || 'Anonymous'}</strong>
+                      Submitted by: <strong className="text-slate-800">{item.uploadedBy?.name || item.author?.name || item.creator?.name || item.sender?.name || 'Anonymous'}</strong>
                     </span>
                     <span>
                       {new Date(item.createdAt).toLocaleDateString()}
@@ -231,23 +261,66 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   )}
+
+                  {activeTab === 'concerns' && (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center bg-slate-50 border border-slate-200 p-2.5">
+                        <span className="text-[10px] font-black uppercase text-slate-700">
+                          TYPE: {item.concernType?.split('_').join(' ')}
+                        </span>
+                        <span className={`px-2 py-0.5 text-[8px] font-black border ${
+                          item.status === 'resolved' 
+                            ? 'bg-emerald-55 bg-emerald-50 text-emerald-800 border-emerald-300' 
+                            : 'bg-red-55 bg-red-50 text-red-800 border-red-300 animate-pulse'
+                        }`}>
+                          {item.status?.toUpperCase()}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-650 font-medium whitespace-pre-wrap leading-normal bg-slate-50 border border-slate-200 p-2.5">
+                        {item.text}
+                      </p>
+                      {item.sender && (
+                        <div className="text-[9px] font-bold text-slate-500 bg-slate-100/50 p-2 border border-dashed border-slate-200 uppercase space-y-0.5">
+                          <div>Sender: {item.sender.name} ({item.sender.email})</div>
+                          <div>Dept: {item.sender.department || 'N/A'} • Level: {item.sender.level} • XP: {item.sender.xp}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Moderate Buttons */}
-                <div className="flex items-center gap-3 border-t border-slate-100 pt-4 mt-5">
-                  <button
-                    onClick={() => handleApprove(item._id, activeTab.slice(0, -1))}
-                    className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 text-xs rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1"
-                  >
-                    <Check className="w-4 h-4" /> APPROVE
-                  </button>
-                  <button
-                    onClick={() => initiateReject(item._id, activeTab.slice(0, -1), item.title || item.name || (activeTab === 'replies' ? 'Reply content' : 'Submission'))}
-                    className="flex-1 bg-red-500 hover:bg-red-650 text-white font-bold py-1.5 text-xs rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1"
-                  >
-                    <X className="w-4 h-4" /> REJECT
-                  </button>
-                </div>
+                {activeTab === 'concerns' ? (
+                  <div className="flex items-center gap-3 border-t border-slate-100 pt-4 mt-5">
+                    {item.status === 'pending' ? (
+                      <button
+                        onClick={() => handleResolveConcern(item._id)}
+                        className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 text-xs rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1.5 uppercase"
+                      >
+                        <Check className="w-4 h-4" /> Resolve Concern
+                      </button>
+                    ) : (
+                      <span className="flex-1 text-center py-1.5 bg-slate-100 text-slate-500 text-xs font-black uppercase border border-slate-300">
+                        Resolved
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 border-t border-slate-100 pt-4 mt-5">
+                    <button
+                      onClick={() => handleApprove(item._id, getItemType(activeTab))}
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 text-xs rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1"
+                    >
+                      <Check className="w-4 h-4" /> APPROVE
+                    </button>
+                    <button
+                      onClick={() => initiateReject(item._id, getItemType(activeTab), item.title || item.name || (activeTab === 'replies' ? 'Reply content' : 'Submission'))}
+                      className="flex-1 bg-red-500 hover:bg-red-650 text-white font-bold py-1.5 text-xs rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1"
+                    >
+                      <X className="w-4 h-4" /> REJECT
+                    </button>
+                  </div>
+                )}
               </motion.div>
             ))}
           </AnimatePresence>

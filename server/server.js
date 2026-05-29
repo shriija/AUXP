@@ -16,6 +16,7 @@ const classroomRoutes = require('./routes/classroom.routes');
 const leaderboardRoutes = require('./routes/leaderboard.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const adminRoutes = require('./routes/admin.routes');
+const concernRoutes = require('./routes/concern.routes');
 
 const app = express();
 const server = http.createServer(app);
@@ -45,6 +46,7 @@ app.use('/api/classrooms', classroomRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/concerns', concernRoutes);
 
 app.get('/', (req, res) => {
     res.send('CSV API is running...');

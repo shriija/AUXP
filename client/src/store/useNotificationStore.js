@@ -12,9 +12,11 @@ export const useNotificationStore = create((set, get) => ({
       const res = await api.get('/notifications');
       const unread = res.data.filter(n => !n.isRead).length;
       set({ notifications: res.data, unreadCount: unread, loading: false });
+      return true;
     } catch (error) {
       console.error('Failed to fetch notifications', error);
       set({ loading: false });
+      return false;
     }
   },
 
