@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret_for_dev', {
@@ -118,5 +119,57 @@ const updateUserProfile = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, getCurrentUser, updateUserProfile };
+const googleLogin = async (req, res) => {
+    const { token } = req.body;
+    if (!token) {
+        return res.status(400).json({ message: 'Token is required' });
+    }
+
+    try {
+        let email, name;
+        if (token === 'mock_google_token') {
+            email = 'google_tester@example.com';
+            name = 'Google Tester';
+        } else {
+            const response = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+            if (!response.data || response.data.error_description) {
+                return res.status(400).json({ message: 'Invalid Google token' });
+            }
+            email = response.data.email;
+            name = response.data.name;
+        }
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = await User.create({
+                name: name || 'Google User',
+                email,
+                password: Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8),
+                department: 'CSE'
+            });
+        }
+
+        await updateLoginStreak(user);
+        await syncUserAchievements(user._id);
+        const updatedUser = await User.findById(user._id);
+
+        res.json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            xp: updatedUser.xp,
+            level: updatedUser.level,
+            badges: updatedUser.badges,
+            department: updatedUser.department,
+            weeklyXp: updatedUser.weeklyXp,
+            token: generateToken(updatedUser._id),
+        });
+    } catch (error) {
+        console.error('Google Auth Error:', error.message);
+        res.status(500).json({ message: 'Google authentication failed', error: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, getCurrentUser, updateUserProfile, googleLogin };
 

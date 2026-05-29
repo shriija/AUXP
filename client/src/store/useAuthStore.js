@@ -73,6 +73,27 @@ export const useAuthStore = create(
         }
       },
 
+      loginWithGoogle: async (googleToken) => {
+        set({ loading: true, error: null });
+        try {
+          const res = await api.post('/auth/google', { token: googleToken });
+          const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
+          set({
+            user: newUser,
+            token: res.data.token,
+            isAuthenticated: true,
+            loading: false,
+          });
+          useToastStore.getState().addToast(`WELCOME, ${res.data.name.toUpperCase()}!`, 'success');
+          return true;
+        } catch (error) {
+          const errMsg = error.response?.data?.message || 'Google Sign-in failed';
+          set({ error: errMsg, loading: false });
+          useToastStore.getState().addToast(errMsg, 'error');
+          return false;
+        }
+      },
+
       register: async (name, email, password, department) => {
         set({ loading: true, error: null });
         try {

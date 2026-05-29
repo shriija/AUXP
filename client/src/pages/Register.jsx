@@ -10,7 +10,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [department, setDepartment] = useState('CSE');
-  const { register, loading, error, clearError, isAuthenticated } = useAuthStore();
+  const { register, loginWithGoogle, loading, error, clearError, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,6 +18,55 @@ export default function Register() {
       navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    const loadScript = () => {
+      const existingScript = document.getElementById('google-gsi-client');
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.id = 'google-gsi-client';
+        script.async = true;
+        script.defer = true;
+        script.onload = initGoogle;
+        document.body.appendChild(script);
+      } else {
+        initGoogle();
+      }
+    };
+
+    const initGoogle = () => {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleSuccess,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-btn'),
+          { theme: 'outline', size: 'large', width: '100%' }
+        );
+      }
+    };
+
+    loadScript();
+  }, [isAuthenticated]);
+
+  const handleGoogleSuccess = async (response) => {
+    const success = await loginWithGoogle(response.credential);
+    if (success) {
+      navigate('/dashboard');
+    }
+  };
+
+  const handleMockGoogleLogin = async () => {
+    const success = await loginWithGoogle('mock_google_token');
+    if (success) {
+      navigate('/dashboard');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -119,6 +168,43 @@ export default function Register() {
               {loading ? 'CREATING...' : 'SIGN UP'}
             </button>
           </form>
+
+          <div className="relative my-6 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t-2 border-slate-200"></div>
+            </div>
+            <span className="relative bg-white px-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">OR SIGN IN WITH</span>
+          </div>
+
+          {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+            <div id="google-signin-btn" className="w-full border-2 border-slate-900 shadow-neo-sm h-10 overflow-hidden flex items-center justify-center bg-white cursor-pointer" />
+          ) : (
+            <button
+              type="button"
+              onClick={handleMockGoogleLogin}
+              className="w-full bg-white hover:bg-slate-50 text-slate-800 font-extrabold py-2.5 rounded-none border-2 border-slate-900 shadow-neo hover:translate-y-[1px] hover:shadow-none transition-all flex justify-center items-center gap-2.5 text-xs uppercase"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#EA4335"
+                  d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3A11.966 11.966 0 0 0 12 0C7.309 0 3.268 2.568.96 6.291l4.306 3.474z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M16.04 15.345c-1.077.732-2.432 1.164-4.04 1.164-2.955 0-5.464-1.996-6.359-4.691L1.305 15.28A11.97 11.97 0 0 0 12 24c3.245 0 6.182-1.077 8.382-2.918l-4.341-3.664-2.073-2.073z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M23.49 12.273c0-.818-.082-1.609-.227-2.373H12v4.518h6.436c-.277 1.482-1.114 2.736-2.382 3.591l4.341 3.664c2.536-2.336 4.1-5.773 4.1-9.4z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.64 11.818a7.042 7.042 0 0 1 0-2.309L1.334 6.035a11.984 11.984 0 0 0 0 11.473l4.306-3.473-1.04-1.04-.3-1.173z"
+                />
+              </svg>
+              Google Account
+            </button>
+          )}
 
           <div className="mt-8 text-center text-[10px] font-bold text-slate-500">
             ALREADY HAVE AN ACCOUNT?{' '}
