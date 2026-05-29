@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
 import { useToastStore } from '../store/useToastStore';
-import { FileText, Loader2, Sparkles, AlertCircle, ArrowLeft, RefreshCw, Trash2, Eye, Edit3 } from 'lucide-react';
+import { FileText, Loader2, Sparkles, AlertCircle, ArrowLeft, RefreshCw, Trash2, Eye, EyeOff, Edit3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import EditModal from '../components/EditModal';
@@ -26,6 +26,41 @@ export default function Profile() {
   const [showRules, setShowRules] = useState(false);
   const [isEditingDept, setIsEditingDept] = useState(false);
   const [tempDept, setTempDept] = useState('CSE');
+  
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showPasswordText, setShowPasswordText] = useState(false);
+
+  const handleSavePassword = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      setPasswordError('PASSWORD MUST BE AT LEAST 6 CHARACTERS');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('PASSWORDS DO NOT MATCH');
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      setPasswordError('');
+      const success = await updateProfile({ password: newPassword });
+      if (success) {
+        setIsEditingPassword(false);
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err) {
+      setPasswordError('FAILED TO UPDATE PASSWORD');
+      console.error(err);
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchProfileData();
@@ -164,6 +199,80 @@ export default function Profile() {
                     className="text-[9px] font-extrabold text-slate-500 hover:text-primary underline flex items-center gap-1 cursor-pointer mt-1 font-mono"
                   >
                     CHANGE DEPARTMENT
+                  </button>
+                )}
+
+                <div className="border-t border-slate-900/10 w-full my-3"></div>
+
+                {isEditingPassword ? (
+                  <form onSubmit={handleSavePassword} className="w-full space-y-2 mt-1">
+                    {passwordError && (
+                      <div className="text-[8px] font-black text-red-600 bg-red-50 border border-red-200 p-1.5 uppercase text-center">
+                        {passwordError}
+                      </div>
+                    )}
+                    <div className="relative">
+                      <input
+                        required
+                        type={showPasswordText ? "text" : "password"}
+                        placeholder="NEW PASSWORD"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="w-full bg-white border-2 border-slate-900 rounded-none px-2 py-1 text-[9px] font-bold text-slate-850 outline-none font-mono pr-8"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordText(!showPasswordText)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors"
+                      >
+                        {showPasswordText ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        required
+                        type={showPasswordText ? "text" : "password"}
+                        placeholder="CONFIRM PASSWORD"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full bg-white border-2 border-slate-900 rounded-none px-2 py-1 text-[9px] font-bold text-slate-850 outline-none font-mono pr-8"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordText(!showPasswordText)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors"
+                      >
+                        {showPasswordText ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                    <div className="flex gap-1.5 w-full">
+                      <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-slate-900 px-2 py-1 text-[9px] font-black cursor-pointer shadow-neo-sm flex-1 flex justify-center items-center"
+                      >
+                        {passwordLoading ? '...' : 'SAVE'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingPassword(false);
+                          setPasswordError('');
+                          setNewPassword('');
+                          setConfirmPassword('');
+                        }}
+                        className="bg-red-50 hover:bg-red-100 text-red-800 border-2 border-slate-900 px-2 py-1 text-[9px] font-black cursor-pointer shadow-neo-sm flex-1"
+                      >
+                        CANCEL
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <button
+                    onClick={() => setIsEditingPassword(true)}
+                    className="text-[9px] font-extrabold text-slate-500 hover:text-primary underline flex items-center gap-1 cursor-pointer font-mono"
+                  >
+                    SET / CHANGE PASSWORD
                   </button>
                 )}
               </div>
