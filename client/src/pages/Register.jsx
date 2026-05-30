@@ -89,8 +89,8 @@ export default function Register() {
         <div className="absolute top-0 left-0 w-full h-1.5 bg-primary border-b-2 border-slate-900" />
         <div className="p-8 mt-2">
           <div className="flex justify-center mb-6">
-            <div className="h-12 w-12 bg-secondary/15 rounded-none flex items-center justify-center border-2 border-slate-900 shadow-neo-sm">
-              <BrainCircuit className="h-5 w-5 text-slate-700" />
+            <div className="h-12 w-12 bg-white rounded-none flex items-center justify-center border-2 border-slate-900 shadow-neo-sm">
+              <img src="/logo.png" alt="AUXP" className="h-8 w-8 object-contain" />
             </div>
           </div>
           <h2 className="text-lg font-extrabold text-center text-slate-800 mb-1 uppercase">Create Account</h2>

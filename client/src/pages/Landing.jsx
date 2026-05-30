@@ -86,8 +86,8 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Left: Brand logo & icon */}
           <Link to="/" className="flex items-center gap-2.5 hover:translate-y-[1px] transition-transform">
-            <div className="bg-primary/10 p-1.5 rounded-none border-2 border-slate-900 shadow-neo-sm">
-              <BrainCircuit className="h-5 w-5 text-primary" />
+            <div className="bg-white p-1 rounded-none border-2 border-slate-900 shadow-neo-sm flex items-center justify-center">
+              <img src="/logo.png" alt="AUXP" className="h-5 w-5 object-contain" />
             </div>
             <span className="font-press text-sm tracking-widest text-slate-900 select-none">AUXP</span>
           </Link>
@@ -520,8 +520,8 @@ export default function Landing() {
       <footer className="bg-white border-t-4 border-slate-900 py-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="bg-primary/10 p-1.5 border-2 border-slate-900 shadow-neo-sm">
-              <BrainCircuit className="h-5 w-5 text-primary" />
+            <div className="bg-white p-1 border-2 border-slate-900 shadow-neo-sm flex items-center justify-center">
+              <img src="/logo.png" alt="AUXP" className="h-5 w-5 object-contain" />
             </div>
             <span className="font-press text-sm tracking-widest text-slate-900 select-none">AUXP</span>
           </div>
