@@ -24,6 +24,17 @@ const models = {
   votes: Vote
 };
 
+function disableRequiredValidation(schema) {
+  schema.eachPath((pathName, schemaType) => {
+    if (schemaType.validators) {
+      schemaType.validators = schemaType.validators.filter(v => v.type !== 'required');
+    }
+    if (schemaType.schema) {
+      disableRequiredValidation(schemaType.schema);
+    }
+  });
+}
+
 async function runRestore() {
   const dbUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/csv';
   console.log(`Connecting to MongoDB for restoration at: ${dbUri}...`);
@@ -54,12 +65,15 @@ async function runRestore() {
         continue;
       }
 
+      // Disable required validation check for legacy backup compatibility
+      disableRequiredValidation(model.schema);
+
       // Clear existing collection
       await model.deleteMany({});
       console.log(`Cleared existing documents in ${name}.`);
 
       // Insert backup documents bypassing validation constraints for legacy compatibility
-      await model.insertMany(documents, { validate: false });
+      await model.insertMany(documents, { validate: false, validateBeforeSave: false });
       console.log(`Successfully restored ${documents.length} documents into ${name}.`);
     }
 
