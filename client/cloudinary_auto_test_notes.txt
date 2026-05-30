@@ -1,3 +1,0 @@
-AUXP Cloudinary Auto-Detect Testing.
-This text file is automatically classified by Cloudinary.
-Everything works smoothly!
