@@ -10,14 +10,15 @@ The Collaborative Study Vault (AUXP) is a full-stack web application designed to
 
 ---
 
-## System Architecture
+## System Architecture & Tech Stack
 
 The application is built using a decoupled architecture, separating the client-side presentation layer from the server-side business logic and data storage.
 
-*   **Frontend (client)**: React (Vite-powered), styled with Tailwind CSS and Vanilla CSS, with state managed globally using Zustand.
-*   **Backend (server)**: Node.js with Express, providing RESTful API endpoints and real-time bidirectional communication via Socket.io.
-*   **Database**: MongoDB hosted on MongoDB Atlas, managed through Mongoose schemas.
-*   **Asset Storage**: Cloudinary integration with a local filesystem fallback for uploaded files and documents.
+### Technology Stack
+*   **Frontend**: React, Vite, Zustand (state management), Tailwind CSS & Vanilla CSS (styling), Axios (API client), Socket.io Client (real-time communication)
+*   **Backend**: Node.js, Express, Socket.io (websockets), Google Auth Library (OAuth 2.0), JWT & Bcrypt (security)
+*   **Database & Storage**: MongoDB Atlas, Mongoose (ODM), Cloudinary (cloud media hosting with local filesystem fallback)
+*   **Deployment**: Vercel (Frontend), Render (Backend)
 
 ---
 
@@ -25,14 +26,14 @@ The application is built using a decoupled architecture, separating the client-s
 
 ```text
 AUXP/
-├── client/                 # React frontend application (Vite)
+├── client/                 # React frontend application (Vite) [See Client README](./client/README.md)
 │   ├── src/
 │   │   ├── components/     # UI components (Whiteboard, Chat, Navbar)
 │   │   ├── pages/          # Page layouts (Login, Register, Dashboard)
 │   │   ├── services/       # Axios API client connection
 │   │   └── store/          # Zustand global stores (auth, notifications)
 │   └── package.json
-├── server/                 # Express backend server (Node.js)
+├── server/                 # Express backend server (Node.js) [See Server README](./server/README.md)
 │   ├── controllers/        # Business logic controllers (rooms, auth, moderation)
 │   ├── models/             # Mongoose database models (User, Classroom, Forum)
 │   ├── routes/             # REST API endpoint route mappings
@@ -41,6 +42,11 @@ AUXP/
 ├── db-backup/              # Preloaded JSON database backups
 └── req.http                # Professional API endpoint HTTP request tests
 ```
+
+### Module Documentation
+For specific details on implementation, state stores, backend routers, or database utilities, refer to the individual module files:
+*   [Frontend Client Documentation](./client/README.md)
+*   [Backend Server Documentation](./server/README.md)
 
 ---
 
