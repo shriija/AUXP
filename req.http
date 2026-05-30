@@ -1,7 +1,6 @@
-### Variables
+### API Variables
 @baseUrl = http://localhost:5000/api
-# Replace this token with the one you get from login/register
-@token = YOUR_JWT_TOKEN_HERE
+@token = YOUR_JWT_TOKEN
 
 ### --- AUTHENTICATION ---
 
@@ -16,7 +15,6 @@ Content-Type: application/json
 }
 
 ### 2. Login with user
-# @name login
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -30,27 +28,27 @@ Content-Type: application/json
 ### 3. Get all resources (Public)
 GET {{baseUrl}}/resources
 
-### 4. Get a single resource by ID (Replace ID with one from Get All Resources response)
-GET {{baseUrl}}/resources/YOUR_RESOURCE_ID_HERE
+### 4. Get a single resource by ID
+GET {{baseUrl}}/resources/YOUR_RESOURCE_ID
 
 ### --- GAMIFICATION / VOTING ---
 
-### 5. Upvote a resource (Protected)
+### 5. Upvote a resource
 POST {{baseUrl}}/votes
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "resourceId": "YOUR_RESOURCE_ID_HERE",
+    "resourceId": "YOUR_RESOURCE_ID",
     "type": "up"
 }
 
-### 6. Downvote a resource (Protected)
+### 6. Downvote a resource
 POST {{baseUrl}}/votes
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "resourceId": "YOUR_RESOURCE_ID_HERE",
+    "resourceId": "YOUR_RESOURCE_ID",
     "type": "down"
 }
