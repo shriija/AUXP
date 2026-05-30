@@ -33,6 +33,14 @@ const forumPostSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    deletedByAdmin: {
+        type: Boolean,
+        default: false
+    },
+    deletionReason: {
+        type: String,
+        default: ''
+    },
     isEdited: {
         type: Boolean,
         default: false

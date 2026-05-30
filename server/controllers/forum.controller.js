@@ -89,12 +89,17 @@ const getPostById = async (req, res) => {
 const addReply = async (req, res) => {
     try {
         const { content } = req.body;
-        const imageUrl = req.file ? (req.file.path && req.file.path.startsWith('http') ? req.file.path : `/uploads/${req.file.filename}`) : '';
+        
+        let imageUrl = '';
+        if (req.file) {
+            imageUrl = req.file.path && req.file.path.startsWith('http') ? req.file.path : `/uploads/${req.file.filename}`;
+        }
 
         const reply = await ForumReply.create({
             post: req.params.id,
             content,
             imageUrl,
+            imageUrls: imageUrl ? [imageUrl] : [],
             author: req.user._id
         });
         

@@ -4,6 +4,7 @@ import api from '../services/api';
 import { Users, Plus, Loader2, Lock } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useToastStore } from '../store/useToastStore';
+import DeleteReasonModal from '../components/DeleteReasonModal';
 
 export default function Classrooms() {
   const [classrooms, setClassrooms] = useState([]);
@@ -26,6 +27,7 @@ export default function Classrooms() {
 
   const { user, getMe } = useAuthStore();
   const navigate = useNavigate();
+  const [adminDeleteTarget, setAdminDeleteTarget] = useState(null);
 
   useEffect(() => {
     fetchClassrooms();
@@ -93,6 +95,24 @@ export default function Classrooms() {
         console.error(error);
         useToastStore.getState().addToast('FAILED TO JOIN CLASSROOM', 'error');
       }
+    }
+  };
+
+  const handleAdminEndClick = (roomId) => {
+    setAdminDeleteTarget({ itemId: roomId, itemType: 'classroom' });
+  };
+
+  const executeAdminEnd = async (reason) => {
+    if (!adminDeleteTarget) return;
+    try {
+      const { itemId, itemType } = adminDeleteTarget;
+      await api.post('/admin/delete-content', { itemId, itemType, reason });
+      useToastStore.getState().addToast('CLASSROOM ENDED BY ADMIN!', 'info');
+      setAdminDeleteTarget(null);
+      fetchClassrooms();
+    } catch (error) {
+      console.error('Failed to admin-end classroom', error);
+      useToastStore.getState().addToast('FAILED TO END CLASSROOM', 'error');
     }
   };
 
@@ -262,6 +282,15 @@ export default function Classrooms() {
                   )}
                 </div>
               </div>
+              {user?.role === 'admin' && room.sessionStatus !== 'ended' && (
+                <button
+                  onClick={() => handleAdminEndClick(room._id)}
+                  className="w-full mb-2 py-2 rounded-none border-2 border-slate-900 font-extrabold text-xs bg-red-500 hover:bg-red-650 text-white shadow-neo hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  id={`admin-end-classroom-btn-${room._id}`}
+                >
+                  ADMIN END ROOM
+                </button>
+              )}
                 <button 
                   disabled={room.approvalStatus !== 'approved'}
                   onClick={() => handleJoin(room)}
@@ -277,6 +306,13 @@ export default function Classrooms() {
           ))}
         </div>
       )}
+      <DeleteReasonModal
+        isOpen={!!adminDeleteTarget}
+        onClose={() => setAdminDeleteTarget(null)}
+        onSubmit={executeAdminEnd}
+        title="Admin End Study Room"
+        placeholder="State reason for ending this live study classroom..."
+      />
     </div>
   );
 }

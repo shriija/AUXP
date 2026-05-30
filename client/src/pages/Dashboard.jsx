@@ -8,6 +8,7 @@ import UploadModal from '../components/UploadModal';
 import EditModal from '../components/EditModal';
 import PreviewModal from '../components/PreviewModal';
 import ConfirmModal from '../components/ConfirmModal';
+import DeleteReasonModal from '../components/DeleteReasonModal';
 
 export default function Dashboard() {
   const { user, token, getMe } = useAuthStore();
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const [confirmRestoreId, setConfirmRestoreId] = useState(null);
   const [topic, setTopic] = useState('');
   const [myUploads, setMyUploads] = useState([]);
+  const [adminDeleteTarget, setAdminDeleteTarget] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
   const [showRules, setShowRules] = useState(false);
@@ -106,6 +108,25 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to restore resource', error);
       useToastStore.getState().addToast('FAILED TO RESTORE RESOURCE', 'error');
+    }
+  };
+
+  const handleAdminDeleteClick = (itemId, itemType) => {
+    setAdminDeleteTarget({ itemId, itemType });
+  };
+
+  const executeAdminDelete = async (reason) => {
+    if (!adminDeleteTarget) return;
+    try {
+      const { itemId, itemType } = adminDeleteTarget;
+      await api.post('/admin/delete-content', { itemId, itemType, reason });
+      useToastStore.getState().addToast('RESOURCE DELETED BY ADMIN!', 'info');
+      setAdminDeleteTarget(null);
+      fetchResources();
+      fetchMyUploads();
+    } catch (error) {
+      console.error('Failed to admin-delete resource', error);
+      useToastStore.getState().addToast('FAILED TO DELETE RESOURCE', 'error');
     }
   };
 
@@ -442,6 +463,15 @@ export default function Dashboard() {
                           <span className="bg-[#ffb800] text-slate-950 px-2 py-0.5 border-2 border-slate-900 rounded-none shadow-neo-sm text-[9px] font-black uppercase whitespace-nowrap">
                             ⭐ QUALITY: {resource.score || 0}
                           </span>
+                          {user?.role === 'admin' && (
+                            <button
+                              onClick={() => handleAdminDeleteClick(resource._id, 'resource')}
+                              className="bg-red-500 text-white px-2.5 py-1 text-[10px] font-bold border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                              id={`admin-delete-resource-btn-${resource._id}`}
+                            >
+                              ADMIN DELETE
+                            </button>
+                          )}
                           {(resource.uploadedBy?._id === user?._id || resource.uploadedBy === user?._id) && (
                             <div className="flex items-center gap-1.5">
                               <button
@@ -552,6 +582,14 @@ export default function Dashboard() {
         confirmText="Restore"
         cancelText="Cancel"
         type="success"
+      />
+
+      <DeleteReasonModal
+        isOpen={!!adminDeleteTarget}
+        onClose={() => setAdminDeleteTarget(null)}
+        onSubmit={executeAdminDelete}
+        title="Admin Delete Resource"
+        placeholder="State reason for deleting this vault resource..."
       />
     </div>
   );

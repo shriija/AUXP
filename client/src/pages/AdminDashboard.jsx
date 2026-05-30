@@ -4,6 +4,7 @@ import { useToastStore } from '../store/useToastStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { FileText, MessageSquare, Users, Check, X, ShieldAlert, FileDown, Eye, Loader2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ImagePreviewModal from '../components/ImagePreviewModal';
 
 export default function AdminDashboard() {
   const { user } = useAuthStore();
@@ -15,6 +16,29 @@ export default function AdminDashboard() {
   // Rejection modal/state
   const [rejectingItem, setRejectingItem] = useState(null); // { id, type, title }
   const [rejectionReason, setRejectionReason] = useState('');
+
+  // Image preview states
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [previewIndex, setPreviewIndex] = useState(0);
+
+  const handleDownloadImage = async (imageUrl, filename) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename || 'downloaded-image.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to download image', err);
+      window.open(imageUrl, '_blank');
+    }
+  };
 
   const getItemType = (tabId) => {
     if (tabId === 'replies') return 'reply';
@@ -57,6 +81,17 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error(error);
       useToastStore.getState().addToast('FAILED TO RESOLVE CONCERN', 'error');
+    }
+  };
+
+  const handleRevertAppeal = async (itemId, itemType, concernId) => {
+    try {
+      await api.post('/admin/revert-content', { itemId, itemType, concernId });
+      useToastStore.getState().addToast(`${itemType.toUpperCase()} RESTORED AND CONCERN RESOLVED!`, 'success');
+      fetchConcerns();
+    } catch (error) {
+      console.error('Failed to revert appeal', error);
+      useToastStore.getState().addToast('FAILED TO REVERT ACTION', 'error');
     }
   };
 
@@ -224,7 +259,13 @@ export default function AdminDashboard() {
                           <img 
                             src={item.imageUrl.startsWith('http') ? item.imageUrl : `${BACKEND_URL}${item.imageUrl}`} 
                             alt="Post Attachment Review" 
-                            className="border-2 border-slate-900 max-h-32 object-cover shadow-neo-sm" 
+                            className="border-2 border-slate-900 max-h-32 object-cover shadow-neo-sm cursor-pointer hover:opacity-95 transition-opacity" 
+                            onClick={() => {
+                              const url = item.imageUrl.startsWith('http') ? item.imageUrl : `${BACKEND_URL}${item.imageUrl}`;
+                              setPreviewUrls([url]);
+                              setPreviewIndex(0);
+                              setIsPreviewOpen(true);
+                            }}
                           />
                         </div>
                       )}
@@ -248,15 +289,41 @@ export default function AdminDashboard() {
                       <p className="text-xs text-slate-650 font-medium whitespace-pre-wrap leading-normal line-clamp-4 bg-slate-50 border border-slate-200 p-2.5">
                         {item.content}
                       </p>
-                      {item.imageUrl && (
+                      {item.imageUrls && item.imageUrls.length > 0 ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {item.imageUrls.map((url, idx) => {
+                            const fullUrl = url.startsWith('http') ? url : `${BACKEND_URL}${url}`;
+                            return (
+                              <img 
+                                key={idx}
+                                src={fullUrl} 
+                                alt={`Reply Attachment Review ${idx + 1}`} 
+                                className="border-2 border-slate-900 max-h-24 object-cover shadow-neo-sm cursor-pointer hover:opacity-95 transition-opacity" 
+                                onClick={() => {
+                                  const urls = item.imageUrls.map(u => u.startsWith('http') ? u : `${BACKEND_URL}${u}`);
+                                  setPreviewUrls(urls);
+                                  setPreviewIndex(idx);
+                                  setIsPreviewOpen(true);
+                                }}
+                              />
+                            );
+                          })}
+                        </div>
+                      ) : item.imageUrl ? (
                         <div className="mt-2 max-w-sm">
                           <img 
                             src={item.imageUrl.startsWith('http') ? item.imageUrl : `${BACKEND_URL}${item.imageUrl}`} 
                             alt="Reply Attachment Review" 
-                            className="border-2 border-slate-900 max-h-32 object-cover shadow-neo-sm" 
+                            className="border-2 border-slate-900 max-h-32 object-cover shadow-neo-sm cursor-pointer hover:opacity-95 transition-opacity" 
+                            onClick={() => {
+                              const url = item.imageUrl.startsWith('http') ? item.imageUrl : `${BACKEND_URL}${item.imageUrl}`;
+                              setPreviewUrls([url]);
+                              setPreviewIndex(0);
+                              setIsPreviewOpen(true);
+                            }}
                           />
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   )}
 
@@ -303,20 +370,37 @@ export default function AdminDashboard() {
                           <div>Dept: {item.sender.department || 'N/A'} • Level: {item.sender.level} • XP: {item.sender.xp}</div>
                         </div>
                       )}
+                      {item.concernType === 'ADMIN_APPEAL' && (
+                        <div className="text-[9px] font-bold text-red-650 bg-red-50 p-2 border border-dashed border-red-200 uppercase space-y-0.5">
+                          <div>Appealing deletion of: {item.contentType?.toUpperCase()} (ID: {item.contentId})</div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
 
                 {/* Moderate Buttons */}
                 {activeTab === 'concerns' ? (
-                  <div className="flex items-center gap-3 border-t border-slate-100 pt-4 mt-5">
+                  <div className="flex items-center gap-3 border-t border-slate-100 pt-4 mt-5 w-full">
                     {item.status === 'pending' ? (
-                      <button
-                        onClick={() => handleResolveConcern(item._id)}
-                        className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 text-xs rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1.5 uppercase"
-                      >
-                        <Check className="w-4 h-4" /> Resolve Concern
-                      </button>
+                      <>
+                        {item.concernType === 'ADMIN_APPEAL' && (
+                          <button
+                            onClick={() => handleRevertAppeal(item.contentId, item.contentType, item._id)}
+                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-1.5 text-xs rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1.5 uppercase cursor-pointer"
+                            id={`revert-appeal-btn-${item._id}`}
+                          >
+                            <Check className="w-4 h-4" /> Revert & Restore
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleResolveConcern(item._id)}
+                          className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 text-xs rounded-none border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all flex items-center justify-center gap-1.5 uppercase cursor-pointer"
+                          id={`resolve-concern-btn-${item._id}`}
+                        >
+                          <Check className="w-4 h-4" /> Dismiss / Resolve
+                        </button>
+                      </>
                     ) : (
                       <span className="flex-1 text-center py-1.5 bg-slate-100 text-slate-500 text-xs font-black uppercase border border-slate-300">
                         Resolved
@@ -400,6 +484,14 @@ export default function AdminDashboard() {
           </form>
         </div>
       )}
+      <ImagePreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        imageUrls={previewUrls}
+        currentIndex={previewIndex}
+        setCurrentIndex={setPreviewIndex}
+        onDownload={handleDownloadImage}
+      />
     </div>
   );
 }

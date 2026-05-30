@@ -55,6 +55,14 @@ const resourceSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    deletedByAdmin: {
+        type: Boolean,
+        default: false
+    },
+    deletionReason: {
+        type: String,
+        default: ''
+    },
     approvalStatus: {
         type: String,
         enum: ['pending', 'approved', 'rejected'],

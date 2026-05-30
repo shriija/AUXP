@@ -31,6 +31,14 @@ const forumReplySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    deletedByAdmin: {
+        type: Boolean,
+        default: false
+    },
+    deletionReason: {
+        type: String,
+        default: ''
+    },
     isEdited: {
         type: Boolean,
         default: false
@@ -47,7 +55,10 @@ const forumReplySchema = new mongoose.Schema({
     imageUrl: {
         type: String,
         default: ''
-    }
+    },
+    imageUrls: [{
+        type: String
+    }]
 }, { timestamps: true });
 
 const ForumReply = mongoose.model('ForumReply', forumReplySchema);

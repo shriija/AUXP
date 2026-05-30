@@ -8,7 +8,7 @@ const concernSchema = new mongoose.Schema({
     },
     concernType: {
         type: String,
-        enum: ['FORUM_ABUSE', 'NOTES_SPAM', 'ROOM_TOXICITY', 'TECH_BUG', 'CUSTOM'],
+        enum: ['FORUM_ABUSE', 'NOTES_SPAM', 'ROOM_TOXICITY', 'TECH_BUG', 'CUSTOM', 'ADMIN_APPEAL'],
         required: true
     },
     text: {
@@ -19,6 +19,13 @@ const concernSchema = new mongoose.Schema({
         type: String,
         enum: ['pending', 'resolved'],
         default: 'pending'
+    },
+    contentType: {
+        type: String,
+        enum: ['resource', 'post', 'reply', 'classroom']
+    },
+    contentId: {
+        type: mongoose.Schema.Types.ObjectId
     }
 }, { timestamps: true });
 

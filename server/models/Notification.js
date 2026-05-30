@@ -13,7 +13,7 @@ const notificationSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['FORUM_REPLY', 'RESOURCE_UPVOTE', 'CLASSROOM_JOIN', 'APPROVAL_STATUS', 'CONCERN_RAISED'],
+        enum: ['FORUM_REPLY', 'RESOURCE_UPVOTE', 'CLASSROOM_JOIN', 'APPROVAL_STATUS', 'CONCERN_RAISED', 'ADMIN_ACTION'],
         required: true
     },
     relatedItem: {

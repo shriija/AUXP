@@ -7,13 +7,13 @@ const Notification = require('../models/Notification');
 // @access  Private
 const createConcern = async (req, res) => {
     try {
-        const { concernType, text } = req.body;
+        const { concernType, text, contentType, contentId } = req.body;
 
         if (!concernType || !text) {
             return res.status(400).json({ message: 'Concern type and text are required.' });
         }
 
-        const validTypes = ['FORUM_ABUSE', 'NOTES_SPAM', 'ROOM_TOXICITY', 'TECH_BUG', 'CUSTOM'];
+        const validTypes = ['FORUM_ABUSE', 'NOTES_SPAM', 'ROOM_TOXICITY', 'TECH_BUG', 'CUSTOM', 'ADMIN_APPEAL'];
         if (!validTypes.includes(concernType)) {
             return res.status(400).json({ message: 'Invalid concern type.' });
         }
@@ -21,7 +21,9 @@ const createConcern = async (req, res) => {
         const concern = await Concern.create({
             sender: req.user._id,
             concernType,
-            text
+            text,
+            contentType,
+            contentId
         });
 
         // Find all admin users to notify them

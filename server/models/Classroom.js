@@ -92,6 +92,14 @@ const classroomSchema = new mongoose.Schema({
     isDeleted: {
         type: Boolean,
         default: false
+    },
+    deletedByAdmin: {
+        type: Boolean,
+        default: false
+    },
+    deletionReason: {
+        type: String,
+        default: ''
     }
 }, { timestamps: true });
 

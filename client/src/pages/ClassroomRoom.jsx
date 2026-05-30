@@ -5,6 +5,8 @@ import { io } from 'socket.io-client';
 import { ReactSketchCanvas } from 'react-sketch-canvas';
 import { Loader2, Send, Trash2, ArrowLeft, Undo, Redo, Eraser, PenTool, Camera, X, Expand, Download, Plus, Check, Square, Circle, StickyNote } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useToastStore } from '../store/useToastStore';
+import DeleteReasonModal from '../components/DeleteReasonModal';
 
 const SOCKET_URL = BACKEND_URL;
 
@@ -24,6 +26,8 @@ export default function ClassroomRoom() {
   const [sessionEndedAt, setSessionEndedAt] = useState(null);
   const [sessionTitle, setSessionTitle] = useState('');
   const [editStartTime, setEditStartTime] = useState('');
+  
+  const [adminDeleteTarget, setAdminDeleteTarget] = useState(null);
   
   const socketRef = useRef(null);
   const canvasRef = useRef(null);
@@ -220,6 +224,24 @@ export default function ClassroomRoom() {
   const handleTogglePomodoro = () => {
     if (socketRef.current) {
       socketRef.current.emit('toggle-pomodoro', { roomId: id, enabled: !showPomodoro });
+    }
+  };
+
+  const handleAdminEndClick = (roomId) => {
+    setAdminDeleteTarget({ itemId: roomId, itemType: 'classroom' });
+  };
+
+  const executeAdminEnd = async (reason) => {
+    if (!adminDeleteTarget) return;
+    try {
+      const { itemId, itemType } = adminDeleteTarget;
+      await api.post('/admin/delete-content', { itemId, itemType, reason });
+      useToastStore.getState().addToast('CLASSROOM ENDED BY ADMIN!', 'info');
+      setAdminDeleteTarget(null);
+      navigate('/classrooms');
+    } catch (error) {
+      console.error('Failed to admin-end classroom', error);
+      useToastStore.getState().addToast('FAILED TO END CLASSROOM', 'error');
     }
   };
 
@@ -542,6 +564,15 @@ export default function ClassroomRoom() {
           {(room?.creator?._id === user?._id || room?.creator === user?._id) && (
             <button onClick={handleEndSessionManual} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 border-2 border-slate-900 rounded-none font-bold flex items-center gap-2 shadow-neo hover:translate-y-[1px] hover:shadow-none transition-all text-xs uppercase">
               END SESSION
+            </button>
+          )}
+          {user?.role === 'admin' && (
+            <button 
+              onClick={() => handleAdminEndClick(room._id)} 
+              className="bg-red-500 hover:bg-red-650 text-white px-4 py-2 border-2 border-slate-900 rounded-none font-bold flex items-center gap-2 shadow-neo hover:translate-y-[1px] hover:shadow-none transition-all text-xs uppercase cursor-pointer"
+              id="admin-end-session-btn"
+            >
+              ADMIN END SESSION
             </button>
           )}
         </div>
@@ -878,12 +909,20 @@ export default function ClassroomRoom() {
 
       {fullscreenSnapshot && (
         <div className="fixed inset-0 z-[100] bg-slate-900/90 flex items-center justify-center p-8 backdrop-blur-md">
-          <button onClick={() => setFullscreenSnapshot(null)} className="absolute top-6 right-6 text-slate-950 hover:text-red-700 bg-[#ffb800] border-2 border-slate-900 p-2 rounded-none shadow-neo hover:translate-y-[1px] hover:shadow-none font-bold text-xs flex items-center gap-1">
+          <button onClick={() => setFullscreenSnapshot(null)} className="absolute top-6 right-6 text-slate-955 hover:text-red-700 bg-[#ffb800] border-2 border-slate-900 p-2 rounded-none shadow-neo hover:translate-y-[1px] hover:shadow-none font-bold text-xs flex items-center gap-1">
             <X className="w-5 h-5" /> CLOSE
           </button>
           <img src={fullscreenSnapshot} alt="Fullscreen Snapshot" className="max-w-full max-h-full object-contain border-4 border-slate-900 rounded-none shadow-neo" />
         </div>
       )}
+
+      <DeleteReasonModal
+        isOpen={!!adminDeleteTarget}
+        onClose={() => setAdminDeleteTarget(null)}
+        onSubmit={executeAdminEnd}
+        title="Admin End Study Room"
+        placeholder="State reason for ending this live study classroom..."
+      />
     </div>
   );
 }

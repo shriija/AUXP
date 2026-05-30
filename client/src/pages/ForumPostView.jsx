@@ -4,11 +4,38 @@ import api, { BACKEND_URL } from '../services/api';
 import { Loader2, ArrowLeft, ThumbsUp, ThumbsDown, Pencil, Trash2, X, Check } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useToastStore } from '../store/useToastStore';
+import ImagePreviewModal from '../components/ImagePreviewModal';
+import DeleteReasonModal from '../components/DeleteReasonModal';
 
 const getImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
   return `${BACKEND_URL}${url}`;
+};
+
+const handleDownloadImage = async (imageUrl, filename) => {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename || 'downloaded-image.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('Failed to download image', err);
+    window.open(imageUrl, '_blank');
+  }
+};
+
+const getReplyImages = (reply) => {
+  if (reply.imageUrls && reply.imageUrls.length > 0) {
+    return reply.imageUrls;
+  }
+  return reply.imageUrl ? [reply.imageUrl] : [];
 };
 
 export default function ForumPostView() {
@@ -17,8 +44,10 @@ export default function ForumPostView() {
   const [loading, setLoading] = useState(true);
   const [replyContent, setReplyContent] = useState('');
   const [selectedReplyImage, setSelectedReplyImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   const { user, getMe } = useAuthStore();
   const navigate = useNavigate();
+  const [adminDeleteTarget, setAdminDeleteTarget] = useState(null);
 
   // Edit states
   const [postEditing, setPostEditing] = useState(false);
@@ -27,6 +56,24 @@ export default function ForumPostView() {
   
   const [replyEditingId, setReplyEditingId] = useState(null);
   const [editReplyContent, setEditReplyContent] = useState('');
+
+  // Image preview states
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [previewIndex, setPreviewIndex] = useState(0);
+
+  // Manage memory-safe URL object preview for selected file
+  useEffect(() => {
+    if (!selectedReplyImage) {
+      setImagePreview('');
+      return;
+    }
+    const url = URL.createObjectURL(selectedReplyImage);
+    setImagePreview(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [selectedReplyImage]);
 
   useEffect(() => {
     fetchData();
@@ -51,6 +98,28 @@ export default function ForumPostView() {
       navigate('/forum');
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleAdminDeleteClick = (itemId, itemType) => {
+    setAdminDeleteTarget({ itemId, itemType });
+  };
+
+  const executeAdminDelete = async (reason) => {
+    if (!adminDeleteTarget) return;
+    try {
+      const { itemId, itemType } = adminDeleteTarget;
+      await api.post('/admin/delete-content', { itemId, itemType, reason });
+      useToastStore.getState().addToast(`${itemType.toUpperCase()} DELETED BY ADMIN!`, 'info');
+      setAdminDeleteTarget(null);
+      if (itemType === 'post') {
+        navigate('/forum');
+      } else {
+        fetchData();
+      }
+    } catch (error) {
+      console.error('Failed to admin-delete content', error);
+      useToastStore.getState().addToast('FAILED TO DELETE CONTENT', 'error');
     }
   };
 
@@ -182,21 +251,57 @@ export default function ForumPostView() {
                     </span>
                   )}
                 </div>
-                {user && user._id === post.author?._id && (
-                  <div className="flex gap-2">
-                    <button onClick={() => { setPostEditing(true); setEditTitle(post.title); setEditDesc(post.description); }} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-slate-50 text-slate-700 hover:text-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Edit Post"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={handleDeletePost} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-red-50 text-slate-700 hover:text-red-700 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Delete Post"><Trash2 className="w-4 h-4" /></button>
-                  </div>
-                )}
+                <div className="flex gap-2">
+                  {user && user._id === post.author?._id && (
+                    <>
+                      <button onClick={() => { setPostEditing(true); setEditTitle(post.title); setEditDesc(post.description); }} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-slate-50 text-slate-700 hover:text-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Edit Post"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={handleDeletePost} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-red-50 text-slate-700 hover:text-red-700 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Delete Post"><Trash2 className="w-4 h-4" /></button>
+                    </>
+                  )}
+                  {user && user.role === 'admin' && (
+                    <button
+                      onClick={() => handleAdminDeleteClick(post._id, 'post')}
+                      className="bg-red-500 hover:bg-red-650 text-white font-extrabold text-xs px-3 py-1.5 border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                      id="admin-delete-post-btn"
+                    >
+                      ADMIN DELETE
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed mb-6 text-sm">{post.description}</p>
               {post.imageUrl && (
-                <div className="mt-4 mb-6 max-w-full border-2 border-slate-900 shadow-neo p-2 inline-block bg-slate-50">
+                <div className="mt-4 mb-6 border-2 border-slate-900 shadow-neo p-2 inline-block bg-slate-50 relative group">
                   <img 
                     src={getImageUrl(post.imageUrl)} 
                     alt="Post Attachment" 
-                    className="max-h-96 object-contain" 
+                    className="max-h-96 object-contain animate-fadeIn cursor-pointer hover:opacity-95 transition-opacity" 
+                    onClick={() => {
+                      setPreviewUrls([getImageUrl(post.imageUrl)]);
+                      setPreviewIndex(0);
+                      setIsPreviewOpen(true);
+                    }}
                   />
+                  <div className="mt-2 flex gap-2 justify-start border-t border-slate-200 pt-2 font-mono">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewUrls([getImageUrl(post.imageUrl)]);
+                        setPreviewIndex(0);
+                        setIsPreviewOpen(true);
+                      }}
+                      className="text-[10px] font-extrabold text-slate-700 hover:text-primary transition-colors uppercase px-2 py-0.5 border border-slate-900 bg-white shadow-neo-sm hover:translate-y-[0.5px] hover:shadow-none"
+                    >
+                      View Full Size
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadImage(getImageUrl(post.imageUrl), `post-attachment-${post._id}.png`)}
+                      className="text-[10px] font-extrabold text-slate-700 hover:text-emerald-700 transition-colors uppercase px-2 py-0.5 border border-slate-900 bg-white shadow-neo-sm hover:translate-y-[0.5px] hover:shadow-none"
+                    >
+                      Download Image
+                    </button>
+                  </div>
                 </div>
               )}
               <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 bg-[#cbe3db]/40 px-3 py-1.5 rounded-none border-2 border-slate-900 inline-flex shadow-neo-sm">
@@ -231,13 +336,22 @@ export default function ForumPostView() {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="whitespace-pre-wrap font-medium text-slate-700 text-sm leading-relaxed">{reply.content}</p>
-                      {reply.imageUrl && (
-                        <div className="mt-3 mb-2 max-w-md border border-slate-900 p-1 inline-block bg-slate-50 shadow-neo-sm">
-                          <img 
-                            src={getImageUrl(reply.imageUrl)} 
-                            alt="Reply Attachment" 
-                            className="max-h-48 object-contain" 
-                          />
+                      {getReplyImages(reply).length > 0 && (
+                        <div className="mt-3 mb-2 flex flex-wrap gap-3">
+                          {getReplyImages(reply).map((imgUrl, index) => (
+                            <div key={index} className="border-2 border-slate-900 p-1 bg-slate-50 shadow-neo-sm inline-block relative group animate-fadeIn">
+                              <img 
+                                src={getImageUrl(imgUrl)} 
+                                alt={`Reply Attachment ${index + 1}`} 
+                                className="max-h-48 object-contain cursor-pointer hover:opacity-95 transition-opacity" 
+                                onClick={() => {
+                                  setPreviewUrls(getReplyImages(reply).map(url => getImageUrl(url)));
+                                  setPreviewIndex(index);
+                                  setIsPreviewOpen(true);
+                                }}
+                              />
+                            </div>
+                          ))}
                         </div>
                       )}
                       {reply.approvalStatus === 'pending' && (
@@ -251,12 +365,23 @@ export default function ForumPostView() {
                         </div>
                       )}
                     </div>
-                    {user && user._id === reply.author?._id && (
-                      <div className="flex gap-2">
-                        <button onClick={() => { setReplyEditingId(reply._id); setEditReplyContent(reply.content); }} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-slate-50 text-slate-600 hover:text-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Edit Reply"><Pencil className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => handleDeleteReply(reply._id)} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-red-50 text-slate-650 hover:text-red-705 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Delete Reply"><Trash2 className="w-3.5 h-3.5" /></button>
-                      </div>
-                    )}
+                    <div className="flex gap-2">
+                      {user && user._id === reply.author?._id && (
+                        <>
+                          <button onClick={() => { setReplyEditingId(reply._id); setEditReplyContent(reply.content); }} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-slate-50 text-slate-600 hover:text-slate-900 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Edit Reply"><Pencil className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => handleDeleteReply(reply._id)} className="p-1.5 border-2 border-slate-900 rounded-none hover:bg-red-50 text-slate-650 hover:text-red-705 hover:translate-y-[1px] hover:shadow-none transition-colors shadow-neo-sm" title="Delete Reply"><Trash2 className="w-3.5 h-3.5" /></button>
+                        </>
+                      )}
+                      {user && user.role === 'admin' && (
+                        <button
+                          onClick={() => handleAdminDeleteClick(reply._id, 'reply')}
+                          className="bg-red-500 hover:bg-red-650 text-white font-extrabold text-[10px] px-2 py-1 border-2 border-slate-900 shadow-neo-sm hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                          id={`admin-delete-reply-btn-${reply._id}`}
+                        >
+                          ADMIN DELETE
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <p className="text-[10px] font-bold text-slate-600 mt-2 inline-block">— {reply.author?.name?.toUpperCase()} ON {new Date(reply.createdAt).toLocaleDateString()} AT {new Date(reply.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()} {reply.isEdited && <span className="italic text-[9px] ml-1 text-primary">(EDITED)</span>}</p>
                 </>
@@ -283,15 +408,55 @@ export default function ForumPostView() {
             <input 
               type="file" 
               accept="image/*" 
-              onChange={e => setSelectedReplyImage(e.target.files[0])} 
-              className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-bold text-slate-800 text-xs" 
+              onChange={e => setSelectedReplyImage(e.target.files[0] || null)} 
+              className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-bold text-slate-800 text-xs cursor-pointer" 
             />
+            {selectedReplyImage && (
+              <div className="mt-2.5 p-2.5 bg-slate-50 border-2 border-dashed border-slate-900 text-[10px] font-bold text-slate-700 space-y-1.5 font-mono shadow-neo-xs">
+                <p className="font-extrabold uppercase border-b-2 border-slate-900/10 pb-1 mb-1.5 text-slate-900">SELECTED IMAGE:</p>
+                <div className="max-w-xs relative bg-white border-2 border-slate-900 p-1.5 shadow-neo-xs flex flex-col justify-between group">
+                  <div className="relative aspect-video w-full bg-slate-100 border border-slate-300 mb-1.5 overflow-hidden">
+                    {imagePreview && (
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover" 
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedReplyImage(null)}
+                      className="absolute top-1 right-1 bg-red-500 hover:bg-red-650 text-white p-1 border border-slate-900 shadow-neo-xs text-[9px] font-black uppercase transition-all"
+                    >
+                      X
+                    </button>
+                  </div>
+                  <span className="truncate max-w-full text-[8px] text-slate-650 block mb-0.5">{selectedReplyImage.name}</span>
+                  <span className="text-[8px] text-slate-550 font-extrabold">{(selectedReplyImage.size / 1024).toFixed(1)} KB</span>
+                </div>
+              </div>
+            )}
           </div>
           <button type="submit" className="bg-[#ffb800] text-slate-950 border-2 border-slate-900 font-bold py-2 px-5 rounded-none hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs">
             POST REPLY
           </button>
         </form>
       )}
+      <ImagePreviewModal 
+        isOpen={isPreviewOpen} 
+        onClose={() => setIsPreviewOpen(false)} 
+        imageUrls={previewUrls} 
+        currentIndex={previewIndex} 
+        setCurrentIndex={setPreviewIndex} 
+        onDownload={handleDownloadImage}
+      />
+      <DeleteReasonModal
+        isOpen={!!adminDeleteTarget}
+        onClose={() => setAdminDeleteTarget(null)}
+        onSubmit={executeAdminDelete}
+        title={adminDeleteTarget?.itemType === 'post' ? "Admin Delete Post" : "Admin Delete Reply"}
+        placeholder={`State reason for deleting this forum ${adminDeleteTarget?.itemType || 'item'}...`}
+      />
     </div>
   );
 }

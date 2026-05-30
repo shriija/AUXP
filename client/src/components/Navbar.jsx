@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { LogOut, LayoutDashboard, BrainCircuit, Bell, Trash2, CheckCheck, X, MessageSquare, ArrowBigUpDash, Users, ShieldAlert } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useNotificationStore } from '../store/useNotificationStore';
+import AppealModal from './AppealModal';
 
 export default function Navbar() {
   const { user, logout, isAuthenticated, getMe } = useAuthStore();
@@ -13,6 +14,7 @@ export default function Navbar() {
   const dropdownRef = useRef(null);
   const processedNotifIds = useRef(new Set());
   const isInitialLoad = useRef(true);
+  const [appealNotif, setAppealNotif] = useState(null);
 
   const handleLogout = () => {
     logout();
@@ -129,6 +131,12 @@ export default function Navbar() {
           </div>
         );
       case 'CONCERN_RAISED':
+        return (
+          <div className="p-1.5 bg-red-100 border border-slate-900 text-red-650 flex items-center justify-center">
+            <ShieldAlert className="h-4 w-4" />
+          </div>
+        );
+      case 'ADMIN_ACTION':
         return (
           <div className="p-1.5 bg-red-100 border border-slate-900 text-red-650 flex items-center justify-center">
             <ShieldAlert className="h-4 w-4" />
@@ -263,6 +271,18 @@ export default function Navbar() {
                                 <span className="text-[8px] text-slate-400 font-bold block mt-1 uppercase">
                                   {formatTimeAgo(notif.createdAt)}
                                 </span>
+                                {notif.type === 'ADMIN_ACTION' && !notif.message.includes('restored') && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAppealNotif(notif);
+                                    }}
+                                    className="mt-2 bg-[#ffb800] hover:bg-[#e0a200] text-slate-950 font-black text-[9px] px-2 py-0.5 border border-slate-900 shadow-neo-sm hover:translate-y-[0.5px] hover:shadow-none transition-all cursor-pointer"
+                                    id={`appeal-btn-${notif._id}`}
+                                  >
+                                    APPEAL
+                                  </button>
+                                )}
                               </div>
                               <button 
                                 onClick={(e) => {
@@ -297,6 +317,11 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      <AppealModal
+        isOpen={!!appealNotif}
+        onClose={() => setAppealNotif(null)}
+        notification={appealNotif}
+      />
     </nav>
   );
 }

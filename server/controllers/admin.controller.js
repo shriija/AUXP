@@ -3,6 +3,7 @@ const ForumPost = require('../models/ForumPost');
 const ForumReply = require('../models/ForumReply');
 const Classroom = require('../models/Classroom');
 const Notification = require('../models/Notification');
+const Concern = require('../models/Concern');
 const { awardXP, checkAchievements } = require('../utils/gamification');
 
 const getPendingItems = async (req, res) => {
@@ -219,4 +220,155 @@ const rejectItem = async (req, res) => {
     }
 };
 
-module.exports = { getPendingItems, approveItem, rejectItem };
+const adminDeleteContent = async (req, res) => {
+    try {
+        const { itemId, itemType, reason } = req.body;
+        if (!itemId || !itemType || !reason) {
+            return res.status(400).json({ message: 'Item ID, type, and reason are required' });
+        }
+
+        let item;
+        let ownerId;
+        let message = '';
+        let title = '';
+
+        if (itemType === 'resource') {
+            item = await Resource.findById(itemId);
+            if (!item) return res.status(404).json({ message: 'Resource not found' });
+            item.isDeleted = true;
+            item.deletedByAdmin = true;
+            item.deletionReason = reason;
+            await item.save();
+            ownerId = item.uploadedBy;
+            title = item.title;
+            message = `Your Vault notes upload "${title}" was deleted by Admin. Reason: ${reason}`;
+        } else if (itemType === 'post') {
+            item = await ForumPost.findById(itemId);
+            if (!item) return res.status(404).json({ message: 'Forum post not found' });
+            item.isDeleted = true;
+            item.deletedByAdmin = true;
+            item.deletionReason = reason;
+            await item.save();
+            ownerId = item.author;
+            title = item.title;
+            message = `Your forum post "${title}" was deleted by Admin. Reason: ${reason}`;
+        } else if (itemType === 'reply') {
+            item = await ForumReply.findById(itemId);
+            if (!item) return res.status(404).json({ message: 'Forum reply not found' });
+            item.isDeleted = true;
+            item.deletedByAdmin = true;
+            item.deletionReason = reason;
+            await item.save();
+            ownerId = item.author;
+            message = `Your forum reply was deleted by Admin. Reason: ${reason}`;
+        } else if (itemType === 'classroom') {
+            item = await Classroom.findById(itemId);
+            if (!item) return res.status(404).json({ message: 'Classroom not found' });
+            item.sessionStatus = 'ended';
+            item.isDeleted = true;
+            item.deletedByAdmin = true;
+            item.deletionReason = reason;
+            await item.save();
+            ownerId = item.creator;
+            title = item.name;
+            message = `Your classroom study room "${title}" was ended by Admin. Reason: ${reason}`;
+        } else {
+            return res.status(400).json({ message: 'Invalid item type' });
+        }
+
+        // Create notification for the user
+        await Notification.create({
+            recipient: ownerId,
+            sender: req.user._id,
+            type: 'ADMIN_ACTION',
+            relatedItem: itemId,
+            message
+        });
+
+        res.json({ message: `${itemType} deleted successfully by admin`, item });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete content', error: error.message });
+    }
+};
+
+const adminRevertContent = async (req, res) => {
+    try {
+        const { itemId, itemType, concernId } = req.body;
+        if (!itemId || !itemType) {
+            return res.status(400).json({ message: 'Item ID and type are required' });
+        }
+
+        let item;
+        let ownerId;
+        let message = '';
+        let title = '';
+
+        if (itemType === 'resource') {
+            item = await Resource.findById(itemId);
+            if (!item) return res.status(404).json({ message: 'Resource not found' });
+            item.isDeleted = false;
+            item.deletedByAdmin = false;
+            item.deletionReason = '';
+            await item.save();
+            ownerId = item.uploadedBy;
+            title = item.title;
+            message = `Your Vault notes upload "${title}" has been restored by Admin.`;
+        } else if (itemType === 'post') {
+            item = await ForumPost.findById(itemId);
+            if (!item) return res.status(404).json({ message: 'Forum post not found' });
+            item.isDeleted = false;
+            item.deletedByAdmin = false;
+            item.deletionReason = '';
+            await item.save();
+            ownerId = item.author;
+            title = item.title;
+            message = `Your forum post "${title}" has been restored by Admin.`;
+        } else if (itemType === 'reply') {
+            item = await ForumReply.findById(itemId);
+            if (!item) return res.status(404).json({ message: 'Forum reply not found' });
+            item.isDeleted = false;
+            item.deletedByAdmin = false;
+            item.deletionReason = '';
+            await item.save();
+            ownerId = item.author;
+            message = `Your forum reply has been restored by Admin.`;
+        } else if (itemType === 'classroom') {
+            item = await Classroom.findById(itemId);
+            if (!item) return res.status(404).json({ message: 'Classroom not found' });
+            item.sessionStatus = 'active';
+            item.isDeleted = false;
+            item.deletedByAdmin = false;
+            item.deletionReason = '';
+            await item.save();
+            ownerId = item.creator;
+            title = item.name;
+            message = `Your classroom study room "${title}" has been restored by Admin.`;
+        } else {
+            return res.status(400).json({ message: 'Invalid item type' });
+        }
+
+        // Create notification for the user
+        await Notification.create({
+            recipient: ownerId,
+            sender: req.user._id,
+            type: 'ADMIN_ACTION',
+            relatedItem: itemId,
+            message
+        });
+
+        // Resolve linked concern if provided
+        if (concernId) {
+            const concern = await Concern.findById(concernId);
+            if (concern) {
+                concern.status = 'resolved';
+                await concern.save();
+            }
+        }
+
+        res.json({ message: `${itemType} restored successfully by admin`, item });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to revert action', error: error.message });
+    }
+};
+
+module.exports = { getPendingItems, approveItem, rejectItem, adminDeleteContent, adminRevertContent };
