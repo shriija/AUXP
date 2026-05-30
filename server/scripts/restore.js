@@ -1,7 +1,7 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const mongoose = require('mongoose');
 const fs = require('fs');
-const path = require('path');
 
 // Import all models
 const User = require('../models/User');
@@ -58,8 +58,8 @@ async function runRestore() {
       await model.deleteMany({});
       console.log(`Cleared existing documents in ${name}.`);
 
-      // Insert backup documents
-      await model.insertMany(documents);
+      // Insert backup documents bypassing validation constraints for legacy compatibility
+      await model.insertMany(documents, { validate: false });
       console.log(`Successfully restored ${documents.length} documents into ${name}.`);
     }
 
