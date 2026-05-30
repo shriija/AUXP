@@ -150,8 +150,13 @@ export default function Dashboard() {
 
   const handleVote = async (resourceId, type) => {
     try {
-      await api.post('/votes', { resourceId, type });
-      useToastStore.getState().addToast(type === 'up' ? 'VOTED UP!' : 'VOTED DOWN!', 'success');
+      const res = await api.post('/votes', { resourceId, type });
+      const { message } = res.data;
+      if (message === 'Vote removed') {
+        useToastStore.getState().addToast(type === 'up' ? 'UPVOTE REMOVED' : 'DOWNVOTE REMOVED', 'info');
+      } else {
+        useToastStore.getState().addToast(type === 'up' ? 'VOTED UP!' : 'VOTED DOWN!', 'success');
+      }
       // Reload resources to sync state
       fetchResources();
       getMe();

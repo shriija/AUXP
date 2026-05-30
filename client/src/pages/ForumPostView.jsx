@@ -155,10 +155,15 @@ export default function ForumPostView() {
 
   const handleVotePost = async (type) => {
     try {
-      await api.post(`/forum/${id}/vote`, { type });
+      const res = await api.post(`/forum/${id}/vote`, { type });
       fetchData();
       getMe();
-      useToastStore.getState().addToast(type === 'up' ? 'POST UPVOTED!' : 'POST DOWNVOTED!', 'success');
+      const { action } = res.data;
+      if (action === 'removed') {
+        useToastStore.getState().addToast(type === 'up' ? 'UPVOTE REMOVED' : 'DOWNVOTE REMOVED', 'info');
+      } else {
+        useToastStore.getState().addToast(type === 'up' ? 'POST UPVOTED!' : 'POST DOWNVOTED!', 'success');
+      }
     } catch (error) {
       console.error(error);
       useToastStore.getState().addToast('VOTE FAILED', 'error');
@@ -167,10 +172,15 @@ export default function ForumPostView() {
 
   const handleVoteReply = async (replyId, type) => {
     try {
-      await api.post(`/forum/replies/${replyId}/vote`, { type });
+      const res = await api.post(`/forum/replies/${replyId}/vote`, { type });
       fetchData();
       getMe();
-      useToastStore.getState().addToast(type === 'up' ? 'REPLY UPVOTED!' : 'REPLY DOWNVOTED!', 'success');
+      const { action } = res.data;
+      if (action === 'removed') {
+        useToastStore.getState().addToast(type === 'up' ? 'UPVOTE REMOVED' : 'DOWNVOTE REMOVED', 'info');
+      } else {
+        useToastStore.getState().addToast(type === 'up' ? 'REPLY UPVOTED!' : 'REPLY DOWNVOTED!', 'success');
+      }
     } catch (error) {
       console.error(error);
       useToastStore.getState().addToast('VOTE FAILED', 'error');

@@ -119,7 +119,7 @@ const votePost = async (req, res) => {
         if (!post) return res.status(404).json({ message: 'Post not found' });
         
         const existingVoteIndex = post.voters.findIndex(v => v.user.toString() === userId.toString());
-        
+        let action = '';
         if (existingVoteIndex !== -1) {
             const existingVote = post.voters[existingVoteIndex];
             if (existingVote.type === type) {
@@ -127,6 +127,7 @@ const votePost = async (req, res) => {
                 post.voters.splice(existingVoteIndex, 1);
                 if (type === 'up') post.upvotes = Math.max(0, post.upvotes - 1);
                 if (type === 'down') post.downvotes = Math.max(0, post.downvotes - 1);
+                action = 'removed';
             } else {
                 // Change vote
                 existingVote.type = type;
@@ -137,16 +138,18 @@ const votePost = async (req, res) => {
                     post.downvotes += 1;
                     post.upvotes = Math.max(0, post.upvotes - 1);
                 }
+                action = 'switched';
             }
         } else {
             // New vote
             post.voters.push({ user: userId, type });
             if (type === 'up') post.upvotes += 1;
             if (type === 'down') post.downvotes += 1;
+            action = 'added';
         }
         
         await post.save();
-        res.json(post);
+        res.json({ post, action });
     } catch (error) {
         res.status(500).json({ message: 'Failed to vote', error: error.message });
     }
@@ -162,7 +165,7 @@ const voteReply = async (req, res) => {
         
         const replyAuthor = reply.author;
         const existingVoteIndex = reply.voters.findIndex(v => v.user.toString() === userId.toString());
-        
+        let action = '';
         if (existingVoteIndex !== -1) {
             const existingVote = reply.voters[existingVoteIndex];
             if (existingVote.type === type) {
@@ -174,6 +177,7 @@ const voteReply = async (req, res) => {
                 } else if (type === 'down') {
                     reply.downvotes = Math.max(0, reply.downvotes - 1);
                 }
+                action = 'removed';
             } else {
                 existingVote.type = type;
                 if (type === 'up') {
@@ -187,6 +191,7 @@ const voteReply = async (req, res) => {
                     // Switched from Up to Down, deduct -3 XP
                     await awardXP(replyAuthor, 'REPLY_UPVOTE_RECEIVED', -1);
                 }
+                action = 'switched';
             }
         } else {
             reply.voters.push({ user: userId, type });
@@ -197,10 +202,11 @@ const voteReply = async (req, res) => {
             } else if (type === 'down') {
                 reply.downvotes += 1;
             }
+            action = 'added';
         }
         
         await reply.save();
-        res.json(reply);
+        res.json({ reply, action });
     } catch (error) {
         res.status(500).json({ message: 'Failed to vote', error: error.message });
     }
