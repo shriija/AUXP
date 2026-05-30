@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
+import api, { BACKEND_URL } from '../services/api';
 import { MessageSquare, Plus, Loader2, ThumbsUp } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useToastStore } from '../store/useToastStore';
@@ -8,7 +8,7 @@ import { useToastStore } from '../store/useToastStore';
 const getImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  return `http://localhost:5000${url}`;
+  return `${BACKEND_URL}${url}`;
 };
 
 export default function Forum() {

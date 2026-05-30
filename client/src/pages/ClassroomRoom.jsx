@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { BACKEND_URL } from '../services/api';
 import { io } from 'socket.io-client';
 import { ReactSketchCanvas } from 'react-sketch-canvas';
 import { Loader2, Send, Trash2, ArrowLeft, Undo, Redo, Eraser, PenTool, Camera, X, Expand, Download, Plus, Check, Square, Circle, StickyNote } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+const SOCKET_URL = BACKEND_URL;
 
 export default function ClassroomRoom() {
   const { id } = useParams();

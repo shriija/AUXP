@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../services/api';
+import api, { BACKEND_URL } from '../services/api';
 import { useToastStore } from '../store/useToastStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { FileText, MessageSquare, Users, Check, X, ShieldAlert, FileDown, Eye, Loader2, AlertTriangle } from 'lucide-react';
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
                       {item.fileUrl && (
                         <div className="flex gap-2 pt-2.5">
                           <a
-                            href={item.fileUrl.startsWith('http') ? item.fileUrl : `http://localhost:5000${item.fileUrl}`}
+                            href={item.fileUrl.startsWith('http') ? item.fileUrl : `${BACKEND_URL}${item.fileUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-[#d0ebff] hover:bg-[#d0ebff]/90 border border-slate-900 px-2 py-1 text-[9px] font-black text-[#228be6] flex items-center gap-1 hover:translate-y-[1px] transition-all shadow-neo-sm hover:shadow-none"
@@ -222,7 +222,7 @@ export default function AdminDashboard() {
                       {item.imageUrl && (
                         <div className="mt-2 max-w-sm">
                           <img 
-                            src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5000${item.imageUrl}`} 
+                            src={item.imageUrl.startsWith('http') ? item.imageUrl : `${BACKEND_URL}${item.imageUrl}`} 
                             alt="Post Attachment Review" 
                             className="border-2 border-slate-900 max-h-32 object-cover shadow-neo-sm" 
                           />
@@ -251,7 +251,7 @@ export default function AdminDashboard() {
                       {item.imageUrl && (
                         <div className="mt-2 max-w-sm">
                           <img 
-                            src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5000${item.imageUrl}`} 
+                            src={item.imageUrl.startsWith('http') ? item.imageUrl : `${BACKEND_URL}${item.imageUrl}`} 
                             alt="Reply Attachment Review" 
                             className="border-2 border-slate-900 max-h-32 object-cover shadow-neo-sm" 
                           />
