@@ -145,6 +145,36 @@ export default function Register() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {password && (
+                <div className="mt-3 p-3 bg-[#fffbeb] border-2 border-slate-900 text-[9px] font-black text-slate-700 space-y-1 shadow-neo-sm">
+                  <p className="font-extrabold uppercase tracking-wide border-b-2 border-slate-900 pb-1 mb-1 text-[10px]">PASSWORD REQUIREMENTS</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className={password.length >= 8 ? "text-emerald-700" : "text-slate-400"}>
+                      {password.length >= 8 ? "✓" : "○"} 8+ CHARACTERS
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className={/[A-Z]/.test(password) ? "text-emerald-700" : "text-slate-400"}>
+                      {/[A-Z]/.test(password) ? "✓" : "○"} AT LEAST ONE UPPERCASE LETTER (A-Z)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className={/[a-z]/.test(password) ? "text-emerald-700" : "text-slate-400"}>
+                      {/[a-z]/.test(password) ? "✓" : "○"} AT LEAST ONE LOWERCASE LETTER (a-z)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className={/[0-9]/.test(password) ? "text-emerald-700" : "text-slate-400"}>
+                      {/[0-9]/.test(password) ? "✓" : "○"} AT LEAST ONE NUMBER (0-9)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className={/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "text-emerald-700" : "text-slate-400"}>
+                      {/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "✓" : "○"} AT LEAST ONE SPECIAL CHARACTER (!@#...)
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-[10px] font-bold mb-1.5 text-slate-700">DEPARTMENT</label>

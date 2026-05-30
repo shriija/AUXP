@@ -204,8 +204,28 @@ export default function Profile() {
 
   const handleSavePassword = async (e) => {
     e.preventDefault();
-    if (newPassword.length < 6) {
-      setPasswordError('PASSWORD MUST BE AT LEAST 6 CHARACTERS');
+    if (!newPassword) {
+      setPasswordError('PASSWORD IS REQUIRED');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError('PASSWORD MUST BE AT LEAST 8 CHARACTERS');
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      setPasswordError('PASSWORD MUST CONTAIN AT LEAST ONE UPPERCASE LETTER');
+      return;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      setPasswordError('PASSWORD MUST CONTAIN AT LEAST ONE LOWERCASE LETTER');
+      return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      setPasswordError('PASSWORD MUST CONTAIN AT LEAST ONE NUMBER');
+      return;
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+      setPasswordError('PASSWORD MUST CONTAIN AT LEAST ONE SPECIAL CHARACTER');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -519,6 +539,36 @@ export default function Profile() {
                         {showPasswordText ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                     </div>
+                    {newPassword && (
+                      <div className="p-2 bg-[#fffbeb] border border-slate-900 text-[8px] font-black text-slate-700 space-y-0.5 leading-tight">
+                        <p className="font-extrabold uppercase border-b border-slate-900/10 pb-0.5 mb-1 text-[9px]">PASSWORD REQUIREMENTS</p>
+                        <div className="flex items-center gap-1">
+                          <span className={newPassword.length >= 8 ? "text-emerald-700" : "text-slate-400"}>
+                            {newPassword.length >= 8 ? "✓" : "○"} 8+ CHARACTERS
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={/[A-Z]/.test(newPassword) ? "text-emerald-700" : "text-slate-400"}>
+                            {/[A-Z]/.test(newPassword) ? "✓" : "○"} UPPERCASE (A-Z)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={/[a-z]/.test(newPassword) ? "text-emerald-700" : "text-slate-400"}>
+                            {/[a-z]/.test(newPassword) ? "✓" : "○"} LOWERCASE (a-z)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={/[0-9]/.test(newPassword) ? "text-emerald-700" : "text-slate-400"}>
+                            {/[0-9]/.test(newPassword) ? "✓" : "○"} NUMBER (0-9)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={/[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? "text-emerald-700" : "text-slate-400"}>
+                            {/[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? "✓" : "○"} SPECIAL CHAR (!@#...)
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex gap-1.5 w-full">
                       <button
                         type="submit"

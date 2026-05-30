@@ -15,9 +15,24 @@ const generateToken = (id) => {
 
 const { updateLoginStreak, syncUserAchievements } = require('../utils/gamification');
 
+const validatePassword = (password) => {
+    if (!password) return 'Password is required';
+    if (password.length < 8) return 'Password must be at least 8 characters long';
+    if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter';
+    if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter';
+    if (!/[0-9]/.test(password)) return 'Password must contain at least one number';
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return 'Password must contain at least one special character';
+    return null;
+};
+
 const registerUser = async (req, res) => {
     const { name, email, password, department } = req.body;
     try {
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            return res.status(400).json({ message: passwordError });
+        }
+
         if (email !== 'google_tester@example.com') {
             if (!email.endsWith('@anurag.edu.in')) {
                 return res.status(400).json({ message: 'Only @anurag.edu.in emails are allowed' });
@@ -116,6 +131,10 @@ const updateUserProfile = async (req, res) => {
                 user.department = req.body.department;
             }
             if (req.body.password) {
+                const passwordError = validatePassword(req.body.password);
+                if (passwordError) {
+                    return res.status(400).json({ message: passwordError });
+                }
                 user.password = req.body.password;
             }
             const updatedUser = await user.save();

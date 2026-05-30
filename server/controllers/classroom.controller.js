@@ -54,10 +54,12 @@ const getClassrooms = async (req, res) => {
         }
 
         const fiveMinsAgo = new Date(now.getTime() - 5 * 60000);
+        const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
         const timeQuery = {
             $or: [
                 { sessionStatus: { $in: ['scheduled', 'active'] } },
-                { sessionStatus: 'ended', endedAt: { $gte: fiveMinsAgo } }
+                { sessionStatus: 'ended', name: 'Completed Exam Review', endedAt: { $gte: tenDaysAgo } },
+                { sessionStatus: 'ended', name: { $ne: 'Completed Exam Review' }, endedAt: { $gte: fiveMinsAgo } }
             ]
         };
 
