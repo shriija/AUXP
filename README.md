@@ -4,6 +4,12 @@ The Collaborative Study Vault (AUXP) is a full-stack web application designed to
 
 ---
 
+## Deployment Links
+*   **Live Web Application (Frontend)**: [https://auxp-chi.vercel.app](https://auxp-chi.vercel.app)
+*   **Production API Server (Backend)**: [https://auxp-backend.onrender.com](https://auxp-backend.onrender.com)
+
+---
+
 ## System Architecture
 
 The application is built using a decoupled architecture, separating the client-side presentation layer from the server-side business logic and data storage.
@@ -12,6 +18,29 @@ The application is built using a decoupled architecture, separating the client-s
 *   **Backend (server)**: Node.js with Express, providing RESTful API endpoints and real-time bidirectional communication via Socket.io.
 *   **Database**: MongoDB hosted on MongoDB Atlas, managed through Mongoose schemas.
 *   **Asset Storage**: Cloudinary integration with a local filesystem fallback for uploaded files and documents.
+
+---
+
+## Repository Structure
+
+```text
+AUXP/
+├── client/                 # React frontend application (Vite)
+│   ├── src/
+│   │   ├── components/     # UI components (Whiteboard, Chat, Navbar)
+│   │   ├── pages/          # Page layouts (Login, Register, Dashboard)
+│   │   ├── services/       # Axios API client connection
+│   │   └── store/          # Zustand global stores (auth, notifications)
+│   └── package.json
+├── server/                 # Express backend server (Node.js)
+│   ├── controllers/        # Business logic controllers (rooms, auth, moderation)
+│   ├── models/             # Mongoose database models (User, Classroom, Forum)
+│   ├── routes/             # REST API endpoint route mappings
+│   ├── scripts/            # Database backup and validation-bypass restore tools
+│   └── server.js           # Server startup and socket handler
+├── db-backup/              # Preloaded JSON database backups
+└── req.http                # Professional API endpoint HTTP request tests
+```
 
 ---
 
@@ -83,3 +112,12 @@ Throughout the development of AUXP, we focused on system stability, security, an
    # Create a .env file and define VITE_API_URL
    npm run dev
    ```
+
+---
+
+## API Testing Utility
+
+At the root of the repository, a `req.http` file is configured. If you are using a REST client extension (such as the VS Code REST Client extension), you can open this file and run the pre-configured requests directly against the API server. It contains sample configurations for:
+*   User registration and login flows.
+*   Public resource fetching.
+*   Protected gamification voting (upvote/downvote).
