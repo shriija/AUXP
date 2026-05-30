@@ -1,0 +1,182 @@
+[
+  {
+    "_id": "6a17d80057fbd3525909d512",
+    "title": "OOM Interaction diagram unit 3",
+    "category": "Resources",
+    "year": "Year III",
+    "subject": "OOM",
+    "topic": "Interaction Diagram",
+    "fileUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1779947519/auxp_vault/1779947516823-831048493.pdf",
+    "uploadedBy": "6a12d329ac157c28a6da85d7",
+    "tags": [
+      "exam",
+      "summary"
+    ],
+    "upvotes": 1,
+    "downvotes": 0,
+    "bookmarkedBy": [
+      "6a12d329ac157c28a6da85d7"
+    ],
+    "downloadedBy": [
+      "6a12d329ac157c28a6da85d7"
+    ],
+    "isDeleted": true,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "createdAt": "2026-05-28T05:52:00.268Z",
+    "updatedAt": "2026-05-29T16:31:19.442Z",
+    "__v": 2,
+    "rejectionCount": 0
+  },
+  {
+    "_id": "6a19ba8811e320d7ee94cab9",
+    "title": "Temporary Test Note",
+    "category": "Resources",
+    "year": "Year I",
+    "subject": "Math",
+    "topic": "Calculus",
+    "fileUrl": "http://example.com/test.pdf",
+    "uploadedBy": "6a13eaf969fe67a63cc3724c",
+    "tags": [],
+    "upvotes": 0,
+    "downvotes": 0,
+    "bookmarkedBy": [],
+    "downloadedBy": [],
+    "isDeleted": true,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "createdAt": "2026-05-29T16:10:48.683Z",
+    "updatedAt": "2026-05-29T16:10:48.746Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a19c19570221737eceb2c16",
+    "title": "Unit 3 - Interaction Diagrams OOM.",
+    "category": "Resources",
+    "year": "Year III",
+    "subject": "OOM",
+    "topic": "Interaction Diagram",
+    "fileUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780072852/auxp_vault/1780072850663-616780258.pdf",
+    "uploadedBy": "6a19c12a70221737eceb2b6e",
+    "tags": [
+      "exam",
+      "summary"
+    ],
+    "upvotes": 5,
+    "downvotes": 0,
+    "bookmarkedBy": [
+      "6a19c12a70221737eceb2b6e",
+      "6a1a56900aa811f679ef15f3",
+      "6a1a5d240aa811f679ef3339"
+    ],
+    "downloadedBy": [
+      "6a1a56900aa811f679ef15f3",
+      "6a1a5d240aa811f679ef3339",
+      "6a1a983a64c558b64a8c520f"
+    ],
+    "isDeleted": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "createdAt": "2026-05-29T16:40:53.620Z",
+    "updatedAt": "2026-05-30T08:26:12.230Z",
+    "__v": 6,
+    "deletedByAdmin": false,
+    "deletionReason": ""
+  },
+  {
+    "_id": "6a1a583f0aa811f679ef2ff5",
+    "title": "Amazon Leadership Principles",
+    "category": "Resources",
+    "year": "Year IV",
+    "subject": "Amazon",
+    "topic": "LP",
+    "fileUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780111422/auxp_vault/1780111421246-532806757.pdf",
+    "uploadedBy": "6a1a56900aa811f679ef15f3",
+    "tags": [
+      "interview",
+      "prep",
+      "amazon"
+    ],
+    "upvotes": 4,
+    "downvotes": 0,
+    "bookmarkedBy": [
+      "6a1a56900aa811f679ef15f3"
+    ],
+    "downloadedBy": [
+      "6a1a56900aa811f679ef15f3",
+      "6a1a5d240aa811f679ef3339"
+    ],
+    "isDeleted": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "createdAt": "2026-05-30T03:23:43.275Z",
+    "updatedAt": "2026-05-30T08:23:59.434Z",
+    "__v": 3
+  },
+  {
+    "_id": "6a1a972a64c558b64a8c509a",
+    "title": "C Programming",
+    "category": "Resources",
+    "year": "Year I",
+    "subject": "C",
+    "topic": "A-Z",
+    "fileUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780127528/auxp_vault/1780127526643-317467949.pdf",
+    "uploadedBy": "6a1a5d240aa811f679ef3339",
+    "tags": [
+      "exam",
+      "summary",
+      "revision"
+    ],
+    "upvotes": 2,
+    "downvotes": 0,
+    "bookmarkedBy": [
+      "6a1a5d240aa811f679ef3339",
+      "6a1a983a64c558b64a8c520f"
+    ],
+    "downloadedBy": [],
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "createdAt": "2026-05-30T07:52:10.039Z",
+    "updatedAt": "2026-05-30T07:57:05.543Z",
+    "__v": 2
+  },
+  {
+    "_id": "6a1a9b0964c558b64a8c54c7",
+    "title": "BD SEM Past Year Papers",
+    "category": "Past Papers",
+    "year": "Year III",
+    "subject": "BIG DATA",
+    "topic": "Previous Years",
+    "fileUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780128520/auxp_vault/1780128518006-972147865.pdf",
+    "uploadedBy": "6a1a983a64c558b64a8c520f",
+    "tags": [
+      "exam",
+      "summary",
+      "past year",
+      "big data",
+      "question papers"
+    ],
+    "upvotes": 1,
+    "downvotes": 0,
+    "bookmarkedBy": [
+      "6a1a983a64c558b64a8c520f"
+    ],
+    "downloadedBy": [],
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "createdAt": "2026-05-30T08:08:41.653Z",
+    "updatedAt": "2026-05-30T08:30:29.894Z",
+    "__v": 1
+  }
+]

@@ -1,0 +1,96 @@
+[
+  {
+    "_id": "6a19288c0afb5cac8164fda1",
+    "sender": "6a1927d10afb5cac8164fd0f",
+    "concernType": "FORUM_ABUSE",
+    "text": "I would like to report inappropriate content or behavior in the discussion forums. - Reported offensive comment on thread #2.",
+    "status": "resolved",
+    "createdAt": "2026-05-29T05:47:56.229Z",
+    "updatedAt": "2026-05-29T05:48:49.102Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a71643d7fcced33dde959",
+    "sender": "6a19d16b70221737eceb313a",
+    "concernType": "ADMIN_APPEAL",
+    "text": "This post is educational and follows rules. Please restore.",
+    "status": "resolved",
+    "contentType": "post",
+    "contentId": "6a1a71643d7fcced33dde945",
+    "createdAt": "2026-05-30T05:11:00.347Z",
+    "updatedAt": "2026-05-30T05:11:00.398Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a74c53d7fcced33ddea43",
+    "sender": "6a19d16b70221737eceb313a",
+    "concernType": "ADMIN_APPEAL",
+    "text": "This post is educational and follows rules. Please restore.",
+    "status": "resolved",
+    "contentType": "post",
+    "contentId": "6a1a74c53d7fcced33ddea2e",
+    "createdAt": "2026-05-30T05:25:25.928Z",
+    "updatedAt": "2026-05-30T05:25:25.974Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a76053d7fcced33ddeb24",
+    "sender": "6a1a4e7cfa499e2c94101115",
+    "concernType": "ADMIN_APPEAL",
+    "text": "This is a different proofs request using Squeeze Theorem. Please restore.",
+    "status": "resolved",
+    "contentType": "post",
+    "contentId": "6a1a75aa3d7fcced33ddeae1",
+    "createdAt": "2026-05-30T05:30:45.654Z",
+    "updatedAt": "2026-05-30T05:31:15.421Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a7a79990ed0658ccfcae8",
+    "sender": "6a19d16b70221737eceb313a",
+    "concernType": "ADMIN_APPEAL",
+    "text": "This post is educational and follows rules. Please restore.",
+    "status": "resolved",
+    "contentType": "post",
+    "contentId": "6a1a7a79990ed0658ccfcad1",
+    "createdAt": "2026-05-30T05:49:45.559Z",
+    "updatedAt": "2026-05-30T05:49:45.608Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a9c1f64f517d12d063ead",
+    "sender": "6a19d16b70221737eceb313a",
+    "concernType": "ADMIN_APPEAL",
+    "text": "This post is educational and follows rules. Please restore.",
+    "status": "resolved",
+    "contentType": "post",
+    "contentId": "6a1a9c1f64f517d12d063e95",
+    "createdAt": "2026-05-30T08:13:19.710Z",
+    "updatedAt": "2026-05-30T08:13:19.753Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a9d4f4a2be6fd85e486aa",
+    "sender": "6a19d16b70221737eceb313a",
+    "concernType": "ADMIN_APPEAL",
+    "text": "This post is educational and follows rules. Please restore.",
+    "status": "resolved",
+    "contentType": "post",
+    "contentId": "6a1a9d4f4a2be6fd85e48692",
+    "createdAt": "2026-05-30T08:18:23.938Z",
+    "updatedAt": "2026-05-30T08:18:23.988Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1ab9a815ad667f7f1c2547",
+    "sender": "6a19d16b70221737eceb313a",
+    "concernType": "ADMIN_APPEAL",
+    "text": "This post is educational and follows rules. Please restore.",
+    "status": "resolved",
+    "contentType": "post",
+    "contentId": "6a1ab9a815ad667f7f1c252e",
+    "createdAt": "2026-05-30T10:19:20.606Z",
+    "updatedAt": "2026-05-30T10:19:20.648Z",
+    "__v": 0
+  }
+]

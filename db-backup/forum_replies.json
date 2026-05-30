@@ -1,0 +1,386 @@
+[
+  {
+    "_id": "6a04a04ca5420b5a0bce865e",
+    "post": "6a04a032a5420b5a0bce8653",
+    "content": "You should use the ILATE rule.",
+    "author": "69c91cf827a10f2ecdbb4c90",
+    "upvotes": 15,
+    "downvotes": 12,
+    "createdAt": "2026-05-13T16:01:16.242Z",
+    "updatedAt": "2026-05-18T06:02:22.303Z",
+    "__v": 13,
+    "voters": [
+      {
+        "user": "69c91cf827a10f2ecdbb4c90",
+        "type": "up",
+        "_id": "6a04ab6d9c394f601dfd0228"
+      }
+    ],
+    "isDeleted": false,
+    "isEdited": false
+  },
+  {
+    "_id": "6a04a5b171e3f5e371bd2dc2",
+    "post": "6a04a032a5420b5a0bce8653",
+    "content": "Identify the type of each function: Determine whether each function in the integrand is inverse trigonometric, logarithmic, algebraic, trigonometric, or exponential.\n\nChoose the first function: Select the function that appears first in the ILATE order as the first function (u).\n\nSelect the second function: The remaining function will be the second function (dv).\n\nApply the integration by parts formula: Use the formula ∫u dv = uv - ∫v du to integrate the product of the two functions.",
+    "author": "69c91cf827a10f2ecdbb4c90",
+    "upvotes": 1,
+    "downvotes": 0,
+    "voters": [
+      {
+        "user": "6a04a9729c394f601dfd019c",
+        "type": "up",
+        "_id": "6a04a9849c394f601dfd01c1"
+      }
+    ],
+    "createdAt": "2026-05-13T16:24:17.484Z",
+    "updatedAt": "2026-05-13T16:48:34.852Z",
+    "__v": 3,
+    "isDeleted": true,
+    "isEdited": false
+  },
+  {
+    "_id": "6a04a99d9c394f601dfd01c9",
+    "post": "6a04a032a5420b5a0bce8653",
+    "content": "Use the formula ∫u dv = uv - ∫v du to integrate the product of the two functions.",
+    "author": "6a04a9729c394f601dfd019c",
+    "upvotes": 2,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "voters": [
+      {
+        "user": "69c91cf827a10f2ecdbb4c90",
+        "type": "up",
+        "_id": "6a04ab819c394f601dfd0281"
+      },
+      {
+        "user": "6a0aaade10e429c96eb74743",
+        "type": "up",
+        "_id": "6a0b028810e429c96eb74d3e"
+      }
+    ],
+    "createdAt": "2026-05-13T16:41:01.823Z",
+    "updatedAt": "2026-05-18T12:14:00.092Z",
+    "__v": 12
+  },
+  {
+    "_id": "6a105b8ad384a57e626878e8",
+    "post": "6a105b40d384a57e626878db",
+    "content": "useState is for state management, useEffect is for side effects.",
+    "author": "6a105a55d384a57e626878cc",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "voters": [],
+    "createdAt": "2026-05-22T13:35:06.189Z",
+    "updatedAt": "2026-05-23T05:35:08.003Z",
+    "__v": 8
+  },
+  {
+    "_id": "6a12d1caac157c28a6da851f",
+    "post": "6a11488d8b2d102ab64ca244",
+    "content": "giuu",
+    "author": "6a113f329d00e9c075959700",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "voters": [],
+    "createdAt": "2026-05-24T10:24:10.103Z",
+    "updatedAt": "2026-05-24T10:24:10.103Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a12d1ddac157c28a6da8548",
+    "post": "6a11488d8b2d102ab64ca244",
+    "content": "3f",
+    "author": "6a105bffd384a57e6268790a",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "voters": [],
+    "createdAt": "2026-05-24T10:24:29.374Z",
+    "updatedAt": "2026-05-24T10:24:29.374Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a13fc493a9fbda37e22ad34",
+    "post": "6a12eaabe278d3adf3f062c9",
+    "content": "j",
+    "author": "6a12d329ac157c28a6da85d7",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "voters": [],
+    "createdAt": "2026-05-25T07:37:45.585Z",
+    "updatedAt": "2026-05-25T07:37:45.585Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a156bf58038fb8d151d2ec9",
+    "post": "6a12eaabe278d3adf3f062c9",
+    "content": "yguuy\n",
+    "author": "6a13ecfb3a9fbda37e22ac8d",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "voters": [],
+    "createdAt": "2026-05-26T09:46:29.808Z",
+    "updatedAt": "2026-05-26T09:46:29.808Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a17e6bf57fbd3525909de47",
+    "post": "6a17db6857fbd3525909d72a",
+    "content": "hrvb8o",
+    "author": "6a12d329ac157c28a6da85d7",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "isEdited": true,
+    "approvalStatus": "rejected",
+    "rejectionReason": "Off-topic comment",
+    "voters": [],
+    "createdAt": "2026-05-28T06:54:55.317Z",
+    "updatedAt": "2026-05-29T05:27:53.495Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a17f1dd8d7ab2f637f87c03",
+    "post": "6a17db6857fbd3525909d72a",
+    "content": "f8o",
+    "author": "6a12d329ac157c28a6da85d7",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "isEdited": false,
+    "approvalStatus": "rejected",
+    "rejectionReason": "Inappropriate content",
+    "voters": [],
+    "createdAt": "2026-05-28T07:42:21.455Z",
+    "updatedAt": "2026-05-29T05:27:56.142Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1923e0c3ba1243b5749f97",
+    "post": "6a17db6857fbd3525909d72a",
+    "content": "f m m",
+    "author": "6a12d329ac157c28a6da85d7",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "isEdited": true,
+    "approvalStatus": "rejected",
+    "rejectionReason": "fiyl",
+    "voters": [],
+    "createdAt": "2026-05-29T05:28:00.604Z",
+    "updatedAt": "2026-05-29T05:29:37.357Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a1f4c0aa811f679ef0351",
+    "post": "6a1a1e740aa811f679ef01fe",
+    "content": "This neobrutalist dashboard design looks extremely sleek!",
+    "author": "6a19d16b70221737eceb313a",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "imageUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780096843/auxp_vault/1780096840895-445326613.png",
+    "voters": [],
+    "createdAt": "2026-05-29T23:20:44.256Z",
+    "updatedAt": "2026-05-29T23:21:17.721Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a57bb0aa811f679ef2e71",
+    "post": "6a17db6857fbd3525909d72a",
+    "content": "Node Color: Each node is either red or black.\r\nRoot Property: The root of the tree is always black.\r\nRed Property: Red nodes cannot have red children (no two consecutive red nodes on any path).\r\nBlack Property: Every path from a node to its descendant null nodes (leaves) has the same number of black nodes.\r\nLeaf Property: All leaves (NIL nodes) are black.\r\n\r\nThese properties ensure that the longest path from the root to any leaf is no more than twice as long as the shortest path, maintaining the tree’s balance and efficient performance. \r\n\r\nhope this helps!",
+    "author": "6a1a56900aa811f679ef15f3",
+    "upvotes": 2,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "imageUrl": "",
+    "voters": [
+      {
+        "user": "6a1a56900aa811f679ef15f3",
+        "type": "up",
+        "_id": "6a1a57c30aa811f679ef2e8e"
+      },
+      {
+        "user": "6a1a5d240aa811f679ef3339",
+        "type": "up",
+        "_id": "6a1a5d900aa811f679ef342e"
+      }
+    ],
+    "createdAt": "2026-05-30T03:21:31.098Z",
+    "updatedAt": "2026-05-30T03:46:25.005Z",
+    "__v": 2
+  },
+  {
+    "_id": "6a1a5e140aa811f679ef3473",
+    "post": "6a17db6857fbd3525909d72a",
+    "content": "found this image that really helped me understand. you gotta understand the theory to help with calculations",
+    "author": "6a1a5d240aa811f679ef3339",
+    "upvotes": 1,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": true,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "imageUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780112915/auxp_vault/1780112913997-381651593.webp",
+    "voters": [
+      {
+        "user": "6a1a5d240aa811f679ef3339",
+        "type": "up",
+        "_id": "6a1a5e230aa811f679ef348d"
+      }
+    ],
+    "createdAt": "2026-05-30T03:48:36.070Z",
+    "updatedAt": "2026-05-30T03:53:33.971Z",
+    "__v": 1
+  },
+  {
+    "_id": "6a1a67df9fcd81b0ad557350",
+    "post": "6a17db6857fbd3525909d72a",
+    "content": "This is a test reply with multiple image attachments.",
+    "author": "6a19d16b70221737eceb313a",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "imageUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780115423/auxp_vault/1780115421163-198209169.png",
+    "imageUrls": [
+      "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780115423/auxp_vault/1780115421163-198209169.png",
+      "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780115423/auxp_vault/1780115421230-330762768.png"
+    ],
+    "voters": [],
+    "createdAt": "2026-05-30T04:30:23.808Z",
+    "updatedAt": "2026-05-30T04:36:25.804Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a68f59fcd81b0ad55745a",
+    "post": "6a17db6857fbd3525909d72a",
+    "content": "Here are the rotation diagram attachments for Red-Black trees.",
+    "author": "6a1a4e7cfa499e2c94101115",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "imageUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780115700/auxp_vault/1780115697416-928474253.png",
+    "imageUrls": [
+      "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780115700/auxp_vault/1780115697416-928474253.png"
+    ],
+    "voters": [],
+    "createdAt": "2026-05-30T04:35:01.912Z",
+    "updatedAt": "2026-05-30T04:36:14.075Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a7a9b64c558b64a8c4ae5",
+    "post": "6a1a7a79990ed0658ccfcad1",
+    "content": "This is a test reply with a single image attachment.",
+    "author": "6a19d16b70221737eceb313a",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "isEdited": false,
+    "approvalStatus": "pending",
+    "rejectionReason": "",
+    "imageUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780120218/auxp_vault/1780120216697-950397542.png",
+    "imageUrls": [
+      "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780120218/auxp_vault/1780120216697-950397542.png"
+    ],
+    "voters": [],
+    "createdAt": "2026-05-30T05:50:19.105Z",
+    "updatedAt": "2026-05-30T05:50:19.105Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a7b7f64c558b64a8c4be3",
+    "post": "6a1a798a3d7fcced33ddf18e",
+    "content": "This is a test reply with a single image attachment.",
+    "author": "6a1a4e7cfa499e2c94101115",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "isEdited": false,
+    "approvalStatus": "pending",
+    "rejectionReason": "",
+    "imageUrl": "",
+    "imageUrls": [],
+    "voters": [],
+    "createdAt": "2026-05-30T05:54:07.767Z",
+    "updatedAt": "2026-05-30T08:21:42.737Z",
+    "__v": 2
+  },
+  {
+    "_id": "6a1a9f4f4a2be6fd85e48a0f",
+    "post": "6a1a798a3d7fcced33ddf18e",
+    "content": "hope this image helps",
+    "author": "6a1a983a64c558b64a8c520f",
+    "upvotes": 1,
+    "downvotes": 0,
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "imageUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780129615/auxp_vault/1780129614167-449989665.webp",
+    "imageUrls": [
+      "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780129615/auxp_vault/1780129614167-449989665.webp"
+    ],
+    "voters": [
+      {
+        "user": "6a1a983a64c558b64a8c520f",
+        "type": "up",
+        "_id": "6a1a9f544a2be6fd85e48a24"
+      }
+    ],
+    "createdAt": "2026-05-30T08:26:55.722Z",
+    "updatedAt": "2026-05-30T08:29:47.757Z",
+    "__v": 1
+  },
+  {
+    "_id": "6a1ab9b615ad667f7f1c257f",
+    "post": "6a1ab9a815ad667f7f1c252e",
+    "content": "This is a test reply with a single image attachment.",
+    "author": "6a19d16b70221737eceb313a",
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "isEdited": false,
+    "approvalStatus": "pending",
+    "rejectionReason": "",
+    "imageUrl": "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780136373/auxp_vault/1780136371542-766045320.png",
+    "imageUrls": [
+      "https://res.cloudinary.com/dcg9ljkpz/image/upload/v1780136373/auxp_vault/1780136371542-766045320.png"
+    ],
+    "voters": [],
+    "createdAt": "2026-05-30T10:19:34.528Z",
+    "updatedAt": "2026-05-30T10:19:34.528Z",
+    "__v": 0
+  }
+]

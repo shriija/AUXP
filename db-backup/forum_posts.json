@@ -1,0 +1,300 @@
+[
+  {
+    "_id": "6a17db6857fbd3525909d72a",
+    "title": "Explain the Red Black Tree in simple terms ",
+    "description": "I have been finding it hard to understand the calculation of the Red Black Tree and would appreciate any simple explanations , tricks or tips",
+    "author": "6a12d329ac157c28a6da85d7",
+    "tags": [
+      "DSA",
+      "Data Structures"
+    ],
+    "upvotes": 4,
+    "downvotes": 0,
+    "isDeleted": true,
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "voters": [
+      {
+        "user": "6a04a9729c394f601dfd019c",
+        "type": "up",
+        "_id": "6a17e44257fbd3525909db95"
+      },
+      {
+        "user": "6a19c12a70221737eceb2b6e",
+        "type": "up",
+        "_id": "6a1a51710aa811f679ef1007"
+      },
+      {
+        "user": "6a1a4e7cfa499e2c94101115",
+        "type": "up",
+        "_id": "6a1a56460aa811f679ef1547"
+      },
+      {
+        "user": "6a1a5d240aa811f679ef3339",
+        "type": "up",
+        "_id": "6a1a5d920aa811f679ef3447"
+      }
+    ],
+    "createdAt": "2026-05-28T06:06:32.394Z",
+    "updatedAt": "2026-05-30T05:10:37.724Z",
+    "__v": 8,
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "deletedByAdmin": true,
+    "deletionReason": "Test of administrative deletion functionality"
+  },
+  {
+    "_id": "6a17dbad57fbd3525909d7c7",
+    "title": "any pointers on how to approach the LR Parser",
+    "description": "q53j",
+    "author": "6a12d329ac157c28a6da85d7",
+    "tags": [
+      "q535"
+    ],
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "isEdited": true,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "voters": [],
+    "createdAt": "2026-05-28T06:07:41.956Z",
+    "updatedAt": "2026-05-28T07:41:09.515Z",
+    "__v": 0,
+    "rejectionCount": 0
+  },
+  {
+    "_id": "6a1837798d7ab2f637f8f69b",
+    "title": "Explain Red Black Tree",
+    "description": "Can someone explain a red black tree? Thanks!",
+    "author": "6a1835bf8d7ab2f637f8f4ad",
+    "tags": [
+      "dsa"
+    ],
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "isEdited": false,
+    "approvalStatus": "rejected",
+    "rejectionReason": "Too short, add more details.",
+    "rejectionCount": 1,
+    "voters": [],
+    "createdAt": "2026-05-28T12:39:21.581Z",
+    "updatedAt": "2026-05-28T12:41:40.743Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a71643d7fcced33dde945",
+    "title": "Admin Deletion Test Post 1780117860197",
+    "description": "This is a test post that will be deleted and appealed.",
+    "author": "6a19d16b70221737eceb313a",
+    "tags": [
+      "test",
+      "admin"
+    ],
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "deletedByAdmin": true,
+    "deletionReason": "k",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "voters": [],
+    "createdAt": "2026-05-30T05:11:00.224Z",
+    "updatedAt": "2026-05-30T05:35:27.632Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a74c53d7fcced33ddea2e",
+    "title": "Admin Deletion Test Post 1780118725830",
+    "description": "This is a test post that will be deleted and appealed.",
+    "author": "6a19d16b70221737eceb313a",
+    "tags": [
+      "test",
+      "admin"
+    ],
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "deletedByAdmin": true,
+    "deletionReason": "na",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "voters": [],
+    "createdAt": "2026-05-30T05:25:25.838Z",
+    "updatedAt": "2026-05-30T05:35:13.807Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a75aa3d7fcced33ddeae1",
+    "title": "Calculus Limits Proof",
+    "description": "Can someone prove the limit of sin(x)/x as x approaches 0?",
+    "author": "6a1a4e7cfa499e2c94101115",
+    "tags": [
+      "math",
+      "calculus"
+    ],
+    "upvotes": 1,
+    "downvotes": 0,
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "voters": [
+      {
+        "user": "6a1a5d240aa811f679ef3339",
+        "type": "up",
+        "_id": "6a1a95ed64c558b64a8c4f41"
+      }
+    ],
+    "createdAt": "2026-05-30T05:29:14.193Z",
+    "updatedAt": "2026-05-30T07:46:53.349Z",
+    "__v": 3
+  },
+  {
+    "_id": "6a1a798a3d7fcced33ddf18e",
+    "title": "Explain the Red Black Tree in simple terms",
+    "description": "I have been finding it hard to understand the calculation of the Red Black Tree and would appreciate any simple explanations , tricks or tips",
+    "author": "6a1a5d240aa811f679ef3339",
+    "tags": [
+      "DSA Data Structures"
+    ],
+    "upvotes": 3,
+    "downvotes": 0,
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "voters": [
+      {
+        "user": "6a1a5d240aa811f679ef3339",
+        "type": "up",
+        "_id": "6a1a79b43d7fcced33ddf27b"
+      },
+      {
+        "user": "6a1a983a64c558b64a8c520f",
+        "type": "up",
+        "_id": "6a1a9b1964c558b64a8c5511"
+      },
+      {
+        "user": "6a1a4e7cfa499e2c94101115",
+        "type": "up",
+        "_id": "6a1a9eac4a2be6fd85e488e2"
+      }
+    ],
+    "createdAt": "2026-05-30T05:45:46.769Z",
+    "updatedAt": "2026-05-30T08:24:12.476Z",
+    "__v": 9
+  },
+  {
+    "_id": "6a1a7a79990ed0658ccfcad1",
+    "title": "Admin Deletion Test Post 1780120185421",
+    "description": "This is a test post that will be deleted and appealed.",
+    "author": "6a19d16b70221737eceb313a",
+    "tags": [
+      "test",
+      "admin"
+    ],
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "deletedByAdmin": true,
+    "deletionReason": ",,",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "voters": [],
+    "createdAt": "2026-05-30T05:49:45.447Z",
+    "updatedAt": "2026-05-30T07:46:35.892Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a9c1f64f517d12d063e95",
+    "title": "Admin Deletion Test Post 1780128799569",
+    "description": "This is a test post that will be deleted and appealed.",
+    "author": "6a19d16b70221737eceb313a",
+    "tags": [
+      "test",
+      "admin"
+    ],
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "deletedByAdmin": true,
+    "deletionReason": " yi",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "voters": [],
+    "createdAt": "2026-05-30T08:13:19.591Z",
+    "updatedAt": "2026-05-30T08:29:17.636Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a9d4f4a2be6fd85e48692",
+    "title": "Admin Deletion Test Post 1780129103803",
+    "description": "This is a test post that will be deleted and appealed.",
+    "author": "6a19d16b70221737eceb313a",
+    "tags": [
+      "test",
+      "admin"
+    ],
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": true,
+    "deletedByAdmin": true,
+    "deletionReason": "dele",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "voters": [],
+    "createdAt": "2026-05-30T08:18:23.825Z",
+    "updatedAt": "2026-05-30T08:28:53.920Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1ab9a815ad667f7f1c252e",
+    "title": "Admin Deletion Test Post 1780136360466",
+    "description": "This is a test post that will be deleted and appealed.",
+    "author": "6a19d16b70221737eceb313a",
+    "tags": [
+      "test",
+      "admin"
+    ],
+    "upvotes": 0,
+    "downvotes": 0,
+    "isDeleted": false,
+    "deletedByAdmin": false,
+    "deletionReason": "",
+    "isEdited": false,
+    "approvalStatus": "approved",
+    "rejectionReason": "",
+    "rejectionCount": 0,
+    "imageUrl": "",
+    "voters": [],
+    "createdAt": "2026-05-30T10:19:20.487Z",
+    "updatedAt": "2026-05-30T10:19:20.640Z",
+    "__v": 0
+  }
+]

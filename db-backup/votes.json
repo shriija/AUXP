@@ -1,0 +1,218 @@
+[
+  {
+    "_id": "6a03f9ee4d4037da5e0c88e9",
+    "userId": "6a03f9c74d4037da5e0c88e1",
+    "resourceId": "69c91d4627a10f2ecdbb4c95",
+    "type": "up",
+    "createdAt": "2026-05-13T04:11:26.164Z",
+    "updatedAt": "2026-05-13T04:11:26.164Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a04a3dba5420b5a0bce8755",
+    "userId": "69c91cf827a10f2ecdbb4c90",
+    "resourceId": "69c91d4627a10f2ecdbb4c95",
+    "type": "down",
+    "createdAt": "2026-05-13T16:16:27.740Z",
+    "updatedAt": "2026-05-13T16:16:27.740Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a0afff710e429c96eb74c96",
+    "userId": "6a04a9729c394f601dfd019c",
+    "resourceId": "6a0aabe810e429c96eb74c53",
+    "type": "up",
+    "createdAt": "2026-05-18T12:03:03.330Z",
+    "updatedAt": "2026-05-18T12:03:03.330Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a106a2dd384a57e62687c7d",
+    "userId": "6a105bffd384a57e6268790a",
+    "resourceId": "6a0aabe810e429c96eb74c53",
+    "type": "up",
+    "createdAt": "2026-05-22T14:37:33.144Z",
+    "updatedAt": "2026-05-22T14:37:33.144Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a106a33d384a57e62687c88",
+    "userId": "6a105bffd384a57e6268790a",
+    "resourceId": "6a105cabd384a57e62687bdd",
+    "type": "up",
+    "createdAt": "2026-05-22T14:37:39.748Z",
+    "updatedAt": "2026-05-22T14:37:39.748Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a12d116ac157c28a6da84d0",
+    "userId": "6a105bffd384a57e6268790a",
+    "resourceId": "6a1144258b2d102ab64ca16a",
+    "type": "up",
+    "createdAt": "2026-05-24T10:21:10.643Z",
+    "updatedAt": "2026-05-24T10:21:10.643Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a12d171ac157c28a6da84f9",
+    "userId": "6a113f329d00e9c075959700",
+    "resourceId": "6a12d060ac157c28a6da843d",
+    "type": "up",
+    "createdAt": "2026-05-24T10:22:41.130Z",
+    "updatedAt": "2026-05-24T10:22:41.130Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1405e25320ae779680efb3",
+    "userId": "6a13ecfb3a9fbda37e22ac8d",
+    "resourceId": "6a14059c5320ae779680ef96",
+    "type": "up",
+    "createdAt": "2026-05-25T08:18:42.381Z",
+    "updatedAt": "2026-05-25T08:18:42.381Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a156b888038fb8d151d2dde",
+    "userId": "6a12d329ac157c28a6da85d7",
+    "resourceId": "6a145f63c585bf743b24dc0d",
+    "type": "up",
+    "createdAt": "2026-05-26T09:44:41.006Z",
+    "updatedAt": "2026-05-26T09:44:41.006Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a156b928038fb8d151d2e00",
+    "userId": "6a12d329ac157c28a6da85d7",
+    "resourceId": "6a0aabe810e429c96eb74c53",
+    "type": "down",
+    "createdAt": "2026-05-26T09:44:50.703Z",
+    "updatedAt": "2026-05-26T09:44:50.703Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a156bac8038fb8d151d2e3c",
+    "userId": "6a13ecfb3a9fbda37e22ac8d",
+    "resourceId": "6a145f63c585bf743b24dc0d",
+    "type": "up",
+    "createdAt": "2026-05-26T09:45:16.922Z",
+    "updatedAt": "2026-05-26T09:45:16.922Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a19bc5470221737eceb28bb",
+    "userId": "6a12d329ac157c28a6da85d7",
+    "resourceId": "6a17d80057fbd3525909d512",
+    "type": "up",
+    "createdAt": "2026-05-29T16:18:28.982Z",
+    "updatedAt": "2026-05-29T16:18:28.982Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a55f90aa811f679ef1406",
+    "userId": "6a19c12a70221737eceb2b6e",
+    "resourceId": "6a19c19570221737eceb2c16",
+    "type": "up",
+    "createdAt": "2026-05-30T03:14:01.490Z",
+    "updatedAt": "2026-05-30T03:14:01.490Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a56990aa811f679ef1620",
+    "userId": "6a1a56900aa811f679ef15f3",
+    "resourceId": "6a19c19570221737eceb2c16",
+    "type": "up",
+    "createdAt": "2026-05-30T03:16:41.490Z",
+    "updatedAt": "2026-05-30T03:16:41.490Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a58700aa811f679ef312b",
+    "userId": "6a1a56900aa811f679ef15f3",
+    "resourceId": "6a1a583f0aa811f679ef2ff5",
+    "type": "up",
+    "createdAt": "2026-05-30T03:24:32.052Z",
+    "updatedAt": "2026-05-30T03:24:32.052Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a5d290aa811f679ef335c",
+    "userId": "6a1a5d240aa811f679ef3339",
+    "resourceId": "6a1a583f0aa811f679ef2ff5",
+    "type": "up",
+    "createdAt": "2026-05-30T03:44:41.488Z",
+    "updatedAt": "2026-05-30T03:44:41.488Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a951f64c558b64a8c4d47",
+    "userId": "6a1a5d240aa811f679ef3339",
+    "resourceId": "6a19c19570221737eceb2c16",
+    "type": "up",
+    "createdAt": "2026-05-30T07:43:27.350Z",
+    "updatedAt": "2026-05-30T07:43:27.350Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a976264c558b64a8c5165",
+    "userId": "6a1a5d240aa811f679ef3339",
+    "resourceId": "6a1a972a64c558b64a8c509a",
+    "type": "up",
+    "createdAt": "2026-05-30T07:53:06.850Z",
+    "updatedAt": "2026-05-30T07:53:06.850Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a984364c558b64a8c5236",
+    "userId": "6a1a983a64c558b64a8c520f",
+    "resourceId": "6a1a972a64c558b64a8c509a",
+    "type": "up",
+    "createdAt": "2026-05-30T07:56:51.741Z",
+    "updatedAt": "2026-05-30T07:56:51.741Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a984664c558b64a8c5249",
+    "userId": "6a1a983a64c558b64a8c520f",
+    "resourceId": "6a1a583f0aa811f679ef2ff5",
+    "type": "up",
+    "createdAt": "2026-05-30T07:56:54.191Z",
+    "updatedAt": "2026-05-30T07:56:54.191Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a9e9a4a2be6fd85e48853",
+    "userId": "6a1a4e7cfa499e2c94101115",
+    "resourceId": "6a19c19570221737eceb2c16",
+    "type": "up",
+    "createdAt": "2026-05-30T08:23:54.713Z",
+    "updatedAt": "2026-05-30T08:23:54.713Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a9e9f4a2be6fd85e48879",
+    "userId": "6a1a4e7cfa499e2c94101115",
+    "resourceId": "6a1a583f0aa811f679ef2ff5",
+    "type": "up",
+    "createdAt": "2026-05-30T08:23:59.429Z",
+    "updatedAt": "2026-05-30T08:23:59.429Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a9f244a2be6fd85e48982",
+    "userId": "6a1a983a64c558b64a8c520f",
+    "resourceId": "6a19c19570221737eceb2c16",
+    "type": "up",
+    "createdAt": "2026-05-30T08:26:12.228Z",
+    "updatedAt": "2026-05-30T08:26:12.228Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a1a9f284a2be6fd85e489a5",
+    "userId": "6a1a983a64c558b64a8c520f",
+    "resourceId": "6a1a9b0964c558b64a8c54c7",
+    "type": "up",
+    "createdAt": "2026-05-30T08:26:16.930Z",
+    "updatedAt": "2026-05-30T08:26:16.930Z",
+    "__v": 0
+  }
+]
