@@ -6,10 +6,23 @@ const Notification = require('../models/Notification');
 const createPost = async (req, res) => {
     try {
         const { title, description, tags } = req.body;
+        
+        let parsedTags = tags;
+        if (typeof tags === 'string') {
+            try {
+                parsedTags = JSON.parse(tags);
+            } catch (e) {
+                parsedTags = tags.split(',').map(t => t.trim()).filter(Boolean);
+            }
+        }
+
+        const imageUrl = req.file ? (req.file.path && req.file.path.startsWith('http') ? req.file.path : `/uploads/${req.file.filename}`) : '';
+
         const post = await ForumPost.create({
             title,
             description,
-            tags,
+            tags: parsedTags,
+            imageUrl,
             author: req.user._id
         });
         
@@ -76,9 +89,12 @@ const getPostById = async (req, res) => {
 const addReply = async (req, res) => {
     try {
         const { content } = req.body;
+        const imageUrl = req.file ? (req.file.path && req.file.path.startsWith('http') ? req.file.path : `/uploads/${req.file.filename}`) : '';
+
         const reply = await ForumReply.create({
             post: req.params.id,
             content,
+            imageUrl,
             author: req.user._id
         });
         

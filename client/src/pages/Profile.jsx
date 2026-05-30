@@ -3,10 +3,173 @@ import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
 import { useToastStore } from '../store/useToastStore';
 import { FileText, Loader2, Sparkles, AlertCircle, ArrowLeft, RefreshCw, Trash2, Eye, EyeOff, Edit3 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import EditModal from '../components/EditModal';
 import ConfirmModal from '../components/ConfirmModal';
+
+function ActivityBreakdownChart({ counts }) {
+  const categories = [
+    { label: 'Uploads', val: counts.uploads, color: '#34d399' },
+    { label: 'Downloads', val: counts.downloads, color: '#38bdf8' },
+    { label: 'Forum Posts', val: counts.forumPosts, color: '#a855f7' },
+    { label: 'Forum Replies', val: counts.forumReplies, color: '#ec4899' },
+    { label: 'Classrooms', val: counts.classrooms, color: '#fb923c' }
+  ];
+
+  const width = 450;
+  const height = 220;
+  const chartHeight = 150;
+  const chartWidth = 390;
+  const maxVal = Math.max(...categories.map(c => c.val), 5);
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[450px] mx-auto font-mono">
+      {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+        const y = 30 + ratio * chartHeight;
+        const gridVal = Math.round(maxVal * (1 - ratio));
+        return (
+          <g key={idx}>
+            <line x1="45" y1={y} x2={45 + chartWidth} y2={y} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+            <text x="35" y={y + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">{gridVal}</text>
+          </g>
+        );
+      })}
+
+      {categories.map((c, i) => {
+        const barSpacing = chartWidth / categories.length;
+        const x = 50 + i * barSpacing + (barSpacing - 40) / 2;
+        const barHeight = (c.val / maxVal) * chartHeight;
+        const y = 30 + chartHeight - barHeight;
+
+        return (
+          <g key={i}>
+            {barHeight > 0 && (
+              <rect x={x + 4} y={y + 4} width="36" height={barHeight} fill="#0f172a" />
+            )}
+            <rect
+              x={x}
+              y={y}
+              width="36"
+              height={barHeight}
+              fill={c.color}
+              stroke="#0f172a"
+              strokeWidth="2.5"
+            />
+            <text x={x + 18} y={y - 8} textAnchor="middle" className="text-[10px] font-black fill-slate-900">{c.val}</text>
+            <text x={x + 18} y={30 + chartHeight + 18} textAnchor="middle" className="text-[9px] font-bold fill-slate-650 uppercase tracking-tight">{c.label}</text>
+          </g>
+        );
+      })}
+      
+      <line x1="45" y1={30 + chartHeight} x2={45 + chartWidth} y2={30 + chartHeight} stroke="#0f172a" strokeWidth="2.5" />
+    </svg>
+  );
+}
+
+function ActivityTrendChart({ trend }) {
+  const width = 450;
+  const height = 220;
+  const chartHeight = 150;
+  const chartWidth = 390;
+  const maxVal = Math.max(...trend.map(t => t.total), 5);
+
+  const points = trend.map((t, i) => {
+    const xSpacing = chartWidth / (trend.length - 1);
+    const x = 50 + i * xSpacing;
+    const y = 30 + chartHeight - (t.total / maxVal) * chartHeight;
+    return { x, y, ...t };
+  });
+
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const areaD = `${pathD} L ${points[points.length - 1].x} ${30 + chartHeight} L ${points[0].x} ${30 + chartHeight} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[450px] mx-auto font-mono">
+      {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+        const y = 30 + ratio * chartHeight;
+        const gridVal = Math.round(maxVal * (1 - ratio));
+        return (
+          <g key={idx}>
+            <line x1="45" y1={y} x2={45 + chartWidth} y2={y} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+            <text x="35" y={y + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">{gridVal}</text>
+          </g>
+        );
+      })}
+
+      {points.length > 0 && (
+        <path d={areaD} fill="#fff9db" fillOpacity="0.8" />
+      )}
+
+      {points.length > 0 && (
+        <path d={points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x + 2} ${p.y + 2}`).join(' ')} fill="none" stroke="#0f172a" strokeWidth="3" opacity="0.15" />
+      )}
+
+      {points.length > 0 && (
+        <path d={pathD} fill="none" stroke="#ffb800" strokeWidth="3" />
+      )}
+
+      {points.map((p, i) => (
+        <g key={i}>
+          <circle cx={p.x + 2} cy={p.y + 2} r="5" fill="#0f172a" />
+          <circle
+            cx={p.x}
+            cy={p.y}
+            r="4.5"
+            fill="#ffffff"
+            stroke="#0f172a"
+            strokeWidth="2.5"
+          />
+          <text x={p.x} y={p.y - 10} textAnchor="middle" className="text-[9px] font-black fill-slate-900">{p.total}</text>
+          <text x={p.x} y={30 + chartHeight + 18} textAnchor="middle" className="text-[9px] font-black fill-slate-650 uppercase">{p.day}</text>
+          <text x={p.x} y={30 + chartHeight + 28} textAnchor="middle" className="text-[7px] font-bold fill-slate-400">{p.dateStr}</text>
+        </g>
+      ))}
+
+      <line x1="45" y1={30 + chartHeight} x2={45 + chartWidth} y2={30 + chartHeight} stroke="#0f172a" strokeWidth="2.5" />
+    </svg>
+  );
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="mb-8 font-mono animate-pulse">
+      <div className="bg-[#fffbeb]/60 border-4 border-slate-900 p-6 shadow-neo mb-6 relative">
+        <div className="absolute -top-4.5 left-6 bg-[#ffb800]/60 h-7 w-48 border-4 border-slate-900"></div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mt-4">
+          {[...Array(6)].map((_, idx) => (
+            <div key={idx} className="p-4 border-2 border-slate-900 rounded-none shadow-neo-sm bg-slate-100/70 h-20 flex flex-col justify-between">
+              <div className="h-2 w-12 bg-slate-300 rounded"></div>
+              <div className="h-6 w-8 bg-slate-300 rounded mt-2"></div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8 border-t-4 border-slate-900/10 pt-8">
+          <div className="bg-white border-2 border-slate-900 p-4 rounded-none shadow-neo-sm h-[252px] relative flex flex-col justify-between">
+            <div className="absolute -top-3.5 left-4 bg-slate-300 h-5 w-28 border border-slate-900"></div>
+            <div className="w-full h-full flex items-end gap-6 px-8 pb-4 pt-6">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex-1 bg-slate-150 border-2 border-slate-300" style={{ height: `${20 + i * 15}%` }}></div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white border-2 border-slate-900 p-4 rounded-none shadow-neo-sm h-[252px] relative flex flex-col justify-between">
+            <div className="absolute -top-3.5 left-4 bg-slate-300 h-5 w-36 border border-slate-900"></div>
+            <div className="w-full h-full flex items-center justify-center p-6">
+              <svg className="w-full h-full text-slate-200" viewBox="0 0 100 40" preserveAspectRatio="none">
+                <path d="M0,35 Q15,10 30,25 T60,5 T90,30 L100,40 L0,40 Z" fill="currentColor" opacity="0.3" />
+                <path d="M0,35 Q15,10 30,25 T60,5 T90,30" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const ALL_BADGES = [
   { key: 'First Upload', desc: 'Uploaded your first resource' },
@@ -26,6 +189,8 @@ export default function Profile() {
   const [selectedResource, setSelectedResource] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [confirmRestoreId, setConfirmRestoreId] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [showRules, setShowRules] = useState(false);
   const [isEditingDept, setIsEditingDept] = useState(false);
   const [tempDept, setTempDept] = useState('CSE');
@@ -65,8 +230,21 @@ export default function Profile() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      setStatsLoading(true);
+      const res = await api.get('/auth/stats');
+      setStats(res.data);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProfileData();
+    fetchStats();
   }, [user?._id]);
 
   const handleSaveDept = async () => {
@@ -108,6 +286,7 @@ export default function Profile() {
       await api.delete(`/resources/${confirmDeleteId}`);
       useToastStore.getState().addToast('RESOURCE DELETED SUCCESSFULLY!', 'info');
       await getMe(); // sync XP
+      fetchStats(); // sync stats
       // Refresh local uploads list
       const currentUser = useAuthStore.getState().user;
       if (currentUser?._id) {
@@ -134,6 +313,7 @@ export default function Profile() {
       await api.post(`/resources/${confirmRestoreId}/restore`);
       useToastStore.getState().addToast('RESOURCE RESTORED SUCCESSFULLY!', 'success');
       await getMe(); // sync XP
+      fetchStats(); // sync stats
       // Refresh local uploads list
       const currentUser = useAuthStore.getState().user;
       if (currentUser?._id) {
@@ -163,6 +343,76 @@ export default function Profile() {
         <h1 className="text-3xl font-extrabold tracking-tight mb-1 text-slate-900 uppercase">STUDENT PROFILE</h1>
         <p className="text-sm font-semibold text-slate-600">Review your stats, accomplishments, and uploaded vault items.</p>
       </div>
+
+      {/* Statistics Dashboard Section */}
+      <AnimatePresence mode="wait">
+        {statsLoading ? (
+          <motion.div
+            key="skeleton"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <StatsSkeleton />
+          </motion.div>
+        ) : stats ? (
+          <motion.div
+            key="dashboard"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="mb-8 font-mono"
+          >
+            <div className="bg-[#fffbeb] border-4 border-slate-900 p-6 shadow-neo mb-6 relative">
+              <div className="absolute -top-4.5 left-6 bg-[#ffb800] text-slate-950 px-3 py-1 text-xs border-4 border-slate-900 uppercase font-black tracking-wider">
+                Student Activity Dashboard
+              </div>
+              
+              {/* Stats Cards Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mt-4">
+                {[
+                  { title: 'Uploads', value: stats.counts.uploads, color: 'bg-emerald-100 text-emerald-800' },
+                  { title: 'Downloads', value: stats.counts.downloads, color: 'bg-blue-100 text-blue-800' },
+                  { title: 'Forum Contribs', value: stats.counts.forumContributions, color: 'bg-purple-100 text-purple-800' },
+                  { title: 'Classrooms', value: stats.counts.classrooms, color: 'bg-orange-100 text-orange-850' },
+                  { title: 'Login Streak', value: `${stats.counts.streak} Days`, color: 'bg-yellow-100 text-yellow-800' },
+                  { title: 'Weekly XP', value: `${stats.counts.weeklyXp} XP`, color: 'bg-pink-100 text-pink-850' }
+                ].map((c, idx) => (
+                  <div key={idx} className={`p-4 border-2 border-slate-900 rounded-none shadow-neo-sm flex flex-col justify-between ${c.color}`}>
+                    <span className="text-[10px] font-black uppercase tracking-wider opacity-85">{c.title}</span>
+                    <span className="text-xl font-black mt-2">{c.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Charts Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8 border-t-4 border-slate-900/10 pt-8">
+                {/* Chart 1: Activity Breakdown */}
+                <div className="bg-white border-2 border-slate-900 p-4 rounded-none shadow-neo-sm relative">
+                  <div className="absolute -top-3.5 left-4 bg-slate-900 text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">
+                    Activity Breakdown
+                  </div>
+                  <div className="w-full overflow-x-auto mt-4">
+                    <ActivityBreakdownChart counts={stats.counts} />
+                  </div>
+                </div>
+
+                {/* Chart 2: 7-Day Activity Trend */}
+                <div className="bg-white border-2 border-slate-900 p-4 rounded-none shadow-neo-sm relative">
+                  <div className="absolute -top-3.5 left-4 bg-slate-900 text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">
+                    7-Day Contribution Trend
+                  </div>
+                  <div className="w-full overflow-x-auto mt-4">
+                    <ActivityTrendChart trend={stats.trend} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         

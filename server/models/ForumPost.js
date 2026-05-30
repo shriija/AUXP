@@ -49,6 +49,10 @@ const forumPostSchema = new mongoose.Schema({
     rejectionCount: {
         type: Number,
         default: 0
+    },
+    imageUrl: {
+        type: String,
+        default: ''
     }
 }, { timestamps: true });
 

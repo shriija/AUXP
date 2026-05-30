@@ -5,11 +5,18 @@ import { Loader2, ArrowLeft, ThumbsUp, ThumbsDown, Pencil, Trash2, X, Check } fr
 import { useAuthStore } from '../store/useAuthStore';
 import { useToastStore } from '../store/useToastStore';
 
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `http://localhost:5000${url}`;
+};
+
 export default function ForumPostView() {
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [replyContent, setReplyContent] = useState('');
+  const [selectedReplyImage, setSelectedReplyImage] = useState(null);
   const { user, getMe } = useAuthStore();
   const navigate = useNavigate();
 
@@ -104,8 +111,20 @@ export default function ForumPostView() {
   const handleReplySubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post(`/forum/${id}/replies`, { content: replyContent });
+      const formData = new FormData();
+      formData.append('content', replyContent);
+      if (selectedReplyImage) {
+        formData.append('image', selectedReplyImage);
+      }
+
+      await api.post(`/forum/${id}/replies`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
       setReplyContent('');
+      setSelectedReplyImage(null);
       fetchData();
       getMe();
       useToastStore.getState().addToast('REPLY SUBMITTED FOR ADMIN REVIEW!', 'success');
@@ -171,6 +190,15 @@ export default function ForumPostView() {
                 )}
               </div>
               <p className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed mb-6 text-sm">{post.description}</p>
+              {post.imageUrl && (
+                <div className="mt-4 mb-6 max-w-full border-2 border-slate-900 shadow-neo p-2 inline-block bg-slate-50">
+                  <img 
+                    src={getImageUrl(post.imageUrl)} 
+                    alt="Post Attachment" 
+                    className="max-h-96 object-contain" 
+                  />
+                </div>
+              )}
               <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 bg-[#cbe3db]/40 px-3 py-1.5 rounded-none border-2 border-slate-900 inline-flex shadow-neo-sm">
                 <span>ASKED BY <span className="text-slate-800 font-extrabold">{post.author?.name?.toUpperCase()}</span> ON {new Date(post.createdAt).toLocaleDateString()} AT {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()} {post.isEdited && <span className="italic text-[9px] ml-1 text-primary">(EDITED)</span>}</span>
               </div>
@@ -203,6 +231,15 @@ export default function ForumPostView() {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="whitespace-pre-wrap font-medium text-slate-700 text-sm leading-relaxed">{reply.content}</p>
+                      {reply.imageUrl && (
+                        <div className="mt-3 mb-2 max-w-md border border-slate-900 p-1 inline-block bg-slate-50 shadow-neo-sm">
+                          <img 
+                            src={getImageUrl(reply.imageUrl)} 
+                            alt="Reply Attachment" 
+                            className="max-h-48 object-contain" 
+                          />
+                        </div>
+                      )}
                       {reply.approvalStatus === 'pending' && (
                         <div className="mt-2 text-[9px] bg-amber-50 text-amber-700 px-1.5 py-0.5 border border-amber-300 inline-block font-black uppercase animate-pulse">
                           ⏳ REPLY IN REVIEW
@@ -241,6 +278,15 @@ export default function ForumPostView() {
             className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-3 outline-none focus:bg-slate-50 transition-all font-bold text-slate-800 placeholder:text-slate-400 h-32 mb-4 text-xs" 
             placeholder="Write your reply here..." 
           />
+          <div className="mb-4">
+            <label className="block text-xs font-bold mb-1.5 text-slate-700">ATTACH IMAGE (OPTIONAL)</label>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={e => setSelectedReplyImage(e.target.files[0])} 
+              className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-bold text-slate-800 text-xs" 
+            />
+          </div>
           <button type="submit" className="bg-[#ffb800] text-slate-950 border-2 border-slate-900 font-bold py-2 px-5 rounded-none hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs">
             POST REPLY
           </button>

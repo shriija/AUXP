@@ -219,6 +219,15 @@ export default function AdminDashboard() {
                       <p className="text-xs text-slate-650 font-medium whitespace-pre-wrap leading-normal line-clamp-4 bg-slate-50 border border-slate-200 p-2.5">
                         {item.description}
                       </p>
+                      {item.imageUrl && (
+                        <div className="mt-2 max-w-sm">
+                          <img 
+                            src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5000${item.imageUrl}`} 
+                            alt="Post Attachment Review" 
+                            className="border-2 border-slate-900 max-h-32 object-cover shadow-neo-sm" 
+                          />
+                        </div>
+                      )}
                       {item.tags?.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {item.tags.map(tag => (
@@ -239,6 +248,15 @@ export default function AdminDashboard() {
                       <p className="text-xs text-slate-650 font-medium whitespace-pre-wrap leading-normal line-clamp-4 bg-slate-50 border border-slate-200 p-2.5">
                         {item.content}
                       </p>
+                      {item.imageUrl && (
+                        <div className="mt-2 max-w-sm">
+                          <img 
+                            src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5000${item.imageUrl}`} 
+                            alt="Reply Attachment Review" 
+                            className="border-2 border-slate-900 max-h-32 object-cover shadow-neo-sm" 
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
 

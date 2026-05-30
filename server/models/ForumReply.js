@@ -43,6 +43,10 @@ const forumReplySchema = new mongoose.Schema({
     rejectionReason: {
         type: String,
         default: ''
+    },
+    imageUrl: {
+        type: String,
+        default: ''
     }
 }, { timestamps: true });
 

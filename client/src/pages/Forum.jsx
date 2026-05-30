@@ -5,6 +5,12 @@ import { MessageSquare, Plus, Loader2, ThumbsUp } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useToastStore } from '../store/useToastStore';
 
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `http://localhost:5000${url}`;
+};
+
 export default function Forum() {
   const { getMe } = useAuthStore();
   const [posts, setPosts] = useState([]);
@@ -13,6 +19,7 @@ export default function Forum() {
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newTags, setNewTags] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     fetchPosts();
@@ -32,15 +39,25 @@ export default function Forum() {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/forum', {
-        title: newTitle,
-        description: newDesc,
-        tags: newTags.split(',').map(t => t.trim()).filter(Boolean)
+      const formData = new FormData();
+      formData.append('title', newTitle);
+      formData.append('description', newDesc);
+      formData.append('tags', JSON.stringify(newTags.split(',').map(t => t.trim()).filter(Boolean)));
+      if (selectedImage) {
+        formData.append('image', selectedImage);
+      }
+
+      await api.post('/forum', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
+
       setShowCreate(false);
       setNewTitle('');
       setNewDesc('');
       setNewTags('');
+      setSelectedImage(null);
       fetchPosts();
       getMe();
       useToastStore.getState().addToast('FORUM POST SUBMITTED FOR ADMIN REVIEW!', 'success');
@@ -80,6 +97,10 @@ export default function Forum() {
             <label className="block text-xs font-bold mb-1.5 text-slate-700">TAGS (COMMA SEPARATED)</label>
             <input type="text" value={newTags} onChange={e => setNewTags(e.target.value)} className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-bold text-slate-800 placeholder:text-slate-400 text-xs" placeholder="e.g. physics, kinematics" />
           </div>
+          <div>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700">ATTACH IMAGE (OPTIONAL)</label>
+            <input type="file" accept="image/*" onChange={e => setSelectedImage(e.target.files[0])} className="w-full bg-white border-2 border-slate-900 rounded-none px-4 py-2 outline-none font-bold text-slate-800 text-xs" />
+          </div>
           <button type="submit" className="bg-[#ffb800] text-slate-950 font-bold py-2 px-5 rounded-none border-2 border-slate-900 hover:translate-y-[1px] hover:shadow-none transition-all shadow-neo text-xs">
             POST QUESTION
           </button>
@@ -115,6 +136,15 @@ export default function Forum() {
                     )}
                   </div>
                   <p className="text-slate-650 font-medium text-sm line-clamp-2 mb-3">{post.description}</p>
+                  {post.imageUrl && (
+                    <div className="mt-2 mb-3 max-w-md">
+                      <img 
+                        src={getImageUrl(post.imageUrl)} 
+                        alt="Question Attachment" 
+                        className="border-2 border-slate-900 shadow-neo-sm max-h-32 object-cover" 
+                      />
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 mt-1">
                     <span>ASKED BY <span className="text-slate-850 font-extrabold">{post.author?.name?.toUpperCase()}</span> ON {new Date(post.createdAt).toLocaleDateString()} AT {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()} {post.isEdited && <span className="italic text-[9px] ml-1 text-primary">(EDITED)</span>}</span>
                   </div>
