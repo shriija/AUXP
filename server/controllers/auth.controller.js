@@ -15,6 +15,15 @@ const generateToken = (id) => {
 
 const { updateLoginStreak, syncUserAchievements } = require('../utils/gamification');
 
+const validateName = (name) => {
+    if (!name) return 'Full Name is required';
+    const trimmed = name.trim();
+    if (trimmed.length < 3) return 'Full Name must be at least 3 characters long';
+    if (!/^[a-zA-Z\s]+$/.test(trimmed)) return 'Full Name must only contain letters and spaces';
+    if (!trimmed.includes(' ')) return 'Full Name must include both first and last name';
+    return null;
+};
+
 const validatePassword = (password) => {
     if (!password) return 'Password is required';
     if (password.length < 8) return 'Password must be at least 8 characters long';
@@ -28,6 +37,11 @@ const validatePassword = (password) => {
 const registerUser = async (req, res) => {
     const { name, email, password, department } = req.body;
     try {
+        const nameError = validateName(name);
+        if (nameError) {
+            return res.status(400).json({ message: nameError });
+        }
+
         const passwordError = validatePassword(password);
         if (passwordError) {
             return res.status(400).json({ message: passwordError });
@@ -125,7 +139,13 @@ const updateUserProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
         if (user) {
-            user.name = req.body.name || user.name;
+            if (req.body.name) {
+                const nameError = validateName(req.body.name);
+                if (nameError) {
+                    return res.status(400).json({ message: nameError });
+                }
+                user.name = req.body.name;
+            }
             user.email = req.body.email || user.email;
             if (req.body.department) {
                 user.department = req.body.department;

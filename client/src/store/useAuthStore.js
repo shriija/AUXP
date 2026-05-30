@@ -96,6 +96,28 @@ export const useAuthStore = create(
 
       register: async (name, email, password, department) => {
         set({ loading: true, error: null });
+        
+        // Full Name Validation
+        const trimmedName = (name || '').trim();
+        if (trimmedName.length < 3) {
+          const errMsg = 'Full name must be at least 3 characters long';
+          set({ error: errMsg, loading: false });
+          useToastStore.getState().addToast(errMsg, 'error');
+          return false;
+        }
+        if (!/^[a-zA-Z\s]+$/.test(trimmedName)) {
+          const errMsg = 'Full name must only contain letters and spaces';
+          set({ error: errMsg, loading: false });
+          useToastStore.getState().addToast(errMsg, 'error');
+          return false;
+        }
+        if (!trimmedName.includes(' ')) {
+          const errMsg = 'Full name must include both first and last name';
+          set({ error: errMsg, loading: false });
+          useToastStore.getState().addToast(errMsg, 'error');
+          return false;
+        }
+
         try {
           const res = await api.post('/auth/register', { name, email, password, department });
           const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
@@ -136,6 +158,30 @@ export const useAuthStore = create(
       
       updateProfile: async (profileData) => {
         set({ loading: true, error: null });
+
+        // Full Name Validation if name is updated
+        if (profileData.name) {
+          const trimmedName = profileData.name.trim();
+          if (trimmedName.length < 3) {
+            const errMsg = 'Full name must be at least 3 characters long';
+            set({ error: errMsg, loading: false });
+            useToastStore.getState().addToast(errMsg, 'error');
+            return false;
+          }
+          if (!/^[a-zA-Z\s]+$/.test(trimmedName)) {
+            const errMsg = 'Full name must only contain letters and spaces';
+            set({ error: errMsg, loading: false });
+            useToastStore.getState().addToast(errMsg, 'error');
+            return false;
+          }
+          if (!trimmedName.includes(' ')) {
+            const errMsg = 'Full name must include both first and last name';
+            set({ error: errMsg, loading: false });
+            useToastStore.getState().addToast(errMsg, 'error');
+            return false;
+          }
+        }
+
         try {
           const res = await api.put('/auth/update', profileData);
           const newUser = { _id: res.data._id, name: res.data.name, email: res.data.email, role: res.data.role, xp: res.data.xp, level: res.data.level, badges: res.data.badges, department: res.data.department, weeklyXp: res.data.weeklyXp };
